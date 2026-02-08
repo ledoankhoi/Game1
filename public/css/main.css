@@ -1,17 +1,346 @@
+/* =========================================
+   GIAO DIỆN VŨ TRỤ - GLASSMORPHISM (FINAL)
+   ========================================= */
+
+/* --- 1. CẤU HÌNH CHUNG & HÌNH NỀN --- */
 body {
-    font-family: 'Segoe UI', sans-serif;
     margin: 0;
-    background-color: #f0f2f5;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    /* Hình nền vũ trụ tối */
+    background: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff; /* Mặc định chữ màu trắng */
+    min-height: 100vh;
+}
+
+/* Font tiêu đề công nghệ */
+h1, h2, h3, .logo, .score-board {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); /* Phát sáng nhẹ */
+}
+
+/* --- 2. THANH MENU --- */
+header {
+    padding: 15px 0;
+    background: rgba(0, 0, 0, 0.5); /* Nền đen mờ hơn chút */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+nav a {
+    color: #ddd;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.3s;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+nav a:hover {
+    color: #00ffff;
+    background: rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 8px #00ffff;
+}
+
+/* --- 3. KHỐI KÍNH MỜ (QUAN TRỌNG NHẤT) --- */
+/* Áp dụng cho: Thẻ chọn game, Các màn hình game (.game-area) */
+.game-card, .game-area {
+    background: rgba(30, 30, 40, 0.6); /* Nền tối trong suốt (Thay vì trắng) */
+    backdrop-filter: blur(15px);          /* Làm mờ hậu cảnh mạnh hơn */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Viền sáng mỏng */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7); /* Bóng đổ sâu */
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 800px; /* Giới hạn chiều rộng cho đẹp */
+    color: #fff; /* Đảm bảo chữ bên trong màu trắng */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Container chính để căn giữa */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
     text-align: center;
 }
-header { background-color: #2c3e50; color: white; padding: 1rem 0; }
-nav ul { list-style: none; display: flex; gap: 20px; justify-content: center; padding: 0; }
-nav a { color: white; text-decoration: none; font-weight: bold; cursor: pointer; }
 
-.container { max-width: 800px; margin: 20px auto; padding: 20px; }
+.grid-games {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.game-card {
+    width: 280px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Hiệu ứng hover vào thẻ game */
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 255, 255, 0.2);
+    background: rgba(40, 40, 60, 0.7); /* Sáng hơn một chút khi hover */
+    border-color: rgba(0, 255, 255, 0.5);
+}
+
+/* --- 4. GIAO DIỆN BÊN TRONG GAME --- */
+/* Game Chuỗi số: Số hiển thị to và màu neon */
+#seq-display {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+    color: #00ffff; /* Màu xanh neon */
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    margin: 30px 0;
+}
+
+/* Game Diệt quái: Khu vực chiến trường */
+#battlefield {
+    height: 350px;
+    /* Nền tối hơn một chút để làm nổi bật quái */
+    background: rgba(0, 0, 0, 0.3); 
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+/* Con quái vật */
+.monster {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    color: #ff4757; /* Màu đỏ cho quái */
+    text-shadow: 0 0 8px rgba(255, 71, 87, 0.8);
+    font-size: 18px;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 5px;
+}
+
+/* --- 5. BẢNG XẾP HẠNG (Đã sửa màu chữ) --- */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+    margin-top: 20px;
+}
+
+thead tr th {
+    font-family: 'Orbitron', sans-serif;
+    color: #00ffff; /* Tiêu đề cột màu xanh neon */
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+tbody tr {
+    background: rgba(0, 0, 0, 0.2); /* Nền mỗi dòng tối nhẹ */
+    transition: 0.2s;
+}
+
+tbody tr:hover {
+    background: rgba(255, 255, 255, 0.1) !important; /* Hover sáng lên */
+    transform: scale(1.01);
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    color: #ffffff; /* Tên và điểm màu trắng */
+}
+
+/* Màu đặc biệt cho Top 3 */
+tbody tr:nth-child(1) td:first-child { color: #ffd700; font-size: 1.2em; text-shadow: 0 0 10px #ffd700; } /* Vàng */
+tbody tr:nth-child(2) td:first-child { color: #c0c0c0; font-size: 1.1em; } /* Bạc */
+tbody tr:nth-child(3) td:first-child { color: #cd7f32; font-size: 1.1em; } /* Đồng */
+
+/* Điểm số phụ (chi tiết game) */
+td span {
+    color: #aaa !important; /* Màu xám nhạt cho điểm chi tiết */
+    font-size: 0.9em;
+}
+
+/* --- 6. INPUT & BUTTONS (Đồng bộ) --- */
+input {
+    width: 100%;
+    max-width: 300px; /* Giới hạn chiều rộng ô nhập */
+    padding: 12px 20px;
+    margin: 15px auto;
+    display: block;
+    background: rgba(0, 0, 0, 0.5); /* Nền input tối */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px; /* Bo tròn nhiều hơn */
+    color: #00ffff; /* Chữ khi gõ màu xanh neon */
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+}
+
+button {
+    padding: 10px 25px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Tím xanh */
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(118, 75, 162, 0.6);
+    filter: brightness(1.2);
+}
+
+/* Nút quay lại / Thoát (Màu xám tối) */
+.back-btn {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a1a1a 100%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.back-btn:hover {
+     box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+}
+
+/* --- 7. CÁC THÀNH PHẦN ẨN/HIỆN --- */
 .hidden { display: none !important; }
 
-/* Grid Game Cards */
-.grid-games { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-.game-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; }
-.game-card:hover { transform: translateY(-5px); border: 1px solid #3498db; }
+/* Game Over Overlay */
+#game-over-overlay {
+    background: rgba(0, 0, 0, 0.85) !important; /* Nền đen đậm hơn */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 0, 0, 0.3); /* Viền đỏ nhẹ */
+}
+
+#game-over-overlay h2 {
+    color: #ff4757;
+    font-size: 36px;
+}
+
+/* Thông báo lỗi/thành công */
+#auth-feedback, #seq-feedback {
+    font-weight: bold;
+    margin-top: 15px;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+/* --- ẨN MŨI TÊN TĂNG GIẢM TRONG Ô NHẬP SỐ --- */
+/* Dành cho Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Dành cho Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* --- NÚT ĐIỀU KHIỂN ÂM THANH NỔI --- */
+#sound-float-btn {
+    position: fixed;       /* Cố định vị trí */
+    bottom: 20px;          /* Cách đáy 20px */
+    right: 20px;           /* Cách phải 20px */
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.6); /* Nền đen mờ */
+    border: 2px solid #00ffff;      /* Viền xanh neon */
+    border-radius: 50%;             /* Hình tròn */
+    color: #fff;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;         /* Luôn nổi trên cùng */
+    transition: 0.3s;
+    user-select: none;     /* Không cho bôi đen */
+}
+
+#sound-float-btn:hover {
+    background: rgba(0, 255, 255, 0.3);
+    transform: scale(1.1); /* Phóng to nhẹ khi di chuột */
+    box-shadow: 0 0 15px #00ffff;
+}
+
+/* --- SHOP ITEMS --- */
+.shop-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    width: 150px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.shop-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+}
+
+/* --- CÁC THEME (SKIN) --- */
+/* Mặc định là vũ trụ (đã có ở body), giờ thêm class đè lên */
+
+/* 1. Skin Rừng Rậm */
+body.theme-forest {
+    background: url('https://images.unsplash.com/photo-1448375240586-dfd8f3f72584?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') !important;
+    background-size: cover !important;
+}
+/* Đổi màu nút cho hợp rừng */
+body.theme-forest button {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+/* 2. Skin Băng Giá */
+body.theme-ice {
+    background: url('https://images.unsplash.com/photo-1478720568477-152d9b164e63?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') !important;
+    background-size: cover !important;
+}
+body.theme-ice button {
+    background: linear-gradient(135deg, #2980b9 0%, #6dd5fa 100%) !important;
+}

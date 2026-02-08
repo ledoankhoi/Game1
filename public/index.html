@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toán và Logic - Cổng Game</title>
+    
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/game.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* CSS bổ sung để đảm bảo hiển thị đẹp nếu file css chưa load kịp */
         .hidden { display: none !important; }
-        .back-btn { margin-bottom: 10px; padding: 5px 10px; cursor: pointer; }
-        .game-card { cursor: pointer; border: 1px solid #ccc; padding: 10px; margin: 10px; border-radius: 5px; }
+        .back-btn { cursor: pointer; }
         nav ul { display: flex; list-style: none; gap: 15px; }
-        nav a { text-decoration: none; font-weight: bold; color: #333; cursor: pointer; }
+        nav a { text-decoration: none; font-weight: bold; cursor: pointer; }
+        /* CSS cho nút Loa nổi */
+        #sound-float-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: rgba(0, 0, 0, 0.6); border: 2px solid #00ffff; border-radius: 50%;
+            color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 9999; user-select: none; transition: 0.3s;
+        }
+        #sound-float-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px #00ffff; }
     </style>
 </head>
 <body>
@@ -22,7 +31,8 @@
             <ul>
                 <li><a href="#" onclick="MainApp.goHome()">Trang chủ</a></li>
                 <li><a href="#" onclick="MainApp.showLeaderboard()">Xếp hạng</a></li>
-                
+                <li><span style="color: yellow; font-weight: bold; margin-right: 10px;">💰 <span id="user-coin">0</span></span></li>
+                <li><a href="#" onclick="MainApp.showShop()">Cửa hàng</a></li>
                 <li id="menu-auth"><a href="#" onclick="MainApp.showAuth()">Đăng Nhập</a></li>
             </ul>
         </nav>
@@ -40,6 +50,10 @@
                     <h3>👾 Diệt Quái Toán Học</h3>
                     <p>Gõ nhanh đáp án để tiêu diệt quái vật!</p>
                 </div>
+                <div class="game-card" onclick="MainApp.startGame('speed')">
+                    <h3>⚡ Phản Xạ Thần Tốc</h3>
+                    <p>Đúng hay Sai? Quyết định trong tíc tắc!</p>
+                </div>
             </div>
         </section>
 
@@ -48,29 +62,22 @@
                 <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
                 <h2>🏆 Bảng Phong Thần 🏆</h2>
             </div>
-            
             <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <thead>
-                    <tr style="background: #f0f0f0;">
-                        <th>Hạng</th>
-                        <th>Người chơi</th>
-                        <th>Điểm số</th>
-                    </tr>
+                    <tr><th>Hạng</th><th>Người chơi</th><th>Tổng điểm</th></tr>
                 </thead>
-                <tbody id="leaderboard-body">
-                    </tbody>
+                <tbody id="leaderboard-body"></tbody>
             </table>
         </section>
 
         <section id="sequence-game-screen" class="game-area hidden">
-            <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
+            <button class="back-btn" onclick="SoundManager.play('click'); MainApp.goHome()">← Thoát</button>
             <h2>Quy tắc chuỗi số</h2>
             <div id="sequence-content">
                 <p>Tìm số còn thiếu:</p>
                 <div id="seq-display" class="sequence-box" style="font-size: 24px; font-weight: bold; margin: 20px 0;">Loading...</div>
-                <div class="input-area">
-                    <input type="number" id="seq-input" placeholder="Đáp án...">
-                    <button onclick="SequenceGame.checkAnswer()">Kiểm tra</button>
+                <div class="control-panel" style="margin-top: 15px; text-align: center;">
+                    <input type="tel" id="seq-input" name="seq_random" autocomplete="off" placeholder="Nhập số..." style="padding: 10px; width: 50%;">
                 </div>
                 <p id="seq-feedback"></p>
                 <button onclick="SequenceGame.nextLevel()" class="next-btn" id="seq-next-btn" style="display:none;">Câu tiếp theo</button>
@@ -79,27 +86,67 @@
 
         <section id="monster-game-screen" class="game-area hidden">
             <div class="game-header" style="display: flex; justify-content: space-between;">
-                <button class="back-btn" onclick="MainApp.goHome()">← Thoát</button>
+                <button class="back-btn" onclick="SoundManager.play('click'); MainApp.goHome()">← Thoát</button>
                 <div class="score-board">Điểm: <span id="monster-score">0</span></div>
             </div>
-            
-            <div id="battlefield" style="height: 300px; background: #eee; position: relative; overflow: hidden; margin-top: 10px;">
-                </div>
-
-            <div class="control-panel" style="margin-top: 10px; text-align: center;">
-                <input type="number" id="monster-input" placeholder="Nhập đáp án..." autofocus style="padding: 10px; width: 50%;">
+            <div id="battlefield" style="height: 300px; background: rgba(0,0,0,0.3); position: relative; overflow: hidden; margin-top: 10px; border-radius: 10px;"></div>
+            <div class="control-panel" style="margin-top: 15px; text-align: center;">
+                <input type="tel" id="monster-input" name="monster_random" autocomplete="off" placeholder="Nhập số..." style="padding: 10px; width: 50%;">
             </div>
-            
-            <div id="game-over-overlay" class="hidden" style="position: absolute; top: 100px; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.8); color: white; padding: 20px;">
+            <div id="game-over-overlay" class="hidden" style="position: absolute; top: 100px; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.85); color: white; padding: 20px;">
                 <h2>GAME OVER</h2>
                 <button onclick="MonsterGame.start()">Chơi lại</button>
             </div>
         </section>
 
+        <section id="speed-game-screen" class="game-area hidden">
+            <div class="game-header" style="display: flex; justify-content: space-between;">
+                <button class="back-btn" onclick="MainApp.goHome()">← Thoát</button>
+                <div class="score-board">Điểm: <span id="speed-score">0</span></div>
+            </div>
+            <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 10px; overflow: hidden;">
+                <div id="time-bar" style="width: 100%; height: 100%; background: #00ffff; transition: width 0.1s linear;"></div>
+            </div>
+            <div id="speed-content" style="text-align: center; margin-top: 50px;">
+                <h2 id="math-equation" style="font-size: 48px; color: #fff; text-shadow: 0 0 20px #00ffff;">Loading...</h2>
+                <div style="display: flex; justify-content: center; gap: 50px; margin-top: 50px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 40px;">⬅️</div>
+                        <div style="color: #ff4757; font-weight: bold;">SAI</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 40px;">➡️</div>
+                        <div style="color: #2ecc71; font-weight: bold;">ĐÚNG</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="shop-screen" class="game-area hidden">
+            <div class="game-header">
+                <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
+                <h2>🛒 Cửa Hàng Vật Phẩm</h2>
+            </div>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                <div class="shop-item" onclick="Shop.buy('default', 0)">
+                    <div style="height: 100px; background: #000; border: 1px solid #fff;"></div>
+                    <h3>Vũ Trụ (Gốc)</h3><p>Đã sở hữu</p>
+                </div>
+                <div class="shop-item" onclick="Shop.buy('forest', 500)">
+                    <div style="height: 100px; background: #2ecc71; border: 1px solid #fff;"></div>
+                    <h3>Rừng Rậm</h3><p style="color: yellow;">💰 500</p>
+                </div>
+                <div class="shop-item" onclick="Shop.buy('ice', 1000)">
+                    <div style="height: 100px; background: #3498db; border: 1px solid #fff;"></div>
+                    <h3>Băng Giá</h3><p style="color: yellow;">💰 1000</p>
+                </div>
+            </div>
+            <p id="shop-msg" style="text-align: center; margin-top: 20px; font-weight: bold;"></p>
+        </section>
+
         <section id="auth-screen" class="game-area hidden">
             <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
-            
-            <div class="auth-container" style="max-width: 400px; margin: 20px auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px;">
+            <div class="auth-container" style="max-width: 400px; margin: 20px auto; padding: 20px;">
                 <h2 id="auth-title" style="text-align: center;">Đăng Nhập</h2>
                 
                 <div class="input-group">
@@ -107,18 +154,17 @@
                         <label>Tên hiển thị:</label>
                         <input type="text" id="reg-username" placeholder="Ví dụ: HuyPro" style="width: 100%; margin-bottom: 10px;">
                     </div>
-
                     <label>Email:</label>
                     <input type="email" id="login-email" placeholder="email@example.com" style="width: 100%; margin-bottom: 10px;">
-                    
                     <label>Mật khẩu:</label>
                     <input type="password" id="login-password" placeholder="******" style="width: 100%; margin-bottom: 10px;">
                 </div>
 
+                <p id="auth-feedback" style="color: #ff4757; text-align: center;"></p>
+
                 <div class="action-buttons" style="text-align: center;">
-                    <button onclick="Auth.handleLogin(event)" id="btn-login" style="background: #3498db; color: white; padding: 10px 20px; border: none; cursor: pointer;">Đăng Nhập</button>
-                    
-                    <button onclick="Auth.handleRegister(event)" id="btn-register" class="hidden" style="background: #27ae60; color: white; padding: 10px 20px; border: none; cursor: pointer;">Đăng Ký</button>
+                    <button onclick="Auth.handleLogin(event)" id="btn-login" style="background: #3498db;">Đăng Nhập</button>
+                    <button onclick="Auth.handleRegister(event)" id="btn-register" class="hidden" style="background: #27ae60;">Đăng Ký</button>
                 </div>
 
                 <p class="switch-mode" style="text-align: center; margin-top: 15px;">
@@ -129,24 +175,40 @@
         </section>
     </main>
 
+    <div id="sound-float-btn" onclick="toggleSound(this)">🔊</div>
+
     <script src="js/games/sequence.js"></script>
     <script src="js/games/monster.js"></script>
+    <script src="js/games/speed.js"></script> 
     <script src="js/leaderboard.js"></script>
+    <script src="js/shop.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/soundManager.js"></script>
+
+    <script>
+        function toggleSound(btn) {
+            if (typeof SoundManager !== 'undefined') {
+                const icon = SoundManager.toggleMute();
+                btn.innerText = icon;
+            }
+        }
+    </script>
 
     <script>
         function toggleAuthMode() {
             const isLogin = !document.getElementById('btn-login').classList.contains('hidden');
-            
+            const feedback = document.getElementById('auth-feedback');
+            if(feedback) feedback.innerText = "";
+
             if (isLogin) {
                 // Chuyển sang Đăng Ký
                 document.getElementById('auth-title').innerText = "Đăng Ký Tài Khoản";
                 document.getElementById('btn-login').classList.add('hidden');
                 document.getElementById('btn-register').classList.remove('hidden');
-                document.getElementById('group-username').classList.remove('hidden'); // Hiện ô nhập tên
+                document.getElementById('group-username').classList.remove('hidden');
                 document.getElementById('text-switch').innerText = "Đã có tài khoản?";
                 
-                // Đồng bộ ID cho khớp với main.js (Mẹo nhỏ)
+                // Đổi ID để lấy dữ liệu dễ hơn
                 document.getElementById('login-email').id = 'reg-email';
                 document.getElementById('login-password').id = 'reg-password';
             } else {
@@ -154,10 +216,9 @@
                 document.getElementById('auth-title').innerText = "Đăng Nhập";
                 document.getElementById('btn-login').classList.remove('hidden');
                 document.getElementById('btn-register').classList.add('hidden');
-                document.getElementById('group-username').classList.add('hidden'); // Ẩn ô nhập tên
+                document.getElementById('group-username').classList.add('hidden');
                 document.getElementById('text-switch').innerText = "Chưa có tài khoản?";
 
-                // Trả lại ID cũ
                 document.getElementById('reg-email').id = 'login-email';
                 document.getElementById('reg-password').id = 'login-password';
             }

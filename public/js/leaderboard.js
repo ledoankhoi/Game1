@@ -3,52 +3,54 @@ const Leaderboard = {
         const tbody = document.getElementById('leaderboard-body');
         if (!tbody) return;
 
-        // 1. Hiện thông báo đang tải
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">⏳ Đang tải dữ liệu...</td></tr>`;
+        // Hiện thông báo đang tải
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">⏳ Đang tải dữ liệu...</td></tr>`;
 
         try {
-            // 2. Gọi API lấy dữ liệu
             const response = await fetch('http://localhost:3000/api/auth/leaderboard');
             const data = await response.json();
 
             tbody.innerHTML = '';
 
             if (data.success && data.data.length > 0) {
-                // 3. Duyệt qua từng người chơi
+                // Sắp xếp lại danh sách theo tổng điểm (cao xuống thấp)
+                data.data.sort((a, b) => {
+                    const totalA = (a.highScores?.monster || 0) + (a.highScores?.sequence || 0) + (a.highScores?.speed || 0);
+                    const totalB = (b.highScores?.monster || 0) + (b.highScores?.sequence || 0) + (b.highScores?.speed || 0);
+                    return totalB - totalA;
+                });
+
                 data.data.forEach((player, index) => {
-                    
-                    // --- KHẮC PHỤC LỖI UNDEFINED TẠI ĐÂY ---
-                    // Kiểm tra xem user có điểm không, nếu không thì gán bằng 0
+                    // Lấy điểm từng game (nếu không có thì bằng 0)
                     let monsterScore = 0;
                     let sequenceScore = 0;
+                    let speedScore = 0;
 
                     if (player.highScores) {
                         monsterScore = player.highScores.monster || 0;
                         sequenceScore = player.highScores.sequence || 0;
-                    } else if (player.totalScore) {
-                        // Hỗ trợ hiển thị tạm cho các user cũ (nếu có)
-                        monsterScore = player.totalScore;
-                    }
+                        speedScore = player.highScores.speed || 0; // Thêm game mới
+                    } 
+                    // (Bỏ qua logic cũ totalScore vì giờ ai cũng có highScores rồi)
 
-                    // Tính tổng điểm để hiển thị
-                    const totalDisplay = monsterScore + sequenceScore;
-                    // ----------------------------------------
+                    const totalDisplay = monsterScore + sequenceScore + speedScore;
 
-                    // Xử lý icon huy chương
+                    // Icon huy chương
                     let rankDisplay = index + 1;
-                    if (index === 0) rankDisplay = "🥇 1";
-                    if (index === 1) rankDisplay = "🥈 2";
-                    if (index === 2) rankDisplay = "🥉 3";
+                    if (index === 0) rankDisplay = "🥇";
+                    if (index === 1) rankDisplay = "🥈";
+                    if (index === 2) rankDisplay = "🥉";
 
                     // Vẽ hàng (Row)
                     const row = `
                         <tr>
-                            <td style="text-align: center; font-weight: bold;">${rankDisplay}</td>
+                            <td style="text-align: center; font-weight: bold; font-size: 1.2em;">${rankDisplay}</td>
                             <td>${player.username}</td>
-                            <td style="font-weight: bold; color: #d35400;">
+                            <td style="font-weight: bold; color: #00ffff;">
                                 ${totalDisplay} 
-                                <span style="font-size: 12px; color: gray; font-weight: normal;">
-                                    (👾${monsterScore} | 🔢${sequenceScore})
+                                <br>
+                                <span style="font-size: 0.85em; color: #aaa; font-weight: normal;">
+                                    (👾${monsterScore} | 🔢${sequenceScore} | ⚡${speedScore})
                                 </span>
                             </td>
                         </tr>
@@ -61,7 +63,7 @@ const Leaderboard = {
 
         } catch (error) {
             console.error("Lỗi:", error);
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: red;">❌ Lỗi kết nối Server!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #ff4757;">❌ Lỗi kết nối Server!</td></tr>`;
         }
     }
 };

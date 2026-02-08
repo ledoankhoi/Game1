@@ -1,22 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const authController = require('../controllers/authController');
 
-// --- BƯỚC QUAN TRỌNG NHẤT ---
-// Bạn phải lấy "getLeaderboard" từ trong kho ra thì mới dùng được.
-// Lỗi ReferenceError xảy ra là do dòng dưới đây bị thiếu chữ "getLeaderboard".
-const { 
-    register, 
-    login, 
-    updateScore, 
-    getLeaderboard  // <--- BẮT BUỘC PHẢI CÓ DÒNG NÀY
-} = require('../controllers/authController');
+// 1. Đăng ký
+router.post('/register', authController.register);
 
-// Các đường dẫn cũ
-router.post('/register', register);
-router.post('/login', login);
-router.put('/score', updateScore);
+// 2. Đăng nhập
+router.post('/login', authController.login);
 
-// Đường dẫn mới (Nếu không có dòng import ở trên, dòng này sẽ báo lỗi)
-router.get('/leaderboard', getLeaderboard); 
+// 3. Bảng xếp hạng 
+// (Lưu ý: Đã sửa thành authController.leaderboard cho khớp với file Controller)
+router.get('/leaderboard', authController.leaderboard);
+
+// 4. Cập nhật điểm
+router.post('/update-score', authController.updateScore);
+
+// 5. Mua vật phẩm (Shop)
+router.post('/buy-item', authController.buyItem);
 
 module.exports = router;

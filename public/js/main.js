@@ -1,83 +1,61 @@
 const MainApp = {
-    // 1. Quay về màn hình danh sách game
+    // Chuyển màn hình
     goHome: function() {
-        document.querySelectorAll('.game-area').forEach(el => el.classList.add('hidden'));
+        if (typeof SoundManager !== 'undefined') SoundManager.play('click');
+        document.querySelectorAll('.container, .game-area').forEach(el => el.classList.add('hidden'));
         document.getElementById('game-list').classList.remove('hidden');
-        
-        // Dừng game nếu đang chạy
-        if (typeof MonsterGame !== 'undefined') MonsterGame.isPlaying = false;
+        document.getElementById('game-list').style.display = 'block';
     },
 
-    // 2. Chuyển sang màn hình chơi game
     startGame: function(gameType) {
-        document.getElementById('game-list').classList.add('hidden');
+        if (typeof SoundManager !== 'undefined') SoundManager.play('click');
+        document.querySelectorAll('.container, .game-area').forEach(el => el.classList.add('hidden'));
         
         if (gameType === 'sequence') {
             document.getElementById('sequence-game-screen').classList.remove('hidden');
-            if (typeof SequenceGame !== 'undefined') SequenceGame.init();
+            SequenceGame.init();
         } else if (gameType === 'monster') {
             document.getElementById('monster-game-screen').classList.remove('hidden');
-            if (typeof MonsterGame !== 'undefined') MonsterGame.start();
+            MonsterGame.start();
+        } else if (gameType === 'speed') {
+            document.getElementById('speed-game-screen').classList.remove('hidden');
+            SpeedGame.start();
         }
     },
 
-    // 3. Hiển thị màn hình Đăng nhập/Đăng ký
-    showAuth: function() {
-        document.querySelectorAll('.game-area').forEach(el => el.classList.add('hidden'));
-        document.getElementById('game-list').classList.add('hidden');
-        
-        const authScreen = document.getElementById('auth-screen');
-        if (authScreen) authScreen.classList.remove('hidden');
-    },
-
-    // 4. Hiển thị Bảng Xếp Hạng
     showLeaderboard: function() {
-        document.querySelectorAll('.game-area').forEach(el => el.classList.add('hidden'));
-        document.getElementById('game-list').classList.add('hidden');
-        
-        const lbScreen = document.getElementById('leaderboard-screen');
-        if (lbScreen) {
-            lbScreen.classList.remove('hidden');
-            if (typeof Leaderboard !== 'undefined') Leaderboard.loadData();
-        }
+        if (typeof SoundManager !== 'undefined') SoundManager.play('click');
+        document.querySelectorAll('.container, .game-area').forEach(el => el.classList.add('hidden'));
+        document.getElementById('leaderboard-screen').classList.remove('hidden');
+        Leaderboard.loadData();
     },
 
-    // 5. Kiểm tra trạng thái đăng nhập để vẽ lại Menu (ĐÃ SỬA LỖI)
-    checkLoginStatus: function() {
-        console.log("Đang kiểm tra đăng nhập..."); 
-        const userJson = localStorage.getItem('user');
-        const navUl = document.querySelector('nav ul');
-        
-        if (!navUl) return; 
+    showAuth: function() {
+        if (typeof SoundManager !== 'undefined') SoundManager.play('click');
+        document.querySelectorAll('.container, .game-area').forEach(el => el.classList.add('hidden'));
+        document.getElementById('auth-screen').classList.remove('hidden');
+    },
 
-        if (userJson) {
-            // --- TRƯỜNG HỢP: ĐÃ ĐĂNG NHẬP ---
-            const user = JSON.parse(userJson);
-            navUl.innerHTML = `
-                <li><a href="#" onclick="MainApp.goHome()">Trang chủ</a></li>
-                <li><span style="color: #f1c40f; font-weight: bold;">Chào, ${user.username}</span></li>
-                <li><a href="#" onclick="MainApp.showLeaderboard()">Bảng Xếp Hạng</a></li>
-                <li><a href="#" onclick="Auth.logout()">Đăng xuất</a></li>
-            `;
-        } else {
-            // --- TRƯỜNG HỢP: CHƯA ĐĂNG NHẬP ---
-            navUl.innerHTML = `
-                <li><a href="#" onclick="MainApp.goHome()">Trang chủ</a></li>
-                <li><a href="#" onclick="MainApp.showLeaderboard()">Bảng Xếp Hạng</a></li>
-                <li><a href="#" onclick="MainApp.showAuth()">Đăng Nhập</a></li>
-            `;
-        }
+    showShop: function() {
+        if (typeof SoundManager !== 'undefined') SoundManager.play('click');
+        document.querySelectorAll('.container, .game-area').forEach(el => el.classList.add('hidden'));
+        document.getElementById('shop-screen').classList.remove('hidden');
     }
 };
 
-// --- BỘ XỬ LÝ ĐĂNG KÝ / ĐĂNG NHẬP / ĐĂNG XUẤT (BỔ SUNG THÊM) ---
+// --- XỬ LÝ ĐĂNG KÝ / ĐĂNG NHẬP ---
 const Auth = {
-    // Xử lý Đăng Ký
-    handleRegister: async function(event) {
-        event.preventDefault(); 
+    // 1. XỬ LÝ ĐĂNG KÝ (Đã thêm mới)
+    handleRegister: async function(e) {
         const username = document.getElementById('reg-username').value;
         const email = document.getElementById('reg-email').value;
         const password = document.getElementById('reg-password').value;
+        const feedback = document.getElementById('auth-feedback');
+
+        if (!username || !email || !password) {
+            feedback.innerText = "Vui lòng nhập đủ thông tin!";
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:3000/api/auth/register', {
@@ -89,25 +67,35 @@ const Auth = {
             const data = await response.json();
 
             if (data.success) {
-                alert("✅ Đăng ký thành công! Hãy đăng nhập ngay.");
-                // Xóa trắng ô nhập
-                document.getElementById('reg-username').value = '';
-                document.getElementById('reg-email').value = '';
-                document.getElementById('reg-password').value = '';
+                alert("Đăng ký thành công! Vui lòng đăng nhập.");
+                // Tự động chuyển về màn hình đăng nhập
+                if (typeof toggleAuthMode === 'function') {
+                    toggleAuthMode(); 
+                }
+                // Xóa form
+                document.getElementById('reg-username').value = "";
+                document.getElementById('reg-email').value = "";
+                document.getElementById('reg-password').value = "";
+                feedback.innerText = "";
             } else {
-                alert("❌ Lỗi: " + data.message);
+                feedback.innerText = data.message;
             }
         } catch (error) {
-            console.error("Lỗi:", error);
-            alert("Không kết nối được với Server!");
+            console.error(error);
+            feedback.innerText = "Lỗi kết nối Server!";
         }
     },
 
-    // Xử lý Đăng Nhập
-    handleLogin: async function(event) {
-        event.preventDefault();
+    // 2. XỬ LÝ ĐĂNG NHẬP
+    handleLogin: async function(e) {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        const feedback = document.getElementById('auth-feedback');
+
+        if (!email || !password) {
+            feedback.innerText = "Vui lòng nhập đủ thông tin!";
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:3000/api/auth/login', {
@@ -119,62 +107,61 @@ const Auth = {
             const data = await response.json();
 
             if (data.success) {
-                alert("✅ Đăng nhập thành công!");
-                // Lưu thông tin người dùng vào bộ nhớ trình duyệt
-                localStorage.setItem('user', JSON.stringify(data.user));
-                // Tải lại trang để cập nhật Menu
-                location.reload(); 
+                localStorage.setItem('username', data.user.username);
+                
+                // Cập nhật Menu
+                document.getElementById('menu-auth').innerHTML = `<a href="#" style="color: #00ff00">Chào, ${data.user.username}</a>`;
+                
+                // Cập nhật Tiền
+                if (data.user.coins !== undefined) {
+                    document.getElementById('user-coin').innerText = data.user.coins;
+                }
+                
+                // Áp dụng Skin
+                if (typeof Shop !== 'undefined' && data.user.equippedSkin) {
+                    Shop.applySkin(data.user.equippedSkin);
+                }
+
+                alert("Đăng nhập thành công!");
+                MainApp.goHome();
             } else {
-                alert("❌ Đăng nhập thất bại: " + data.message);
+                feedback.innerText = data.message;
             }
         } catch (error) {
-            console.error("Lỗi:", error);
-            alert("Lỗi kết nối Server!");
-        }
-    },
-
-    // Xử lý Đăng Xuất
-    logout: function() {
-        if(confirm("Bạn có chắc muốn đăng xuất?")) {
-            localStorage.removeItem('user'); // Xóa thông tin user
-            location.reload(); // Tải lại trang
+            console.error(error);
+            feedback.innerText = "Lỗi kết nối Server!";
         }
     }
 };
 
-// --- HÀM GỬI ĐIỂM LÊN SERVER ---
-// --- HÀM GỬI ĐIỂM LÊN SERVER (CÓ PHÂN LOẠI GAME) ---
-// Thêm tham số gameType vào hàm
-// --- HÀM GỬI ĐIỂM (CÓ PHÂN LOẠI GAME) ---
+// --- HÀM LƯU ĐIỂM & CẬP NHẬT TIỀN ---
 async function saveHighScore(gameType, score) {
-    const userJson = localStorage.getItem('user');
-    if (!userJson) return; // Chưa đăng nhập thì thôi
+    const username = localStorage.getItem('username');
+    if (!username) return;
 
-    const user = JSON.parse(userJson);
-    
+    console.log(`Đang lưu điểm: ${gameType} - ${score}`);
+
     try {
-        const response = await fetch('http://localhost:3000/api/auth/score', {
-            method: 'PUT',
+        const response = await fetch('http://localhost:3000/api/auth/update-score', {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                username: user.username, 
-                score: score, 
-                gameType: gameType // Gửi thêm loại game (monster/sequence)
-            })
+            body: JSON.stringify({ username, gameType, score })
         });
 
         const data = await response.json();
-        if (data.newHighScore) {
-            alert(`🎉 KỶ LỤC MỚI (${gameType}): ${data.newHighScore} điểm!`);
+        console.log("Kết quả lưu:", data);
+
+        // Cập nhật tiền mới lên giao diện
+        if (data.newCoins !== undefined) {
+            const coinSpan = document.getElementById('user-coin');
+            coinSpan.innerText = data.newCoins;
+            
+            // Hiệu ứng nháy vàng
+            coinSpan.style.color = '#fff';
+            setTimeout(() => coinSpan.style.color = 'yellow', 300);
         }
+
     } catch (error) {
-        console.error("Lỗi gửi điểm:", error);
+        console.error("Lỗi lưu điểm:", error);
     }
 }
-
-// --- QUAN TRỌNG: Chạy khi trang web tải xong ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Trang web đã tải xong!");
-    // Kiểm tra xem đã đăng nhập chưa để hiển thị Menu đúng
-    MainApp.checkLoginStatus();
-});
