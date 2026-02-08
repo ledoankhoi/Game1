@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toán và Logic - Cổng Game</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+        /* CSS bổ sung để đảm bảo hiển thị đẹp nếu file css chưa load kịp */
+        .hidden { display: none !important; }
+        .back-btn { margin-bottom: 10px; padding: 5px 10px; cursor: pointer; }
+        .game-card { cursor: pointer; border: 1px solid #ccc; padding: 10px; margin: 10px; border-radius: 5px; }
+        nav ul { display: flex; list-style: none; gap: 15px; }
+        nav a { text-decoration: none; font-weight: bold; color: #333; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Toán và Logic</div>
+            <ul>
+                <li><a href="#" onclick="MainApp.goHome()">Trang chủ</a></li>
+                <li><a href="#" onclick="MainApp.showLeaderboard()">Xếp hạng</a></li>
+                
+                <li id="menu-auth"><a href="#" onclick="MainApp.showAuth()">Đăng Nhập</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="game-list" class="container">
+            <h1>Chọn Trò Chơi</h1>
+            <div class="grid-games">
+                <div class="game-card" onclick="MainApp.startGame('sequence')">
+                    <h3>🔢 Quy tắc chuỗi số</h3>
+                    <p>Tìm quy luật và điền số còn thiếu.</p>
+                </div>
+                <div class="game-card" onclick="MainApp.startGame('monster')">
+                    <h3>👾 Diệt Quái Toán Học</h3>
+                    <p>Gõ nhanh đáp án để tiêu diệt quái vật!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="leaderboard-screen" class="game-area hidden">
+            <div class="game-header">
+                <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
+                <h2>🏆 Bảng Phong Thần 🏆</h2>
+            </div>
+            
+            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th>Hạng</th>
+                        <th>Người chơi</th>
+                        <th>Điểm số</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+        </section>
+
+        <section id="sequence-game-screen" class="game-area hidden">
+            <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
+            <h2>Quy tắc chuỗi số</h2>
+            <div id="sequence-content">
+                <p>Tìm số còn thiếu:</p>
+                <div id="seq-display" class="sequence-box" style="font-size: 24px; font-weight: bold; margin: 20px 0;">Loading...</div>
+                <div class="input-area">
+                    <input type="number" id="seq-input" placeholder="Đáp án...">
+                    <button onclick="SequenceGame.checkAnswer()">Kiểm tra</button>
+                </div>
+                <p id="seq-feedback"></p>
+                <button onclick="SequenceGame.nextLevel()" class="next-btn" id="seq-next-btn" style="display:none;">Câu tiếp theo</button>
+            </div>
+        </section>
+
+        <section id="monster-game-screen" class="game-area hidden">
+            <div class="game-header" style="display: flex; justify-content: space-between;">
+                <button class="back-btn" onclick="MainApp.goHome()">← Thoát</button>
+                <div class="score-board">Điểm: <span id="monster-score">0</span></div>
+            </div>
+            
+            <div id="battlefield" style="height: 300px; background: #eee; position: relative; overflow: hidden; margin-top: 10px;">
+                </div>
+
+            <div class="control-panel" style="margin-top: 10px; text-align: center;">
+                <input type="number" id="monster-input" placeholder="Nhập đáp án..." autofocus style="padding: 10px; width: 50%;">
+            </div>
+            
+            <div id="game-over-overlay" class="hidden" style="position: absolute; top: 100px; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.8); color: white; padding: 20px;">
+                <h2>GAME OVER</h2>
+                <button onclick="MonsterGame.start()">Chơi lại</button>
+            </div>
+        </section>
+
+        <section id="auth-screen" class="game-area hidden">
+            <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
+            
+            <div class="auth-container" style="max-width: 400px; margin: 20px auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px;">
+                <h2 id="auth-title" style="text-align: center;">Đăng Nhập</h2>
+                
+                <div class="input-group">
+                    <div id="group-username" class="hidden">
+                        <label>Tên hiển thị:</label>
+                        <input type="text" id="reg-username" placeholder="Ví dụ: HuyPro" style="width: 100%; margin-bottom: 10px;">
+                    </div>
+
+                    <label>Email:</label>
+                    <input type="email" id="login-email" placeholder="email@example.com" style="width: 100%; margin-bottom: 10px;">
+                    
+                    <label>Mật khẩu:</label>
+                    <input type="password" id="login-password" placeholder="******" style="width: 100%; margin-bottom: 10px;">
+                </div>
+
+                <div class="action-buttons" style="text-align: center;">
+                    <button onclick="Auth.handleLogin(event)" id="btn-login" style="background: #3498db; color: white; padding: 10px 20px; border: none; cursor: pointer;">Đăng Nhập</button>
+                    
+                    <button onclick="Auth.handleRegister(event)" id="btn-register" class="hidden" style="background: #27ae60; color: white; padding: 10px 20px; border: none; cursor: pointer;">Đăng Ký</button>
+                </div>
+
+                <p class="switch-mode" style="text-align: center; margin-top: 15px;">
+                    <span id="text-switch">Chưa có tài khoản?</span> 
+                    <a href="#" onclick="toggleAuthMode()">Bấm vào đây</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/games/sequence.js"></script>
+    <script src="js/games/monster.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        function toggleAuthMode() {
+            const isLogin = !document.getElementById('btn-login').classList.contains('hidden');
+            
+            if (isLogin) {
+                // Chuyển sang Đăng Ký
+                document.getElementById('auth-title').innerText = "Đăng Ký Tài Khoản";
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('btn-register').classList.remove('hidden');
+                document.getElementById('group-username').classList.remove('hidden'); // Hiện ô nhập tên
+                document.getElementById('text-switch').innerText = "Đã có tài khoản?";
+                
+                // Đồng bộ ID cho khớp với main.js (Mẹo nhỏ)
+                document.getElementById('login-email').id = 'reg-email';
+                document.getElementById('login-password').id = 'reg-password';
+            } else {
+                // Chuyển về Đăng Nhập
+                document.getElementById('auth-title').innerText = "Đăng Nhập";
+                document.getElementById('btn-login').classList.remove('hidden');
+                document.getElementById('btn-register').classList.add('hidden');
+                document.getElementById('group-username').classList.add('hidden'); // Ẩn ô nhập tên
+                document.getElementById('text-switch').innerText = "Chưa có tài khoản?";
+
+                // Trả lại ID cũ
+                document.getElementById('reg-email').id = 'login-email';
+                document.getElementById('reg-password').id = 'login-password';
+            }
+        }
+    </script>
+</body>
+</html>
