@@ -1,96 +1,127 @@
+/* file: js/auth.js */
 const Auth = {
-    isRegisterMode: false, // Mặc định là chế độ Đăng nhập
+    user: null,
 
-    // 1. Chuyển đổi qua lại giữa Đăng nhập và Đăng ký
-    toggleMode: function() {
-        this.isRegisterMode = !this.isRegisterMode;
-        
-        const title = document.getElementById('auth-title');
-        const btnLogin = document.getElementById('btn-login');
-        const btnRegister = document.getElementById('btn-register');
-        const inputUser = document.getElementById('auth-username');
-        const link = document.querySelector('.switch-mode a');
-
-        if (this.isRegisterMode) {
-            title.innerText = "Đăng Ký Tài Khoản";
-            btnLogin.classList.add('hidden');
-            btnRegister.classList.remove('hidden');
-            inputUser.style.display = 'block'; // Hiện ô nhập tên
-            link.innerText = "Đã có tài khoản? Đăng nhập";
+    // Kiểm tra đăng nhập khi tải trang
+    checkLogin: function() {
+        const storedUser = localStorage.getItem('user_info');
+        if (storedUser) {
+            this.user = JSON.parse(storedUser);
+            this.updateHeaderUI();
         } else {
-            title.innerText = "Đăng Nhập";
-            btnLogin.classList.remove('hidden');
-            btnRegister.classList.add('hidden');
-            inputUser.style.display = 'none'; // Ẩn ô nhập tên
-            link.innerText = "Chưa có tài khoản? Đăng ký ngay";
+            this.updateHeaderUI(); // Gọi để reset về trạng thái Guest
         }
     },
 
-    // 2. Hàm gửi dữ liệu ĐĂNG KÝ lên Server
-    submitRegister: async function() {
-        const username = document.getElementById('auth-username').value;
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
+    // Cập nhật giao diện Header (Guest vs User)
+    updateHeaderUI: function() {
+        const guestSection = document.getElementById('header-guest');
+        const userSection = document.getElementById('header-user');
+        const coinEl = document.getElementById('user-coin');
 
-        // Gửi yêu cầu (Request) đến Server
+        if (this.user) {
+            // ---> TRẠNG THÁI: ĐÃ ĐĂNG NHẬP <---
+            if(guestSection) guestSection.classList.add('hidden'); // Ẩn nút Login/Register
+            if(userSection) userSection.classList.remove('hidden'); // Hiện Coin/Avatar
+            
+            // Cập nhật số tiền
+            if (coinEl) coinEl.innerText = this.user.coins || 0;
+            
+            // Ẩn modal auth nếu đang mở
+            const authModal = document.getElementById('auth-screen');
+            if(authModal) authModal.classList.add('hidden');
+
+            console.log("UI Updated: Logged in");
+        } else {
+            // ---> TRẠNG THÁI: KHÁCH <---
+            if(guestSection) guestSection.classList.remove('hidden'); // Hiện nút Login/Register
+            if(userSection) userSection.classList.add('hidden'); // Ẩn Coin/Avatar
+            
+            console.log("UI Updated: Guest");
+        }
+    },
+
+    // Xử lý ĐĂNG KÝ
+    handleRegister: async function(e) {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const feedback = document.getElementById('auth-feedback');
+
+        if (!username || !email || !password) {
+            feedback.innerText = "Please enter all fields!";
+            return;
+        }
+        feedback.innerText = "Processing...";
+
         try {
-            const response = await fetch('/api/auth/register', {
+            const res = await fetch('http://localhost:3000/api/auth/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json' // Báo cho Server biết ta gửi JSON
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
             });
 
-            const data = await response.json(); // Đọc phản hồi từ Server
+            const data = await res.json();
 
-            if (data.success) {
-                alert("Đăng ký thành công! Hãy đăng nhập ngay.");
-                this.toggleMode(); // Chuyển về màn hình đăng nhập
+            if (res.ok) {
+                alert("Registration successful! Please log in.");
+                if(typeof toggleAuthMode === 'function') toggleAuthMode();
+                feedback.innerText = "";
             } else {
-                document.getElementById('auth-feedback').innerText = data.message;
+                feedback.innerText = data.message || "Registration failed";
             }
-        } catch (error) {
-            console.error("Lỗi:", error);
-            document.getElementById('auth-feedback').innerText = "Không thể kết nối Server!";
+        } catch (err) {
+            console.error(err);
+            feedback.innerText = "Server error!";
         }
     },
 
-    // 3. Hàm gửi dữ liệu ĐĂNG NHẬP lên Server
-    submitLogin: async function() {
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
+    // Xử lý ĐĂNG NHẬP
+    handleLogin: async function(e) {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const feedback = document.getElementById('auth-feedback');
+
+        if (!email || !password) {
+            feedback.innerText = "Enter email and password!";
+            return;
+        }
+        feedback.innerText = "Logging in...";
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const res = await fetch('http://localhost:3000/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
+            const data = await res.json();
 
-            if (data.success) {
-                // LƯU Ý QUAN TRỌNG:
-                // Khi đăng nhập thành công, Server gửi về thông tin User.
-                // Ta cần lưu nó vào bộ nhớ trình duyệt (localStorage) để dùng sau này.
-                localStorage.setItem('user', JSON.stringify(data.user));
+            if (res.ok) {
+                this.user = data.user;
+                localStorage.setItem('user_info', JSON.stringify(this.user));
+                localStorage.setItem('auth_token', data.token);
+
+                alert("Welcome back, " + this.user.username + "!");
+                this.updateHeaderUI(); // Cập nhật Header ngay lập tức
                 
-                alert("Xin chào " + data.user.username + "!");
-                MainApp.goHome(); // Quay về trang chủ
-                MainApp.checkLoginStatus(); // Cập nhật giao diện (sẽ viết hàm này sau)
+                // Quay về trang chủ nếu đang ở màn hình khác
+                if(typeof MainApp !== 'undefined') MainApp.goHome();
             } else {
-                document.getElementById('auth-feedback').innerText = data.message;
+                feedback.innerText = data.message || "Invalid credentials";
             }
-        } catch (error) {
-            console.error("Lỗi:", error);
-            document.getElementById('auth-feedback').innerText = "Lỗi kết nối!";
+        } catch (err) {
+            console.error(err);
+            feedback.innerText = "Server error!";
         }
     },
-    
-    // Hàm đăng xuất
+
+    // Đăng xuất
     logout: function() {
-        localStorage.removeItem('user');
-        window.location.reload(); // Tải lại trang để reset mọi thứ
+        this.user = null;
+        localStorage.removeItem('user_info');
+        localStorage.removeItem('auth_token');
+        this.updateHeaderUI(); // Reset về giao diện Khách
+        location.reload(); // Tải lại trang cho sạch
     }
 };

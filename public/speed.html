@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <title>Phản Xạ Thần Tốc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-black text-white font-body h-screen flex flex-col">
+    
+    <div class="flex items-center justify-between p-4 border-b border-gray-800">
+        <a href="index.html" class="text-yellow-400 hover:text-white font-bold">← Thoát</a>
+        <div class="font-bold text-xl">Điểm: <span id="speed-score" class="text-yellow-400">0</span></div>
+    </div>
+
+    <div class="w-full h-2 bg-gray-800">
+        <div id="time-bar" class="h-full bg-yellow-400 w-full"></div>
+    </div>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4">
+        <div class="text-center">
+            <h2 id="math-equation" class="text-6xl font-display font-bold text-white mb-12 drop-shadow-[0_0_10px_rgba(255,255,0,0.5)]">
+                Loading...
+            </h2>
+            
+            <div class="flex gap-8">
+                <button class="w-32 h-32 rounded-full border-4 border-red-500 text-red-500 font-bold text-xl hover:bg-red-500 hover:text-black transition">
+                    SAI
+                </button>
+                <button class="w-32 h-32 rounded-full border-4 border-green-500 text-green-500 font-bold text-xl hover:bg-green-500 hover:text-black transition">
+                    ĐÚNG
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/soundManager.js"></script>
+    <script src="js/games/speed.js"></script>
+    <script>
+        window.onload = () => SpeedGame.init(); // Giả sử speed.js có hàm init
+    </script>
+</body>
+</html>

@@ -1,228 +1,341 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html class="light" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán và Logic - Cổng Game</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MathQuest - Game Library</title>
     
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet"/> 
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet"/>
+
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/game.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        .hidden { display: none !important; }
-        .back-btn { cursor: pointer; }
-        nav ul { display: flex; list-style: none; gap: 15px; }
-        nav a { text-decoration: none; font-weight: bold; cursor: pointer; }
-        /* CSS cho nút Loa nổi */
-        #sound-float-btn {
-            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
-            background: rgba(0, 0, 0, 0.6); border: 2px solid #00ffff; border-radius: 50%;
-            color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 9999; user-select: none; transition: 0.3s;
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f46a",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
         }
-        #sound-float-btn:hover { transform: scale(1.1); box-shadow: 0 0 15px #00ffff; }
+    </script>
+    <style>
+        body { font-family: 'Lexend', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .card-hover:hover { transform: translateY(-4px); transition: transform 0.2s ease-in-out; cursor: pointer; }
+        .hidden { display: none !important; }
+        
+        /* Modal Overlay Style */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
     </style>
 </head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">Toán và Logic</div>
-            <ul>
-                <li><a href="#" onclick="MainApp.goHome()">Trang chủ</a></li>
-                <li><a href="#" onclick="MainApp.showLeaderboard()">Xếp hạng</a></li>
-                <li><span style="color: yellow; font-weight: bold; margin-right: 10px;">💰 <span id="user-coin">0</span></span></li>
-                <li><a href="#" onclick="MainApp.showShop()">Cửa hàng</a></li>
-                <li id="menu-auth"><a href="#" onclick="MainApp.showAuth()">Đăng Nhập</a></li>
-            </ul>
-        </nav>
+<body class="bg-background-light dark:bg-background-dark text-[#111813] dark:text-white min-h-screen">
+
+<div id="app-lobby" class="relative flex flex-col w-full">
+    
+    <header class="sticky top-0 z-50 w-full bg-white dark:bg-[#1a2e20] border-b border-[#e0e8e2] dark:border-[#2a3f31] px-6 lg:px-12 py-3 flex items-center justify-between shadow-sm">
+        
+        <div class="flex items-center gap-8">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
+                <div class="bg-primary p-1.5 rounded-lg flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-white text-2xl">calculate</span>
+                </div>
+                <h2 class="text-xl font-extrabold tracking-tight text-gray-800 dark:text-white">MathQuest</h2>
+            </div>
+            <nav class="hidden md:flex items-center gap-6">
+                <a class="text-sm font-semibold border-b-2 border-primary pb-0.5 text-gray-900 dark:text-white" href="#" onclick="MainApp.goHome()">Library</a>
+                <a class="text-sm font-medium text-[#608a6e] hover:text-primary transition-colors" href="#" onclick="MainApp.showLeaderboard()">Leaderboard</a>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-4">
+            
+            <div class="relative hidden lg:block w-64">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span class="material-symbols-outlined text-[#608a6e] text-xl">search</span>
+                </span>
+                <input class="w-full pl-10 pr-4 py-2 bg-[#f0f5f1] dark:bg-[#233829] border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Find a game..." type="text"/>
+            </div>
+
+            <button onclick="MainApp.showShop()" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 transition-colors group relative">
+                <span class="material-symbols-outlined text-2xl">storefront</span>
+            </button>
+
+            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            <div id="header-guest" class="flex items-center gap-3">
+                <button onclick="MainApp.showAuth()" class="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary transition-colors px-3 py-2">
+                    Log In
+                </button>
+                <button onclick="MainApp.showAuth()" class="bg-primary hover:bg-green-500 text-white text-sm font-bold px-5 py-2 rounded-xl shadow-lg shadow-green-500/20 transition-all transform active:scale-95">
+                    Sign Up
+                </button>
+            </div>
+
+            <div id="header-user" class="hidden flex items-center gap-3">
+                <div class="bg-[#f0f5f1] dark:bg-[#233829] px-3 py-1.5 rounded-xl flex items-center gap-2 border border-transparent hover:border-yellow-400 transition-colors cursor-pointer" onclick="MainApp.showShop()">
+                    <span class="material-symbols-outlined text-[#facc15] fill-1 text-xl">monetization_on</span>
+                    <span class="text-sm font-bold text-gray-800 dark:text-white"><span id="user-coin">0</span></span>
+                </div>
+                <div class="size-10 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-[2px] shadow-md cursor-pointer" onclick="MainApp.showAuth()">
+                    <div class="size-full rounded-full bg-white dark:bg-[#1a2e20] flex items-center justify-center overflow-hidden">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">person</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </header>
 
-    <main>
-        <section id="game-list" class="container">
-            <h1>Chọn Trò Chơi</h1>
-            <div class="grid-games">
-                <div class="game-card" onclick="MainApp.startGame('sequence')">
-                    <h3>🔢 Quy tắc chuỗi số</h3>
-                    <p>Tìm quy luật và điền số còn thiếu.</p>
-                </div>
-                <div class="game-card" onclick="MainApp.startGame('monster')">
-                    <h3>👾 Diệt Quái Toán Học</h3>
-                    <p>Gõ nhanh đáp án để tiêu diệt quái vật!</p>
-                </div>
-                <div class="game-card" onclick="MainApp.startGame('speed')">
-                    <h3>⚡ Phản Xạ Thần Tốc</h3>
-                    <p>Đúng hay Sai? Quyết định trong tíc tắc!</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="leaderboard-screen" class="game-area hidden">
-            <div class="game-header">
-                <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
-                <h2>🏆 Bảng Phong Thần 🏆</h2>
-            </div>
-            <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr><th>Hạng</th><th>Người chơi</th><th>Tổng điểm</th></tr>
-                </thead>
-                <tbody id="leaderboard-body"></tbody>
-            </table>
-        </section>
-
-        <section id="sequence-game-screen" class="game-area hidden">
-            <button class="back-btn" onclick="SoundManager.play('click'); MainApp.goHome()">← Thoát</button>
-            <h2>Quy tắc chuỗi số</h2>
-            <div id="sequence-content">
-                <p>Tìm số còn thiếu:</p>
-                <div id="seq-display" class="sequence-box" style="font-size: 24px; font-weight: bold; margin: 20px 0;">Loading...</div>
-                <div class="control-panel" style="margin-top: 15px; text-align: center;">
-                    <input type="tel" id="seq-input" name="seq_random" autocomplete="off" placeholder="Nhập số..." style="padding: 10px; width: 50%;">
-                </div>
-                <p id="seq-feedback"></p>
-                <button onclick="SequenceGame.nextLevel()" class="next-btn" id="seq-next-btn" style="display:none;">Câu tiếp theo</button>
-            </div>
-        </section>
-
-        <section id="monster-game-screen" class="game-area hidden">
-            <div class="game-header" style="display: flex; justify-content: space-between;">
-                <button class="back-btn" onclick="SoundManager.play('click'); MainApp.goHome()">← Thoát</button>
-                <div class="score-board">Điểm: <span id="monster-score">0</span></div>
-            </div>
-            <div id="battlefield" style="height: 300px; background: rgba(0,0,0,0.3); position: relative; overflow: hidden; margin-top: 10px; border-radius: 10px;"></div>
-            <div class="control-panel" style="margin-top: 15px; text-align: center;">
-                <input type="tel" id="monster-input" name="monster_random" autocomplete="off" placeholder="Nhập số..." style="padding: 10px; width: 50%;">
-            </div>
-            <div id="game-over-overlay" class="hidden" style="position: absolute; top: 100px; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.85); color: white; padding: 20px;">
-                <h2>GAME OVER</h2>
-                <button onclick="MonsterGame.start()">Chơi lại</button>
-            </div>
-        </section>
-
-        <section id="speed-game-screen" class="game-area hidden">
-            <div class="game-header" style="display: flex; justify-content: space-between;">
-                <button class="back-btn" onclick="MainApp.goHome()">← Thoát</button>
-                <div class="score-board">Điểm: <span id="speed-score">0</span></div>
-            </div>
-            <div style="width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 10px; overflow: hidden;">
-                <div id="time-bar" style="width: 100%; height: 100%; background: #00ffff; transition: width 0.1s linear;"></div>
-            </div>
-            <div id="speed-content" style="text-align: center; margin-top: 50px;">
-                <h2 id="math-equation" style="font-size: 48px; color: #fff; text-shadow: 0 0 20px #00ffff;">Loading...</h2>
-                <div style="display: flex; justify-content: center; gap: 50px; margin-top: 50px;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 40px;">⬅️</div>
-                        <div style="color: #ff4757; font-weight: bold;">SAI</div>
+    <main class="flex flex-1 flex-col lg:flex-row max-w-[1600px] mx-auto w-full p-4 lg:p-8 gap-8">
+        
+        <aside class="w-full lg:w-64 flex flex-col gap-8 shrink-0">
+            <div class="flex flex-col gap-6">
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Grade Levels</h3>
+                    <div class="flex flex-col gap-2">
+                        <button class="flex items-center justify-between px-4 py-3 bg-primary text-white rounded-xl font-semibold shadow-sm">
+                            <span>All Grades</span>
+                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                        </button>
+                        <button class="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1a2e20] hover:bg-[#f0f5f1] rounded-xl font-medium transition-colors">
+                            <span>Grade 3-5</span>
+                        </button>
                     </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 40px;">➡️</div>
-                        <div style="color: #2ecc71; font-weight: bold;">ĐÚNG</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="shop-screen" class="game-area hidden">
-            <div class="game-header">
-                <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
-                <h2>🛒 Cửa Hàng Vật Phẩm</h2>
-            </div>
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
-                <div class="shop-item" onclick="Shop.buy('default', 0)">
-                    <div style="height: 100px; background: #000; border: 1px solid #fff;"></div>
-                    <h3>Vũ Trụ (Gốc)</h3><p>Đã sở hữu</p>
-                </div>
-                <div class="shop-item" onclick="Shop.buy('forest', 500)">
-                    <div style="height: 100px; background: #2ecc71; border: 1px solid #fff;"></div>
-                    <h3>Rừng Rậm</h3><p style="color: yellow;">💰 500</p>
-                </div>
-                <div class="shop-item" onclick="Shop.buy('ice', 1000)">
-                    <div style="height: 100px; background: #3498db; border: 1px solid #fff;"></div>
-                    <h3>Băng Giá</h3><p style="color: yellow;">💰 1000</p>
-                </div>
-            </div>
-            <p id="shop-msg" style="text-align: center; margin-top: 20px; font-weight: bold;"></p>
-        </section>
-
-        <section id="auth-screen" class="game-area hidden">
-            <button class="back-btn" onclick="MainApp.goHome()">← Quay lại</button>
-            <div class="auth-container" style="max-width: 400px; margin: 20px auto; padding: 20px;">
-                <h2 id="auth-title" style="text-align: center;">Đăng Nhập</h2>
+                </section>
                 
-                <div class="input-group">
-                    <div id="group-username" class="hidden">
-                        <label>Tên hiển thị:</label>
-                        <input type="text" id="reg-username" placeholder="Ví dụ: HuyPro" style="width: 100%; margin-bottom: 10px;">
+                <div class="bg-gradient-to-br from-primary to-[#18a34d] p-6 rounded-2xl text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h4 class="font-bold text-lg mb-1">New Skins!</h4>
+                        <p class="text-xs opacity-90 mb-4">Check out the shop for new themes.</p>
+                        <button class="w-full bg-white text-[#18a34d] py-2 rounded-lg text-sm font-bold hover:bg-opacity-90 transition-all" onclick="MainApp.showShop()">Go to Shop</button>
                     </div>
-                    <label>Email:</label>
-                    <input type="email" id="login-email" placeholder="email@example.com" style="width: 100%; margin-bottom: 10px;">
-                    <label>Mật khẩu:</label>
-                    <input type="password" id="login-password" placeholder="******" style="width: 100%; margin-bottom: 10px;">
+                    <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-20 rotate-12">storefront</span>
                 </div>
-
-                <p id="auth-feedback" style="color: #ff4757; text-align: center;"></p>
-
-                <div class="action-buttons" style="text-align: center;">
-                    <button onclick="Auth.handleLogin(event)" id="btn-login" style="background: #3498db;">Đăng Nhập</button>
-                    <button onclick="Auth.handleRegister(event)" id="btn-register" class="hidden" style="background: #27ae60;">Đăng Ký</button>
-                </div>
-
-                <p class="switch-mode" style="text-align: center; margin-top: 15px;">
-                    <span id="text-switch">Chưa có tài khoản?</span> 
-                    <a href="#" onclick="toggleAuthMode()">Bấm vào đây</a>
-                </p>
             </div>
-        </section>
+        </aside>
+
+        <div class="flex-1 flex flex-col gap-10">
+            
+            <section class="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl group">
+                <img alt="Game of the Day" class="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-12">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">FEATURED</span>
+                    </div>
+                    <h1 class="text-4xl lg:text-6xl font-black text-white leading-tight max-w-2xl mb-4">
+                        Galaxy Striker:<br/>Math Defense
+                    </h1>
+                    <p class="text-white/80 text-lg max-w-xl mb-8 leading-relaxed">
+                        Protect the galaxy from number monsters! Type the correct answer to shoot them down.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <button onclick="MainApp.startGame('monster')" class="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
+                            <span class="material-symbols-outlined">play_circle</span> Play Now
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="size-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined text-orange-500">calculate</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-gray-800 dark:text-white">Popular Games</h2>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    
+                    <div class="bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" onclick="MainApp.startGame('sequence')">
+                        <div class="h-44 relative bg-gray-800">
+                            <img alt="Pattern Finder" class="size-full object-cover opacity-80" src="https://images.unsplash.com/photo-1620207418302-439b387441b0?q=80&w=600"/>
+                            <div class="absolute top-3 right-3 bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white">Logic</div>
+                        </div>
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg mb-1 text-black dark:text-white">Pattern Finder</h4>
+                            <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">Identify the missing sequence in a series of numbers.</p>
+                            <button class="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" onclick="MainApp.startGame('speed')">
+                        <div class="h-44 relative bg-gray-800">
+                            <img alt="Speed Math" class="size-full object-cover opacity-80" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600"/>
+                            <div class="absolute top-3 right-3 bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white">Speed</div>
+                        </div>
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg mb-1 text-black dark:text-white">Speed Math</h4>
+                            <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">True or False? Decide quickly before time runs out!</p>
+                            <button class="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" onclick="MainApp.startGame('monster')">
+                        <div class="h-44 relative bg-gray-800">
+                            <img alt="Galaxy Striker" class="size-full object-cover opacity-80" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600"/>
+                            <div class="absolute top-3 right-3 bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white">Action</div>
+                        </div>
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg mb-1 text-black dark:text-white">Galaxy Striker</h4>
+                            <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">Defeat math monsters in this action-packed shooter.</p>
+                            <button class="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
     </main>
+</div>
 
-    <div id="sound-float-btn" onclick="toggleSound(this)">🔊</div>
+<section id="leaderboard-screen" class="modal-overlay hidden">
+    <div class="bg-white dark:bg-[#1a2e20] w-full max-w-4xl max-h-[90vh] overflow-auto rounded-2xl shadow-2xl p-6 relative animation-fade-in">
+        <button class="back-btn absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+            <span class="material-symbols-outlined text-3xl">close</span>
+        </button>
+        <h2 class="text-3xl font-black text-center mb-8 text-gray-800 dark:text-white flex items-center justify-center gap-2">
+            <span class="text-yellow-400 text-4xl">🏆</span> Leaderboard
+        </h2>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <th class="p-4 text-[#608a6e]">Rank</th>
+                    <th class="p-4 text-[#608a6e]">Player</th>
+                    <th class="p-4 text-[#608a6e]">Total Score</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body" class="text-gray-800 dark:text-white">
+                </tbody>
+        </table>
+    </div>
+</section>
 
-    <script src="js/games/sequence.js"></script>
-    <script src="js/games/monster.js"></script>
-    <script src="js/games/speed.js"></script> 
-    <script src="js/leaderboard.js"></script>
-    <script src="js/shop.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/soundManager.js"></script>
+<section id="shop-screen" class="modal-overlay hidden">
+    <div class="bg-white dark:bg-[#1a2e20] w-full max-w-4xl max-h-[90vh] overflow-auto rounded-2xl shadow-2xl p-6 relative animation-fade-in">
+        <button class="back-btn absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+            <span class="material-symbols-outlined text-3xl">close</span>
+        </button>
+        <h2 class="text-3xl font-black text-center mb-8 text-gray-800 dark:text-white flex items-center justify-center gap-2">
+            <span class="text-primary text-4xl">🛒</span> Item Shop
+        </h2>
+        <div class="flex flex-wrap justify-center gap-6">
+            <div class="p-6 bg-gray-100 dark:bg-gray-800 rounded-xl text-center w-56 cursor-pointer hover:ring-2 ring-primary transition transform hover:-translate-y-1" onclick="Shop.buy('default', 0)">
+                <div class="h-24 bg-black rounded-lg mb-4 shadow-inner"></div>
+                <h3 class="font-bold text-lg dark:text-white">Default Space</h3>
+                <p class="text-sm text-gray-500 mt-1">Owned</p>
+            </div>
+            <div class="p-6 bg-gray-100 dark:bg-gray-800 rounded-xl text-center w-56 cursor-pointer hover:ring-2 ring-primary transition transform hover:-translate-y-1" onclick="Shop.buy('forest', 500)">
+                <div class="h-24 bg-green-800 rounded-lg mb-4 shadow-inner"></div>
+                <h3 class="font-bold text-lg dark:text-white">Forest Realm</h3>
+                <p class="text-yellow-500 font-bold mt-1 text-lg">500 Coins</p>
+            </div>
+            <div class="p-6 bg-gray-100 dark:bg-gray-800 rounded-xl text-center w-56 cursor-pointer hover:ring-2 ring-primary transition transform hover:-translate-y-1" onclick="Shop.buy('ice', 1000)">
+                <div class="h-24 bg-blue-600 rounded-lg mb-4 shadow-inner"></div>
+                <h3 class="font-bold text-lg dark:text-white">Ice Kingdom</h3>
+                <p class="text-yellow-500 font-bold mt-1 text-lg">1000 Coins</p>
+            </div>
+        </div>
+        <p id="shop-msg" class="text-center mt-6 font-bold h-6 text-lg"></p>
+    </div>
+</section>
 
-    <script>
-        function toggleSound(btn) {
-            if (typeof SoundManager !== 'undefined') {
-                const icon = SoundManager.toggleMute();
-                btn.innerText = icon;
-            }
+<section id="auth-screen" class="modal-overlay hidden">
+    <div class="bg-white dark:bg-[#1a2e20] p-8 rounded-2xl w-full max-w-sm shadow-2xl relative animation-fade-in">
+        <button class="back-btn absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <h2 id="auth-title" class="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">Login</h2>
+        
+        <div class="flex flex-col gap-3">
+            <div id="group-username" class="hidden">
+                <input type="text" id="reg-username" placeholder="Username" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+            </div>
+            <input type="email" id="login-email" placeholder="Email Address" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+            <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+        </div>
+
+        <p id="auth-feedback" class="text-red-500 text-center text-sm mt-3 h-5 font-medium"></p>
+
+        <button onclick="Auth.handleLogin(event)" id="btn-login" class="w-full bg-primary text-white font-bold py-3 rounded-xl mt-4 hover:bg-green-600 transition shadow-lg shadow-green-500/30">LOGIN</button>
+        <button onclick="Auth.handleRegister(event)" id="btn-register" class="w-full bg-primary text-white font-bold py-3 rounded-xl mt-4 hidden hover:bg-green-600 transition shadow-lg shadow-green-500/30">REGISTER</button>
+        
+        <p class="text-center text-sm mt-6 text-gray-500">
+            <span id="text-switch">Don't have an account?</span> 
+            <a href="#" onclick="toggleAuthMode()" class="text-primary font-bold hover:underline cursor-pointer">Click here</a>
+        </p>
+    </div>
+</section>
+
+<div id="sound-float-btn" onclick="toggleSound(this)" class="fixed bottom-6 right-6 size-12 bg-white dark:bg-[#1a2e20] rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition z-50 border border-gray-200 dark:border-gray-700 text-2xl">
+    🔊
+</div>
+
+<script src="js/soundManager.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+    // Inline UI Logic
+    function toggleSound(btn) {
+        if (typeof SoundManager !== 'undefined') {
+            const icon = SoundManager.toggleMute();
+            btn.innerText = icon;
         }
-    </script>
+    }
 
-    <script>
-        function toggleAuthMode() {
-            const isLogin = !document.getElementById('btn-login').classList.contains('hidden');
-            const feedback = document.getElementById('auth-feedback');
-            if(feedback) feedback.innerText = "";
+    function toggleAuthMode() {
+        const isLogin = !document.getElementById('btn-login').classList.contains('hidden');
+        const feedback = document.getElementById('auth-feedback');
+        if(feedback) feedback.innerText = "";
 
-            if (isLogin) {
-                // Chuyển sang Đăng Ký
-                document.getElementById('auth-title').innerText = "Đăng Ký Tài Khoản";
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('btn-register').classList.remove('hidden');
-                document.getElementById('group-username').classList.remove('hidden');
-                document.getElementById('text-switch').innerText = "Đã có tài khoản?";
-                
-                // Đổi ID để lấy dữ liệu dễ hơn
-                document.getElementById('login-email').id = 'reg-email';
-                document.getElementById('login-password').id = 'reg-password';
-            } else {
-                // Chuyển về Đăng Nhập
-                document.getElementById('auth-title').innerText = "Đăng Nhập";
-                document.getElementById('btn-login').classList.remove('hidden');
-                document.getElementById('btn-register').classList.add('hidden');
-                document.getElementById('group-username').classList.add('hidden');
-                document.getElementById('text-switch').innerText = "Chưa có tài khoản?";
-
-                document.getElementById('reg-email').id = 'login-email';
-                document.getElementById('reg-password').id = 'login-password';
-            }
+        if (isLogin) {
+            document.getElementById('auth-title').innerText = "Create Account";
+            document.getElementById('btn-login').classList.add('hidden');
+            document.getElementById('btn-register').classList.remove('hidden');
+            document.getElementById('group-username').classList.remove('hidden');
+            document.getElementById('text-switch').innerText = "Already have an account?";
+        } else {
+            document.getElementById('auth-title').innerText = "Login";
+            document.getElementById('btn-login').classList.remove('hidden');
+            document.getElementById('btn-register').classList.add('hidden');
+            document.getElementById('group-username').classList.add('hidden');
+            document.getElementById('text-switch').innerText = "Don't have an account?";
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>

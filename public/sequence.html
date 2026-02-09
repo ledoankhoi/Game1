@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <title>Quy Tắc Chuỗi Số</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-black text-white font-body h-screen flex flex-col">
+    
+    <div class="flex items-center p-4 border-b border-gray-800">
+        <a href="index.html" class="text-blue-400 hover:text-white font-bold">← Quay lại Lobby</a>
+        <h1 class="ml-4 text-xl font-display text-blue-500">QUY TẮC CHUỖI SỐ</h1>
+    </div>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-lg text-center">
+            <h2 class="text-2xl font-bold mb-4">Tìm số còn thiếu?</h2>
+            
+            <div id="seq-display" class="text-4xl font-bold text-blue-400 my-8 tracking-widest">
+                Loading...
+            </div>
+
+            <input type="tel" id="seq-input" class="w-full bg-gray-900 border border-blue-500 rounded-lg p-3 text-center text-2xl text-white mb-4 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Nhập đáp án...">
+            
+            <p id="seq-feedback" class="h-6 text-sm font-bold"></p>
+            
+            <button onclick="SequenceGame.nextLevel()" id="seq-next-btn" class="hidden mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded transition">
+                CÂU TIẾP THEO
+            </button>
+        </div>
+    </main>
+
+    <script src="js/soundManager.js"></script>
+    <script src="js/games/sequence.js"></script>
+    <script>
+        window.onload = () => SequenceGame.init(); // Giả sử trong sequence.js có hàm init
+    </script>
+</body>
+</html>
