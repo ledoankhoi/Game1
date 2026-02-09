@@ -1,17 +1,14 @@
+/* File: src/config/db.js */
 const mongoose = require('mongoose');
-
-// Kết nối tới Database nằm ngay trong máy tính của bạn (Localhost)
-// Không cần User/Password gì cả, rất khỏe!
-const connectionString = "mongodb://127.0.0.1:27017/GameToanLogic";
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(connectionString);
-        console.log("✅ Đã kết nối thành công với MongoDB Local!");
-        console.log("   (Dữ liệu đang được lưu trong máy tính của bạn)");
+        // Kết nối với chuỗi trong .env hoặc mặc định localhost
+        const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/MathQuestDB');
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
-        console.error("❌ Lỗi kết nối Local:", error.message);
-        process.exit(1); 
+        console.error(`❌ Lỗi kết nối MongoDB: ${error.message}`);
+        process.exit(1);
     }
 };
 
