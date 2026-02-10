@@ -1,0 +1,85 @@
+/* css/pixel.css */
+
+/* Grid Precision */
+.pixel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+}
+
+.pixel-cell {
+    width: 100%;
+    height: 100%;
+    background-color: transparent; 
+    transition: background-color 0.2s;
+}
+
+/* Colors */
+.bg-red { background-color: #ef4444; }
+.bg-yellow { background-color: #facc15; }
+.bg-blue { background-color: #3b82f6; }
+.bg-orange { background-color: #f97316; }
+.bg-purple { background-color: #a855f7; }
+.bg-green { background-color: #22c55e; }
+.bg-invalid { 
+    background-color: #1a1a1a; 
+    background-image: repeating-linear-gradient(45deg, #1a1a1a 0, #1a1a1a 5px, #331111 5px, #331111 10px);
+}
+
+.glow-frame {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* Source Items Styles */
+.source-item {
+    position: relative;
+    transition: all 0.2s;
+    outline: none; 
+}
+
+/* Base Grid Style */
+.source-item .pixel-grid {
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+}
+
+/* Hover State */
+.source-item:hover .pixel-grid {
+    border-color: rgba(37, 140, 244, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Selected State (Đã chọn) - Viền Xanh */
+.source-item.selected .pixel-grid {
+    border-color: #258cf4;
+    box-shadow: 0 0 10px rgba(37, 140, 244, 0.3);
+}
+
+/* Focused State (Đang điều khiển) - ĐỔI SANG VIỀN TRẮNG */
+.source-item.focused .pixel-grid {
+    border-color: #ffffff; /* Viền trắng */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); /* Glow trắng nhẹ */
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* Selection Badge */
+.select-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    background: #258cf4;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}

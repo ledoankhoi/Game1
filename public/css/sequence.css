@@ -1,0 +1,107 @@
+/* =========================================
+   NEON LAB STYLES
+   ========================================= */
+
+/* --- Fonts & Base --- */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+body {
+    font-family: "Space Grotesk", sans-serif;
+}
+
+/* --- Utility Classes --- */
+.bg-grid-fade {
+    background-size: 24px 24px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+}
+
+.glass-panel {
+    background: rgba(16, 25, 34, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(37, 140, 244, 0.15);
+}
+
+.neon-text {
+    text-shadow: 0 0 8px rgba(37, 140, 244, 0.5);
+}
+
+.scan-line {
+    background: linear-gradient(to bottom, transparent 50%, rgba(37, 140, 244, 0.05) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+}
+
+/* --- Animations --- */
+
+/* 1. Fade In Up (Dùng cho các khối số khi load) */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0; /* Mặc định ẩn để chờ animation */
+}
+
+/* 2. Fade In (Dùng cho Log) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* 3. Shake (Dùng khi nhập sai) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); border-color: #ef4444; }
+    20%, 40%, 60%, 80% { transform: translateX(4px); border-color: #ef4444; }
+}
+.animate-shake {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* 4. Pulse (Hiệu ứng chờ) */
+@keyframes pulse-neon {
+    0%, 100% { box-shadow: 0 0 10px rgba(37, 140, 244, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(37, 140, 244, 0.6); }
+}
+.shadow-neon {
+    box-shadow: 0 0 15px rgba(37, 140, 244, 0.4);
+}
+.shadow-neon-intense {
+    box-shadow: 0 0 30px rgba(37, 140, 244, 0.6);
+}
+
+/* Scrollbar đẹp cho bảng Log */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(37, 140, 244, 0.2);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 140, 244, 0.4);
+}
+
+/* --- UI FIXES: INPUT --- */
+
+/* Ẩn nút tăng giảm trên Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ẩn nút tăng giảm trên Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

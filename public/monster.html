@@ -90,13 +90,219 @@
         </footer>
     </div>
 
+       <!-- ======================================================= -->
+    <!-- MÀN HÌNH BÁO CÁO (REPORT SCREEN) - MỚI THÊM VÀO -->
+    <!-- ======================================================= -->
+    <div id="report-screen" class="hidden fixed inset-0 z-50 bg-[#0a0f0b] flex flex-col h-screen w-screen overflow-hidden">
+    
+    <header class="shrink-0 relative z-20 flex items-center justify-between px-4 h-[60px] bg-black/80 border-b border-primary/20 backdrop-blur-md shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 text-primary">
+                <span class="material-symbols-outlined text-2xl">analytics</span>
+                <h1 class="text-lg font-black tracking-widest uppercase italic">Report</h1>
+            </div>
+            <div class="h-4 w-[1px] bg-white/20"></div>
+            <div class="flex flex-col">
+                <span class="text-[8px] uppercase text-gray-400 tracking-widest leading-none">Sector</span>
+                <span class="text-xs font-bold text-white">ORION-04</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 bg-primary/10 border border-primary/30 rounded flex items-center gap-2">
+                <span class="text-[10px] text-primary font-bold uppercase tracking-tighter">Score</span>
+                <span class="text-lg font-black text-white leading-none" id="report-final-score">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative custom-scrollbar flex flex-col items-center">
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a2a1e_0%,#0a0f0b_100%)]"></div>
+            <div class="absolute inset-0 opacity-20 scanline"></div>
+        </div>
+
+        <div class="relative max-w-6xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 z-10">
+            <div class="md:col-span-5 flex flex-col gap-4">
+                <div class="bg-black/40 border border-white/10 rounded-2xl p-4 backdrop-blur-md relative overflow-hidden text-center flex flex-col items-center justify-center min-h-[200px]">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2">Performance Grade</h3>
+                    <div class="relative w-32 h-32 flex items-center justify-center border-4 border-primary/30 rounded-full">
+                         <span id="report-grade" class="text-6xl font-black text-white">C</span>
+                    </div>
+                </div>
+                
+                <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-3xl text-primary">smart_toy</span>
+                    <div>
+                        <h4 class="text-primary text-xs font-black uppercase mb-1">AI Feedback</h4>
+                        <p id="report-feedback" class="text-xs text-gray-300 italic">"Processing battle data..."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-7 flex flex-col gap-2 h-full">
+                <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Battle Log</h3>
+                <div id="report-list" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[200px] max-h-[400px]">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="shrink-0 relative z-30 bg-black/80 border-t border-primary/20 p-4 flex justify-between items-center backdrop-blur">
+        <button onclick="MonsterExtension.goHome()" class="px-6 py-2 border border-white/20 text-white text-sm font-bold rounded hover:bg-white hover:text-black transition">
+            BASE HUB
+        </button>
+        <button onclick="MonsterExtension.retryMission()" class="px-8 py-2 bg-primary text-black font-black text-sm uppercase tracking-widest rounded hover:scale-105 transition">
+            RETRY
+        </button>
+    </footer>
+</div>
+
+        <main class="flex-1 overflow-y-auto p-8 relative z-10 custom-scrollbar flex items-center justify-center">
+            <div class="max-w-5xl w-full grid grid-cols-12 gap-8">
+                <!-- Cột Trái: Phân tích -->
+                <div class="col-span-5 flex flex-col gap-6">
+                    <div class="bg-black/40 border border-white/10 rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-20">
+                            <span class="material-symbols-outlined text-6xl text-primary">hub</span>
+                        </div>
+                        <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-8">Performance Vector Analysis</h3>
+                        <div class="flex justify-center items-center py-4 relative">
+                            <svg class="w-64 h-64" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" fill="none" r="80" stroke="rgba(255,255,255,0.05)" stroke-width="1"></circle>
+                                <circle cx="100" cy="100" fill="none" r="60" stroke="rgba(255,255,255,0.05)" stroke-width="1"></circle>
+                                <circle cx="100" cy="100" fill="none" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="1"></circle>
+                                <circle cx="100" cy="100" fill="none" r="20" stroke="rgba(255,255,255,0.05)" stroke-width="1"></circle>
+                                <path d="M100 30 L160 80 L140 160 L60 160 L40 80 Z" fill="rgba(37, 244, 106, 0.2)" stroke="#25f46a" stroke-width="2"></path>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="text-center">
+                                    <span class="text-3xl font-black text-white" id="report-grade">A</span>
+                                    <p class="text-[8px] text-primary font-bold">GRADE</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6 backdrop-blur-md flex gap-4 items-start">
+                        <div class="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+                            <span class="material-symbols-outlined text-3xl text-primary">smart_toy</span>
+                        </div>
+                        <div>
+                            <h4 class="text-primary text-xs font-black uppercase tracking-widest mb-1">Tactical AI Feedback</h4>
+                            <p class="text-sm text-gray-300 leading-relaxed italic" id="report-feedback">"Mission failed. System integrity compromised. Recommend immediate recalibration and retry."</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cột Phải: Logs (Tĩnh - Demo) -->
+                <div class="col-span-7 flex flex-col gap-4">
+                    <div class="flex justify-between items-end mb-2">
+                        <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em]">Battle Log (Simulation)</h3>
+                    </div>
+                    <div class="flex flex-col gap-3 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Mock Data -->
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-6">
+                                <div class="text-primary bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center"><span class="material-symbols-outlined">check_circle</span></div>
+                                <div><p class="text-[10px] text-gray-500 font-bold uppercase">Basic Math</p><p class="text-lg font-bold">Target Eliminated</p></div>
+                            </div>
+                            <span class="text-xs font-bold text-gray-400">+10 PTS</span>
+                        </div>
+                        <div class="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-6">
+                                <div class="text-danger bg-danger/10 w-10 h-10 rounded-full flex items-center justify-center"><span class="material-symbols-outlined">warning</span></div>
+                                <div><p class="text-[10px] text-gray-500 font-bold uppercase">Defense System</p><p class="text-lg font-bold">Hull Breach</p></div>
+                            </div>
+                            <span class="text-[10px] text-danger">CRITICAL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="relative z-30 bg-black/40 border-t border-primary/20 p-8 flex justify-between items-center backdrop-blur-md">
+            <div class="flex gap-4">
+                <button onclick="window.location.href='index.html'" class="px-8 py-3 border border-white/20 text-white font-bold rounded hover:bg-white hover:text-black transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">home</span> Base Hub
+                </button>
+            </div>
+            <button onclick="restartFromReport()" class="group relative px-12 py-4 bg-primary text-black font-black text-xl uppercase tracking-widest overflow-hidden hover:scale-105 transition-transform active:scale-95 rounded">
+                <span class="relative flex items-center gap-3"><span class="material-symbols-outlined">rocket_launch</span> Next Mission</span>
+            </button>
+        </footer>
+    </div>
+
     <script src="js/soundManager.js"></script>
     <script src="js/games/monster.js"></script>
+    <script src="js/scoreManager.js"></script>
+    <script src="js/games/monsterExtension.js"></script>
+    
     <script>
         // Tự động start game khi vào trang
         window.onload = function() {
             if(typeof MonsterGame !== 'undefined') MonsterGame.start();
         }
     </script>
+
+<div id="report-screen" class="hidden fixed inset-0 z-50 bg-[#0a0f0b] flex flex-col transition-opacity duration-500 opacity-0">
+        <header class="relative z-20 flex items-center justify-between px-8 py-6 bg-black/40 border-b border-primary/20 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-primary">
+                    <span class="material-symbols-outlined text-3xl">analytics</span>
+                    <h1 class="text-2xl font-black tracking-widest uppercase italic">Mission Report</h1>
+                </div>
+                <div class="h-8 w-[1px] bg-white/20 mx-2"></div>
+                <span class="text-danger font-bold uppercase tracking-widest">SESSION TERMINATED</span>
+            </div>
+            <div class="px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg text-center">
+                <span class="text-[10px] text-primary font-bold uppercase">Final Score</span>
+                <div class="text-xl font-black text-white" id="report-final-score">0</div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 relative custom-scrollbar flex justify-center">
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a2a1e_0%,#0a0f0b_100%)]"></div>
+                <div class="absolute inset-0 opacity-20" style="background: linear-gradient(to bottom, transparent 50%, rgba(37, 244, 106, 0.02) 50%); background-size: 100% 4px;"></div>
+            </div>
+
+            <div class="relative max-w-6xl w-full grid grid-cols-1 md:grid-cols-12 gap-8 z-10">
+                <div class="md:col-span-5 flex flex-col gap-6">
+                    <div class="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden text-center">
+                        <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4">Performance Grade</h3>
+                        <div class="py-8">
+                            <span id="report-grade" class="text-6xl font-black text-white">C</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6 flex gap-4">
+                        <span class="material-symbols-outlined text-3xl text-primary">smart_toy</span>
+                        <div>
+                            <h4 class="text-primary text-xs font-black uppercase mb-1">AI Feedback</h4>
+                            <p id="report-feedback" class="text-sm text-gray-300 italic">"Processing battle data..."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-7 flex flex-col gap-4">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em]">Battle Log</h3>
+                    <div id="report-list" class="flex flex-col gap-2 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="relative z-30 bg-background-dark border-t border-primary/20 p-6 flex justify-between items-center bg-black/80 backdrop-blur">
+            <button onclick="MonsterExtension.goHome()" class="px-6 py-3 border border-white/20 text-white font-bold rounded hover:bg-white hover:text-black transition">
+                BASE HUB
+            </button>
+            <button onclick="MonsterExtension.retryMission()" class="px-8 py-3 bg-primary text-black font-black uppercase tracking-widest rounded hover:scale-105 transition">
+                RETRY MISSION
+            </button>
+        </footer>
+    </div>
+    <script src="js/monsterExtension.js"></script>
+</body>    
+
+
 </body>
 </html>

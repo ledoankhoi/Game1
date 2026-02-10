@@ -1,5 +1,5 @@
 /* =========================================
-   GAME.CSS - GIAO DIỆN TRONG GAME
+   GAME.CSS - GIAO DIỆN TRONG GAME (ĐÃ CHỈNH SỬA)
    ========================================= */
 
 /* --- 1. CHUNG --- */
@@ -8,6 +8,7 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    background-color: #0a0f0b; /* Màu nền an toàn */
 }
 
 /* Nền Vũ Trụ Động */
@@ -23,6 +24,7 @@
     background: linear-gradient(to bottom, transparent 50%, rgba(37, 244, 106, 0.02) 50%);
     background-size: 100% 4px;
     pointer-events: none;
+    z-index: 5; /* Đảm bảo scanline nằm trên nền nhưng dưới UI */
 }
 
 /* --- 2. GALAXY STRIKER (Monster Game) --- */
@@ -154,4 +156,61 @@
     20%, 80% { transform: translate3d(4px, 0, 0); }
     30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
     40%, 60% { transform: translate3d(8px, 0, 0); }
+}
+
+/* Scrollbar tùy chỉnh */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(37, 244, 106, 0.2);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 244, 106, 0.4);
+}
+
+/* =========================================
+   3. UI & REPORT SCREEN FIXES (MỚI)
+   ========================================= */
+
+/* Ép Header nhỏ lại trong màn hình Report */
+#report-screen header {
+    padding-top: 0.75rem !important;    /* Tương đương py-3 */
+    padding-bottom: 0.75rem !important; /* Tương đương py-3 */
+    height: auto !important;
+    min-height: 60px;
+    background: rgba(0, 0, 0, 0.85); /* Tăng độ tối nền để dễ đọc */
+    backdrop-filter: blur(12px);
+    z-index: 100; /* Luôn nằm trên cùng */
+}
+
+/* Thu nhỏ font chữ tiêu đề header */
+#report-screen header h1 {
+    font-size: 1.25rem !important; /* Tương đương text-xl */
+    line-height: 1.75rem;
+}
+
+/* Đảm bảo nội dung chính không bị header che */
+#report-screen main {
+    padding-top: 1rem; 
+    /* Nếu bạn dùng flex-col trong HTML thì padding này cộng thêm khoảng cách */
+    height: calc(100vh - 80px - 80px); /* Trừ đi chiều cao header và footer ước lượng */
+}
+
+/* Tinh chỉnh hiển thị trên Mobile */
+@media (max-width: 768px) {
+    #report-screen header {
+        padding: 0.5rem 1rem !important;
+    }
+    #report-screen header h1 {
+        font-size: 1rem !important;
+    }
+    #report-screen .material-symbols-outlined {
+        font-size: 1.5rem !important;
+    }
 }

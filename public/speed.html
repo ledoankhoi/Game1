@@ -1,46 +1,137 @@
 <!DOCTYPE html>
-<html class="dark" lang="vi">
+<html class="dark" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Phản Xạ Thần Tốc</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/game.css">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="bg-black text-white font-body h-screen flex flex-col">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Crystal Cavern: Fast Calculation</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/speed.css">
     
-    <div class="flex items-center justify-between p-4 border-b border-gray-800">
-        <a href="index.html" class="text-yellow-400 hover:text-white font-bold">← Thoát</a>
-        <div class="font-bold text-xl">Điểm: <span id="speed-score" class="text-yellow-400">0</span></div>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#258cf4",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101922",
+                        "ice-dark": "#0B1521",
+                        "ice-surface": "#1A2634",
+                        "ice-accent": "#5AB2FF",
+                    },
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(37, 140, 244, 0.3)',
+                        'glow-intense': '0 0 30px rgba(37, 140, 244, 0.6)'
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white h-screen w-full overflow-hidden flex flex-col relative select-none">
+    
+    <div class="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <div class="absolute inset-0 bg-gradient-to-b from-ice-dark via-[#0d1f33] to-background-dark opacity-90"></div>
+        <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-ice-accent/5 blur-[100px] rounded-full"></div>
     </div>
 
-    <div class="w-full h-2 bg-gray-800">
-        <div id="time-bar" class="h-full bg-yellow-400 w-full"></div>
-    </div>
-
-    <main class="flex-1 flex flex-col items-center justify-center p-4">
-        <div class="text-center">
-            <h2 id="math-equation" class="text-6xl font-display font-bold text-white mb-12 drop-shadow-[0_0_10px_rgba(255,255,0,0.5)]">
-                Loading...
-            </h2>
-            
-            <div class="flex gap-8">
-                <button class="w-32 h-32 rounded-full border-4 border-red-500 text-red-500 font-bold text-xl hover:bg-red-500 hover:text-black transition">
-                    SAI
-                </button>
-                <button class="w-32 h-32 rounded-full border-4 border-green-500 text-green-500 font-bold text-xl hover:bg-green-500 hover:text-black transition">
-                    ĐÚNG
-                </button>
+    <header class="relative z-10 w-full px-6 py-4 flex justify-between items-center max-w-7xl mx-auto border-b border-white/5 bg-background-dark/50 backdrop-blur-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary to-ice-accent clip-diamond flex items-center justify-center shadow-glow">
+                <span class="material-icons-outlined text-white text-lg">bolt</span>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-primary/70">Fast Calc</h1>
+                <p class="text-xs text-primary/60 font-mono tracking-wider">ZONE: ZERO KELVIN</p>
             </div>
         </div>
+
+        <div class="flex-1 max-w-md mx-8 hidden md:block">
+            <div class="flex justify-between text-xs text-primary/60 mb-1 font-mono uppercase tracking-widest">
+                <span>Core Stability</span>
+                <span id="timer-text">100%</span>
+            </div>
+            <div class="h-2 w-full bg-black/40 rounded overflow-hidden border border-primary/20 relative">
+                <div id="timer-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-ice-accent to-white w-full shadow-[0_0_15px_rgba(37,140,244,0.5)] transition-all duration-100 ease-linear"></div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="text-right">
+                <p class="text-xs text-primary/60 uppercase tracking-wider font-bold">Score</p>
+                <p id="current-score" class="text-2xl font-bold font-mono text-white text-glow">0</p>
+            </div>
+            <a href="index.html" class="w-10 h-10 rounded border border-primary/30 hover:bg-primary/20 flex items-center justify-center transition-colors text-primary hover:text-white" title="Exit">
+                <span class="material-icons-outlined">logout</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-grow flex w-full max-w-7xl mx-auto p-4 gap-6 overflow-hidden">
+        
+        <div class="flex-1 flex flex-col items-center justify-center relative">
+            
+            <div class="relative w-[500px] h-[500px] md:w-[600px] md:h-[600px] flex items-center justify-center scale-90 md:scale-100 transition-transform">
+                <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-0">
+                    <circle cx="50%" cy="50%" fill="none" r="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-width="1"></circle>
+                    <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                    <line x1="50%" y1="50%" x2="85%" y2="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                    <line x1="50%" y1="50%" x2="85%" y2="65%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                    <line x1="50%" y1="50%" x2="50%" y2="85%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                    <line x1="50%" y1="50%" x2="15%" y2="65%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                    <line x1="50%" y1="50%" x2="15%" y2="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
+                </svg>
+
+                <div id="question-container" class="relative z-20 w-56 h-56 md:w-64 md:h-64 clip-shard-main frosted-glass shadow-[0_0_40px_rgba(37,140,244,0.15)] flex flex-col items-center justify-center group cursor-default">
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                    <div class="relative z-30 text-center">
+                        <span class="block text-primary/60 text-xs font-bold tracking-[0.2em] mb-2 uppercase">Equation</span>
+                        <div id="math-equation" class="text-4xl md:text-5xl font-bold text-white drop-shadow-md font-mono flex items-center justify-center gap-2">
+                            Ready
+                        </div>
+                    </div>
+                </div>
+
+                <button id="ans-btn-0" class="ans-btn absolute top-[10%] left-1/2 -translate-x-1/2 z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+                <button id="ans-btn-1" class="ans-btn absolute top-[28%] right-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+                <button id="ans-btn-2" class="ans-btn absolute bottom-[28%] right-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+                <button id="ans-btn-3" class="ans-btn absolute bottom-[10%] left-1/2 -translate-x-1/2 z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+                <button id="ans-btn-4" class="ans-btn absolute bottom-[28%] left-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+                <button id="ans-btn-5" class="ans-btn absolute top-[28%] left-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow"><span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span></button>
+            </div>
+        </div>
+
+        <aside class="hidden md:flex w-80 flex-col log-glass rounded-xl overflow-hidden relative shadow-lg">
+            <div class="p-4 border-b border-primary/20 bg-primary/5 flex justify-between items-center">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-ice-accent flex items-center gap-2">
+                    <span class="material-icons-outlined text-sm">history</span> Neural Feed
+                </h3>
+                <div class="flex gap-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-ice-accent animate-pulse delay-75"></div>
+                </div>
+            </div>
+            
+            <div id="live-log-container" class="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                <div class="text-[10px] text-primary/40 text-center mt-10 italic">Initializing Systems...<br>Waiting for Input.</div>
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-ice-dark to-transparent pointer-events-none"></div>
+        </aside>
+
     </main>
 
+    <div class="fixed bottom-4 left-4 text-[10px] text-primary/30 font-mono hidden md:block z-0">
+        LAT: 45.201 // LON: -12.44 // SECURE CONNECTION
+    </div>
+
     <script src="js/soundManager.js"></script>
+    <script src="js/scoreManager.js"></script>
     <script src="js/games/speed.js"></script>
-    <script>
-        window.onload = () => SpeedGame.init(); // Giả sử speed.js có hàm init
-    </script>
 </body>
 </html>
