@@ -1,6 +1,9 @@
-/* css/pixel.css */
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-/* Grid Precision */
+/* Grid Core */
 .pixel-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -10,66 +13,45 @@
 
 .pixel-cell {
     width: 100%;
-    height: 100%;
-    background-color: transparent; 
-    transition: background-color 0.2s;
+    aspect-ratio: 1;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
 }
 
-/* Colors */
+/* Colors - Phải khớp chính xác với JS */
 .bg-red { background-color: #ef4444; }
 .bg-yellow { background-color: #facc15; }
 .bg-blue { background-color: #3b82f6; }
-.bg-orange { background-color: #f97316; }
-.bg-purple { background-color: #a855f7; }
-.bg-green { background-color: #22c55e; }
+.bg-orange { background-color: #f97316; } /* Mix Red + Yellow */
+.bg-purple { background-color: #a855f7; } /* Mix Red + Blue */
+.bg-green { background-color: #22c55e; }  /* Mix Yellow + Blue */
 .bg-invalid { 
     background-color: #1a1a1a; 
-    background-image: repeating-linear-gradient(45deg, #1a1a1a 0, #1a1a1a 5px, #331111 5px, #331111 10px);
+    background-image: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 5px, #331111 5px, #331111 10px);
 }
 
-.glow-frame {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-}
-
-/* Source Items Styles */
-.source-item {
-    position: relative;
-    transition: all 0.2s;
-    outline: none; 
-}
-
-/* Base Grid Style */
+/* Source Item States */
 .source-item .pixel-grid {
     border: 1px solid rgba(255,255,255,0.1);
     transition: all 0.2s;
 }
 
-/* Hover State */
-.source-item:hover .pixel-grid {
-    border-color: rgba(37, 140, 244, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-/* Selected State (Đã chọn) - Viền Xanh */
 .source-item.selected .pixel-grid {
     border-color: #258cf4;
-    box-shadow: 0 0 10px rgba(37, 140, 244, 0.3);
+    background: rgba(37, 140, 244, 0.05);
 }
 
-/* Focused State (Đang điều khiển) - ĐỔI SANG VIỀN TRẮNG */
+/* FOCUS TRẮNG THEO YÊU CẦU */
 .source-item.focused .pixel-grid {
-    border-color: #ffffff; /* Viền trắng */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); /* Glow trắng nhẹ */
+    border-color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
     transform: scale(1.05);
-    z-index: 10;
 }
 
-/* Selection Badge */
 .select-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -6px;
+    right: -6px;
     width: 18px;
     height: 18px;
     background: #258cf4;
@@ -80,6 +62,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+/* Animations for Log */
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.animate-log { animation: fadeInRight 0.3s ease-out forwards; }
+
+/* Mini grids for System Log */
+.mini-grid-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 4px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+
+.mini-pixel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    width: 30px;
+    height: 30px;
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.mini-pixel-cell {
+    width: 100%;
+    height: 100%;
+}
+
+.log-arrow {
+    font-size: 12px !important;
+    color: rgba(255,255,255,0.2);
 }

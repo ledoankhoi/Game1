@@ -12,31 +12,82 @@
         tailwind.config = {
             darkMode: "class",
             theme: {
-                extend: { colors: { "primary": "#258cf4", "background-dark": "#101922" }, fontFamily: { "display": ["Inter", "sans-serif"] } },
+                extend: { 
+                    colors: { "primary": "#258cf4", "background-dark": "#101922" }, 
+                    fontFamily: { "display": ["Inter", "sans-serif"] } 
+                },
             },
         }
     </script>
+    <style>
+        /* Tái sử dụng style scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .animate-log { animation: none !important; }
+
+        /* --- QUAN TRỌNG: BỔ SUNG CSS CHO MINI GRID ĐỂ HIỆN ẢNH TRONG LOG --- */
+        
+        /* 1. Định nghĩa lại các class màu sắc */
+        .bg-red { background-color: #ef4444; }
+        .bg-yellow { background-color: #facc15; }
+        .bg-blue { background-color: #3b82f6; }
+        .bg-orange { background-color: #f97316; }
+        .bg-purple { background-color: #a855f7; }
+        .bg-green { background-color: #22c55e; }
+
+        /* 2. Style cho khung chứa ảnh nhỏ */
+        .mini-grid-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 8px;
+            padding: 4px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        /* 3. Style cho lưới 3x3 nhỏ */
+        .mini-pixel-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            width: 24px; /* Kích thước nhỏ phù hợp log */
+            height: 24px;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        /* 4. Style cho ô màu nhỏ bên trong */
+        .mini-pixel-cell {
+            width: 100%;
+            height: 100%;
+        }
+        /* 5. Style mũi tên nhỏ giữa các hình */
+        .log-arrow {
+            font-size: 14px !important;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
 </head>
-<body class="bg-background-dark text-slate-300 font-display h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<body class="bg-background-dark text-slate-300 font-display h-screen flex flex-col items-center justify-center relative overflow-hidden p-4">
     
     <div class="absolute inset-0 opacity-5" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M54.627 0l.83.828-1.415 1.415-.828-.828-.828.828-1.415-1.415.828-.828-.828-.828 1.415-1.415.828.828.828-.828 1.415 1.415-.828.828zM22.485 0l.83.828-1.415 1.415-.828-.828-.828.828-1.415-1.415.828-.828-.828-.828 1.415-1.415.828.828.828-.828 1.415 1.415-.828.828z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
 
-    <div class="relative z-10 w-full max-w-md p-6">
-        <div class="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-center shadow-2xl relative overflow-hidden">
+    <div class="relative z-10 w-full max-w-5xl flex flex-col md:flex-row gap-6 h-[500px]">
+        
+        <div class="flex-1 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-center shadow-2xl relative overflow-hidden flex flex-col justify-center">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
-
             <span class="material-icons text-5xl text-white/20 mb-4">gpp_bad</span>
-            
-            <h1 class="text-2xl font-bold text-white tracking-widest uppercase mb-2">Session Terminated</h1>
-            <p class="text-xs text-slate-500 font-mono mb-8">Pixel Reconstruction Halted</p>
+            <h1 class="text-2xl font-bold text-white tracking-widest uppercase mb-1">Session Terminated</h1>
+            <p class="text-[10px] text-slate-500 font-mono mb-8 uppercase">Neural link severed</p>
 
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="bg-white/5 rounded-lg p-4">
-                    <span class="text-[10px] uppercase text-slate-500 tracking-wider">Level Reached</span>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-white/5 rounded-lg p-4 border border-white/5">
+                    <span class="text-[9px] uppercase text-slate-500 tracking-widest block">Final Level</span>
                     <p class="text-2xl font-bold text-white mt-1" id="final-level">0</p>
                 </div>
-                <div class="bg-white/5 rounded-lg p-4">
-                    <span class="text-[10px] uppercase text-slate-500 tracking-wider">Total Score</span>
+                <div class="bg-white/5 rounded-lg p-4 border border-white/5">
+                    <span class="text-[9px] uppercase text-slate-500 tracking-widest block">Total Score</span>
                     <p class="text-2xl font-bold text-primary mt-1" id="final-score">0</p>
                 </div>
             </div>
@@ -44,15 +95,31 @@
             <div id="coin-reward" class="mb-8 hidden">
                 <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
                     <span class="material-icons text-yellow-500 text-xs">monetization_on</span>
-                    <span class="text-yellow-500 text-xs font-bold tracking-wide" id="earned-coins">0 COINS</span>
+                    <span class="text-yellow-500 text-[10px] font-bold tracking-widest" id="earned-coins">0 COINS</span>
                 </div>
             </div>
 
-            <div class="flex gap-3">
-                <button onclick="window.location.href='pixel.html'" class="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition">Retry</button>
-                <button onclick="window.location.href='index.html'" class="flex-1 py-3 border border-white/10 hover:border-white/30 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition">Exit</button>
+            <div class="flex gap-3 mt-auto">
+                <button onclick="window.location.href='pixel.html'" class="flex-1 py-3 bg-primary hover:bg-blue-600 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-lg shadow-primary/20">Re-Initialize</button>
+                <button onclick="window.location.href='index.html'" class="flex-1 py-3 border border-white/10 hover:border-white/5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-all">Return to Menu</button>
             </div>
         </div>
+
+        <div class="w-full md:w-80 bg-background-dark border border-white/5 flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-white/5 bg-black/20 flex justify-between items-center shrink-0">
+                <h2 class="text-[10px] uppercase tracking-[0.2em] text-white font-medium">System Log</h2>
+                <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+            </div>
+            
+            <div id="final-log-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-1">
+                <div class="text-[10px] text-slate-600 italic text-center mt-10">No system data retrieved.</div>
+            </div>
+
+            <div class="p-3 bg-black/40 border-t border-white/5 text-center">
+                <p class="text-[8px] text-slate-600 font-mono tracking-widest uppercase">Connection Status: Offline</p>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -60,9 +127,22 @@
             const score = localStorage.getItem('pixel_last_score') || 0;
             const level = localStorage.getItem('pixel_last_level') || 1;
             const earnedCoins = sessionStorage.getItem('last_coins_earned') || 0;
-
-            document.getElementById('final-score').innerText = score;
+            
+            document.getElementById('final-score').innerText = parseInt(score).toLocaleString();
             document.getElementById('final-level').innerText = level;
+
+            const logData = localStorage.getItem('pixel_final_log');
+
+            if (logData && logData.trim() !== "") {
+                const container = document.getElementById('final-log-container');
+                container.innerHTML = logData;
+                
+                const logEntries = container.querySelectorAll('div');
+                logEntries.forEach(el => {
+                    el.classList.remove('animate-log');
+                    el.style.animation = 'none';
+                });
+            }
 
             if (parseInt(earnedCoins) > 0) {
                 const coinDiv = document.getElementById('coin-reward');

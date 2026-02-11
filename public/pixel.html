@@ -9,12 +9,12 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
     <link rel="stylesheet" href="css/pixel.css">
 
-    <script>
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: { "primary": "#258cf4", "background-light": "#f5f7f8", "background-dark": "#101922" },
+                    colors: { "primary": "#258cf4", "background-dark": "#101922" },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
             },
@@ -27,21 +27,21 @@
         <div class="flex items-center space-x-4">
             <a href="index.html" class="flex items-center space-x-2 hover:text-white transition-colors">
                 <span class="material-icons text-primary text-xl">view_comfy</span>
-                <span class="font-light tracking-[0.2em] text-xs text-white">ELITE STUDIO</span>
+                <span class="font-light tracking-[0.2em] text-xs text-white uppercase">Elite Studio</span>
             </a>
             <div class="h-4 w-px bg-white/10"></div>
-            <span class="text-[10px] font-medium text-slate-400 tracking-wider">PIXEL PAINTING 3</span>
+            <span class="text-[10px] font-medium text-slate-400 tracking-wider uppercase">Pixel Painting 3</span>
         </div>
         <div class="flex items-center space-x-6">
             <div class="text-right">
-                <span class="text-[10px] uppercase tracking-widest text-slate-500 block leading-none mb-1">Level</span>
+                <span class="text-[10px] uppercase text-slate-500 block leading-none mb-1">Level</span>
                 <span id="level-display" class="text-xs font-mono text-white font-bold">1</span>
             </div>
             <div class="text-right">
-                <span class="text-[10px] uppercase tracking-widest text-slate-500 block leading-none mb-1">Score</span>
+                <span class="text-[10px] uppercase text-slate-500 block leading-none mb-1">Score</span>
                 <span id="score-display" class="text-xs font-mono text-primary font-bold">0</span>
             </div>
-            <button onclick="PixelGame.gameOver()" class="text-red-500 hover:text-red-400 transition-colors" title="End Session">
+            <button onclick="PixelGame.gameOver('Manual Termination')" class="text-red-500 hover:text-red-400 transition-colors">
                 <span class="material-icons text-lg">power_settings_new</span>
             </button>
         </div>
@@ -52,12 +52,8 @@
         <section class="w-64 xl:w-72 flex flex-col items-center justify-center gap-6 p-4 border-r border-white/5 bg-black/20">
             <div class="flex flex-col items-center gap-2">
                 <span class="text-[10px] uppercase tracking-[0.2em] text-white/40">Target Protocol</span>
-                <div class="relative p-1 bg-white/5 border border-white/20 rounded glow-frame shadow-lg">
+                <div class="relative p-1 bg-white/5 border border-white/20 rounded shadow-lg">
                     <div id="target-grid" class="pixel-grid w-32 h-32 bg-background-dark border border-white/10"></div>
-                    <div class="absolute -top-px -left-px w-2 h-2 border-t border-l border-white/50"></div>
-                    <div class="absolute -top-px -right-px w-2 h-2 border-t border-r border-white/50"></div>
-                    <div class="absolute -bottom-px -left-px w-2 h-2 border-b border-l border-white/50"></div>
-                    <div class="absolute -bottom-px -right-px w-2 h-2 border-b border-r border-white/50"></div>
                 </div>
             </div>
 
@@ -65,28 +61,23 @@
 
             <div class="flex flex-col items-center gap-2">
                 <span class="text-[10px] uppercase tracking-[0.2em] text-white/40">Simulation</span>
-                <div class="relative p-1 bg-black/40 border border-white/10 rounded shadow-inner">
+                <div class="relative p-1 bg-black/40 border border-white/10 rounded">
                     <div id="result-grid" class="pixel-grid w-32 h-32 bg-background-dark relative">
                         <div id="status-overlay" class="absolute inset-0 flex items-center justify-center z-10 bg-black/80 hidden">
-                            <span class="text-red-500 font-bold text-[10px] uppercase tracking-widest border border-red-500 px-2 py-1">Invalid</span>
+                            <span class="text-red-500 font-bold text-[10px] uppercase border border-red-500 px-2 py-1">Invalid</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-2 w-full px-4">
-                <button id="btn-submit" class="flex-1 py-2 bg-primary hover:bg-blue-600 text-white text-xs font-bold uppercase tracking-wider rounded shadow-lg shadow-primary/20 transition transform active:scale-95">Verify</button>
-            </div>
+            <button id="btn-submit" class="w-full mx-4 py-2 bg-primary hover:bg-blue-600 text-white text-xs font-bold uppercase rounded shadow-lg transition active:scale-95">Verify</button>
         </section>
 
         <section class="flex-1 flex flex-col relative bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent">
-            
             <div class="flex-1 flex flex-col items-center justify-center p-6">
                 <div class="flex w-full max-w-lg justify-between items-end mb-4 border-b border-white/5 pb-2">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Source Fragments <span id="selection-count" class="text-primary ml-2 font-bold">0/3</span></span>
-                    <button id="btn-reset" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                        <span class="material-icons text-[14px]">restart_alt</span> Reset
-                    </button>
+                    <span class="text-[10px] text-slate-600 italic uppercase">Select & Use ◄ ► to Rotate</span>
                 </div>
 
                 <div id="source-container" class="grid grid-cols-3 gap-6 p-6 bg-white/[0.02] rounded-xl border border-white/5 shadow-2xl">
@@ -99,21 +90,16 @@
                 <h2 class="text-[10px] uppercase tracking-[0.2em] text-white font-medium">System Log</h2>
                 <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
             </div>
-            
-            <div id="log-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col-reverse">
-                <div class="text-[10px] text-slate-600 text-center italic mt-4">Waiting for input...</div>
-            </div>
+            <div id="log-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col">
+                </div>
         </aside>
     </main>
 
     <div id="modal-complete" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center backdrop-blur-md">
-        <div class="bg-background-dark border border-primary/30 p-8 rounded-2xl text-center max-w-sm shadow-[0_0_50px_rgba(37,140,244,0.1)] transform scale-100">
-            <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-                <span class="material-icons">check</span>
-            </div>
-            <h2 class="text-xl font-bold text-white mb-1">Sequence Matched</h2>
-            <p class="text-slate-400 text-xs mb-6">Efficiency Rating: 100%</p>
-            <button onclick="PixelGame.nextLevel()" class="w-full py-3 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded uppercase tracking-widest transition">Next Level</button>
+        <div class="bg-background-dark border border-primary/30 p-8 rounded-xl text-center max-w-sm">
+            <h2 class="text-xl font-bold text-white mb-2 uppercase">Matched</h2>
+            <p class="text-slate-400 text-xs mb-6 font-mono">Synchronization Rate: 100%</p>
+            <button onclick="PixelGame.nextLevel()" class="w-full py-3 bg-primary text-white font-bold text-xs rounded uppercase hover:bg-white hover:text-black transition">Next Level</button>
         </div>
     </div>
 
