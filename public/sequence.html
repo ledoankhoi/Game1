@@ -5,7 +5,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Neon Lab: Sequence Protocol</title>
     
-    <link rel="stylesheet" href="css/sequence.css">
+    <link rel="stylesheet" href="sequence.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
@@ -28,6 +29,17 @@
             },
         }
     </script>
+    <style>
+        /* CSS dùng để xóa dấu mũi tên tăng giảm của input number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen overflow-hidden flex flex-col relative select-none">
     
@@ -40,15 +52,15 @@
     <nav class="relative z-10 w-full border-b border-primary/20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="index.html" class="flex items-center gap-3 group cursor-pointer transition-transform hover:scale-105" title="Back to Base Hub">
-    <div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50 shadow-neon group-hover:bg-primary group-hover:border-primary transition-colors duration-300">
-        <span class="material-icons text-primary text-sm group-hover:text-white transition-colors">science</span>
-    </div>
-    <div>
-        <span class="text-xl font-bold tracking-widest uppercase dark:text-white neon-text group-hover:text-primary transition-colors">Neon Labs</span>
-        <span class="block text-[8px] text-primary h-0 overflow-hidden group-hover:h-auto opacity-0 group-hover:opacity-100 transition-all duration-300 tracking-[0.2em] uppercase">Return to Base</span>
-    </div>
-</a>
+                
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="flex items-center gap-3 group cursor-pointer transition-transform hover:scale-105">
+                        <div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50 shadow-neon group-hover:bg-primary group-hover:border-primary transition-colors duration-300">
+                            <span class="material-icons text-primary text-sm group-hover:text-white transition-colors">science</span>
+                        </div>
+                        <span class="text-xl font-bold tracking-widest uppercase dark:text-white neon-text group-hover:text-primary transition-colors">Neon Labs</span>
+                    </a>
+                </div>
 
                 <div class="hidden md:flex items-center gap-6 text-xs tracking-widest font-bold text-primary/70">
                     <div class="flex items-center gap-2">
@@ -61,8 +73,7 @@
 
                 <div class="flex items-center gap-4">
                     <div class="flex flex-col items-end">
-                        <span class="text-xs text-slate-400 uppercase tracking-wide">Protocol Level</span>
-                        <span id="level-indicator" class="text-sm font-bold text-primary">Initializing...</span>
+                        <span id="level-indicator" class="text-sm font-bold text-primary">Protocol Level: 1</span>
                     </div>
                     <div class="w-10 h-10 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center">
                         <span class="material-icons text-primary text-lg">person</span>
@@ -72,80 +83,69 @@
         </div>
     </nav>
 
-    <main class="relative z-10 flex-grow flex w-full max-w-7xl mx-auto p-4 gap-6 overflow-hidden">
+    <main class="relative z-10 flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8 flex flex-col lg:flex-row gap-8">
         
-        <div class="flex-1 flex flex-col items-center justify-center relative">
-            
-            <div class="absolute top-0 flex flex-col items-center animate-pulse z-30">
-                <div class="relative">
-                    <span class="material-icons-outlined text-4xl text-ice-accent shadow-glow-intense drop-shadow-[0_0_10px_rgba(90,178,255,0.8)]">ac_unit</span>
+        <section class="flex-1 flex flex-col justify-center relative">
+            <div class="absolute top-0 left-0 text-primary/40 text-[10px] tracking-[0.2em] font-bold uppercase border-l-2 border-primary/40 pl-2">
+                Containment Field // Sequence Data
+            </div>
+
+            <div class="relative w-full py-20 px-4 md:px-12 my-8">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-full blur-xl"></div>
+                
+                <div id="sequence-container" class="relative w-full h-40 glass-panel rounded-full flex items-center justify-between px-8 md:px-16 shadow-neon border-t border-b border-primary/30 overflow-hidden">
+                    <span class="text-primary/50 text-sm animate-pulse w-full text-center">Loading Data Stream...</span>
                 </div>
             </div>
 
-            <div class="relative w-[500px] h-[500px] md:w-[600px] md:h-[600px] flex items-center justify-center scale-90 md:scale-100 transition-transform">
-                <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-0">
-                    <circle cx="50%" cy="50%" fill="none" r="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-width="1"></circle>
-                    <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                    <line x1="50%" y1="50%" x2="85%" y2="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                    <line x1="50%" y1="50%" x2="85%" y2="65%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                    <line x1="50%" y1="50%" x2="50%" y2="85%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                    <line x1="50%" y1="50%" x2="15%" y2="65%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                    <line x1="50%" y1="50%" x2="15%" y2="35%" stroke="#258cf4" stroke-opacity="0.2" stroke-dasharray="4 4"></line>
-                </svg>
-
-                <div id="question-container" class="relative z-20 w-56 h-56 md:w-64 md:h-64 clip-shard-main frosted-glass shadow-[0_0_40px_rgba(37,140,244,0.15)] flex flex-col items-center justify-center group cursor-default">
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
-                    <div class="relative z-30 text-center">
-                        <span class="block text-primary/60 text-xs font-bold tracking-[0.2em] mb-2 uppercase">Equation</span>
-                        <div id="math-equation" class="text-4xl md:text-5xl font-bold text-white drop-shadow-md font-mono flex items-center justify-center gap-2">
-                            Ready
+            <div class="w-full max-w-2xl mx-auto glass-panel p-6 rounded-xl border border-primary/20 mt-4 relative">
+                <div class="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-primary"></div>
+                <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-primary"></div>
+                
+                <div class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-bold text-primary/80 mb-2 tracking-wider uppercase" for="rule-input">
+                            Input Next Value
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-icons text-primary/50 text-sm">terminal</span>
+                            </div>
+                            <input id="rule-input" class="block w-full pl-10 pr-3 py-3 bg-background-dark border border-primary/30 rounded-lg text-white placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary font-mono text-sm transition-all" placeholder="terminal" type="number" autocomplete="off"/>
+                            <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-500"></div>
                         </div>
                     </div>
+                    <button id="btn-predict" class="w-full md:w-auto px-8 py-3 bg-primary hover:bg-blue-600 text-white font-bold rounded-lg shadow-neon hover:shadow-neon-intense transition-all duration-300 flex items-center justify-center gap-2 uppercase tracking-wide text-sm active:scale-95">
+                        BOLT PREDICT
+                    </button>
                 </div>
-
-                <button id="ans-btn-0" class="ans-btn absolute top-[10%] left-1/2 -translate-x-1/2 z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
-                <button id="ans-btn-1" class="ans-btn absolute top-[28%] right-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
-                <button id="ans-btn-2" class="ans-btn absolute bottom-[28%] right-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
-                <button id="ans-btn-3" class="ans-btn absolute bottom-[10%] left-1/2 -translate-x-1/2 z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
-                <button id="ans-btn-4" class="ans-btn absolute bottom-[28%] left-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
-                <button id="ans-btn-5" class="ans-btn absolute top-[28%] left-[10%] z-20 w-20 h-20 md:w-24 md:h-24 clip-crystal frosted-glass bg-background-dark/40 hover:bg-primary hover:border-primary border-primary/40 flex items-center justify-center transition-all duration-100 hover:scale-110 active:scale-95 group hover:shadow-glow">
-                    <span class="text-xl md:text-2xl font-bold text-ice-accent group-hover:text-white">--</span>
-                </button>
             </div>
-        </div>
+        </section>
 
-        <aside class="hidden md:flex w-72 flex-col frosted-glass rounded-xl border border-primary/20 overflow-hidden relative">
-            <div class="p-3 border-b border-primary/20 bg-primary/10 flex justify-between items-center">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-ice-accent flex items-center gap-2">
-                    <span class="material-icons-outlined text-sm">history</span> Live Feed
-                </h3>
-                <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-            </div>
-            
-            <div id="live-log-container" class="flex-1 overflow-y-auto p-3 space-y-2 relative custom-scrollbar flex flex-col-reverse">
-                <div class="text-[10px] text-primary/40 text-center mt-4 italic">System Ready...</div>
+        <aside class="w-full lg:w-80 flex flex-col gap-6">
+            <div class="glass-panel rounded-xl border border-primary/20 flex flex-col flex-1 min-h-[400px]">
+                <div class="p-4 border-b border-primary/10 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-icons text-primary text-sm">history_edu</span> Lab Notes
+                    </h3>
+                    <button id="btn-clear-log" class="text-[10px] text-primary hover:text-white underline decoration-dotted">CLEAR</button>
+                </div>
+                <div id="lab-notes-content" class="p-4 overflow-y-auto space-y-3 flex-1 max-h-[500px] custom-scrollbar">
+                </div>
             </div>
 
-            <div class="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-ice-dark/80 to-transparent pointer-events-none"></div>
+            <button id="btn-hint" class="w-full py-3 border border-primary/30 rounded-lg text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 group">
+                <span class="material-icons text-sm">lightbulb</span> 
+                REQUEST HINT (-20 PTS)
+            </button>
         </aside>
-
     </main>
 
-    <div class="fixed bottom-4 left-4 text-[10px] text-primary/30 font-mono hidden md:block z-0">
+    <div class="fixed bottom-4 left-4 text-[8px] text-primary/30 font-mono hidden md:block z-0 tracking-widest">
         LAT: 45.201 // LON: -12.44 // SECURE CONNECTION
     </div>
 
-    <script src="js/soundManager.js"></script> <script src="js/scoreManager.js"></script> 
-    <script src="js/games/speed.js"></script>
+    <script src="js/scoreManager.js"></script>
+    <script src="js/games/sequence.js"></script>
 </body>
 </html>

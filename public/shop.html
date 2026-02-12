@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Item Shop - MathQuest</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/main.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f46a",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: { "display": ["Lexend", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>body { font-family: 'Lexend', sans-serif; }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111813] dark:text-white min-h-screen flex flex-col">
+
+    <header class="sticky top-0 z-50 w-full bg-white dark:bg-[#1a2e20] border-b border-[#e0e8e2] dark:border-[#2a3f31] px-6 py-4 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='index.html'" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">storefront</span> Item Shop
+            </h1>
+        </div>
+        
+        <div class="bg-[#f0f5f1] dark:bg-[#233829] px-4 py-2 rounded-xl flex items-center gap-2 border border-transparent hover:border-yellow-400 transition-colors">
+            <span class="material-symbols-outlined text-[#facc15] fill-1 text-xl">monetization_on</span>
+            <span class="text-sm font-bold text-gray-800 dark:text-white"><span id="user-coin">0</span></span>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full p-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-black mb-4">Customize Your Experience</h2>
+            <p class="text-gray-500 dark:text-gray-400">Use your hard-earned coins to unlock new themes and styles.</p>
+        </div>
+
+        <div id="shop-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="col-span-full text-center py-10 text-gray-500">
+                <span class="material-symbols-outlined animate-spin text-4xl">progress_activity</span>
+                <p class="mt-2">Loading items from server...</p>
+            </div>
+        </div>
+
+        <p id="shop-msg" class="text-center mt-8 font-bold h-6 text-lg text-primary"></p>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/characterData.js"></script>    
+    <script src="js/characterManager.js"></script> 
+    <script src="js/main.js"></script>
+    
+</body>
+</html>

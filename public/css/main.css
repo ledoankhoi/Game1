@@ -123,3 +123,14 @@ body.theme-ice .game-area {
 ::-webkit-scrollbar-thumb:hover {
     background: #25f46a;
 }
+/* --- NHÂN VẬT GUNDAM --- */
+.shin-character {
+    width: 100px;  /* Tăng lên 100px để Gundam nhìn cho ngầu */
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    image-rendering: auto;
+    transition: all 0.3s ease;
+    display: block !important; /* Ép buộc hiển thị */
+}

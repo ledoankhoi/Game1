@@ -44,9 +44,8 @@ const MainApp = {
 
     // 4. HIỆN POPUP SHOP
     showShop: function() {
-        this.closeAllModals();
-        const screen = document.getElementById('shop-screen');
-        if(screen) screen.classList.remove('hidden');
+        window.location.href = 'shop.html';
+        
     },
 
     // 5. HIỆN POPUP AUTH (ĐĂNG NHẬP)
