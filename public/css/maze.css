@@ -1,0 +1,48 @@
+/* Hiệu ứng kính mờ đặc thù cho game */
+.glass-panel {
+    background: rgba(34, 22, 16, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(236, 91, 19, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Hiệu ứng rung màn hình khi va chạm tường */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+}
+
+.shake-effect {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Hiệu ứng Grid nền cho khu vực làm việc */
+#main-maze-grid {
+    background-image: 
+        radial-gradient(rgba(236, 91, 19, 0.1) 1px, transparent 1px);
+    background-size: 25px 25px;
+}
+
+/* Cell mượt mà */
+.maze-cell {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Icon Neon */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom Scrollbar cho Sidebar (nếu grid to hơn màn hình) */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(236, 91, 19, 0.3);
+    border-radius: 10px;
+}

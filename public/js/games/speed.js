@@ -1,5 +1,5 @@
 /**
- * SPEED.JS - Core Logic (Synced with Live Log)
+ * SPEED.JS - Core Logic (Integrated with Server Reward & PlayCount)
  */
 
 const SpeedGame = {
@@ -117,6 +117,8 @@ const SpeedGame = {
     updateTimerUI: function() {
         const bar = document.getElementById('timer-bar');
         const text = document.getElementById('timer-text');
+        if(!bar || !text) return;
+
         bar.style.width = `${Math.max(0, this.timeLeft)}%`;
         text.innerText = `${Math.floor(this.timeLeft)}%`;
         
@@ -127,9 +129,7 @@ const SpeedGame = {
         }
     },
 
-    // --- QUAN TRỌNG: Ghi Log vào Sidebar ---
     recordHistory: function(playerChoice, status) {
-        // 1. Lưu data
         const logEntry = {
             equation: this.currentEquationStr,
             correct: this.correctAnswer,
@@ -138,15 +138,11 @@ const SpeedGame = {
         };
         this.history.push(logEntry);
 
-        // 2. Hiển thị lên Sidebar
         const container = document.getElementById('live-log-container');
         if (container) {
-            // Xóa text "Initializing..."
             if (this.history.length === 1) container.innerHTML = '';
 
             const div = document.createElement('div');
-            
-            // Style
             let borderClass = status === 'CORRECT' ? 'border-primary' : 'border-red-500';
             let bgClass = status === 'CORRECT' ? 'bg-primary/10' : 'bg-red-500/10';
             let icon = status === 'CORRECT' ? 'check' : (status === 'TIMEOUT' ? 'timer_off' : 'close');
@@ -160,23 +156,67 @@ const SpeedGame = {
                 </div>
                 <span class="material-icons-outlined text-sm opacity-50 ${textClass}">${icon}</span>
             `;
-
-            // Chèn lên đầu (Mới nhất ở trên)
             container.prepend(div);
         }
     },
 
-    checkAnswer: function(val) {
+    checkAnswer: async function(val) {
         if (!this.isPlaying) return;
 
         if (val === this.correctAnswer) {
-            this.recordHistory(val, 'CORRECT'); // Hiện log màu xanh
+            this.recordHistory(val, 'CORRECT'); 
             this.score += 50;
             this.updateScoreUI();
+
+            // --- GỬI THƯỞNG CHO MỖI CÂU ĐÚNG ---
+            await this.sendReward(5, 10); // 5 coins, 10 exp mỗi câu
+
             this.generateLevel();
         } else {
-            this.recordHistory(val, 'WRONG'); // Hiện log màu đỏ
+            this.recordHistory(val, 'WRONG'); 
             this.gameOver(`Calculation Error: Chose ${val}, Expected ${this.correctAnswer}`);
+        }
+    },
+
+    // --- HÀM GỬI THƯỞNG & TĂNG SỐ LẦN CHƠI (MỚI THÊM) ---
+    sendReward: async function(coins, exp) {
+        const username = localStorage.getItem('username');
+        if (!username) return;
+
+        try {
+            await fetch('http://localhost:3000/api/user/reward', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username,
+                    coins: coins,
+                    exp: exp,
+                    game: 'speed' // <--- QUAN TRỌNG: Server đếm lượt chơi game Speed Math
+                })
+            });
+        } catch (err) {
+            console.error("Lỗi gửi thưởng:", err);
+        }
+    },
+
+    // --- HÀM LƯU ĐIỂM CAO (MỚI THÊM) ---
+    saveHighScore: async function() {
+        const username = localStorage.getItem('username');
+        if (!username) return;
+
+        try {
+            await fetch('http://localhost:3000/api/user/highscore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username,
+                    game: 'speed',
+                    score: this.score
+                })
+            });
+            console.log("Highscore speed saved!");
+        } catch (err) {
+            console.error(err);
         }
     },
 
@@ -184,16 +224,15 @@ const SpeedGame = {
         document.getElementById('current-score').innerText = this.score.toLocaleString();
     },
 
-    gameOver: function(reason) {
+    gameOver: async function(reason) {
         this.isPlaying = false;
         clearInterval(this.timerInterval);
         console.log("Game Over:", reason);
 
-        if (typeof ScoreManager !== 'undefined') {
-            ScoreManager.save('speed', this.score);
-        }
+        // --- LƯU KỶ LỤC LÊN SERVER ---
+        await this.saveHighScore();
 
-        // Lưu bộ nhớ
+        // Lưu bộ nhớ cục bộ cho màn hình GameOver
         localStorage.setItem('speed_last_score', this.score);
         localStorage.setItem('speed_fail_reason', reason);
         localStorage.setItem('speed_history', JSON.stringify(this.history));

@@ -1,5 +1,5 @@
 /**
- * PIXEL.JS - Elite League Logic (Persistent Log Version)
+ * PIXEL.JS - Elite League Logic (Integrated with Server)
  */
 
 const PixelGame = {
@@ -32,12 +32,30 @@ const PixelGame = {
         const submitBtn = document.getElementById('btn-submit');
         if(submitBtn) submitBtn.onclick = () => this.checkWin();
 
+        // Lấy lại điểm cũ nếu có
+        this.loadUserData();
+
         document.addEventListener('keydown', (e) => {
             if (this.activeFocusIndex === null) return;
             if (!this.selectedIndices.includes(this.activeFocusIndex)) return;
             if (e.key === 'ArrowRight') { e.preventDefault(); this.rotateGrid(this.activeFocusIndex, 1); }
             else if (e.key === 'ArrowLeft') { e.preventDefault(); this.rotateGrid(this.activeFocusIndex, -1); }
         });
+    },
+
+    loadUserData: async function() {
+        const username = localStorage.getItem('username');
+        if (!username) return;
+        try {
+            // Lấy thông tin user để hiển thị tiền (nếu cần)
+            const res = await fetch('http://localhost:3000/api/user/info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+            const data = await res.json();
+            // Có thể cập nhật UI tiền ở đây nếu trang game có hiển thị tiền
+        } catch (e) {}
     },
 
     createMiniGridHTML: function(colorClasses) {
@@ -103,8 +121,6 @@ const PixelGame = {
         this.rotations = {};
         this.sourceGrids = [];
 
-        // ĐÃ XÓA LỆNH log.innerHTML = '' Ở ĐÂY ĐỂ GIỮ LẠI LỊCH SỬ
-
         // Ghi tiêu đề cho Level mới trong Log
         this.addToLog('LEVEL_START', `>>> INITIATING LEVEL ${this.level} <<<`);
 
@@ -152,12 +168,58 @@ const PixelGame = {
         const acc = Math.round((match/9)*100);
 
         if(acc === 100) {
+            // THẮNG
             this.addToLog('SUCCESS', `Level ${this.level} Matched!`, 100, { fragments: frags, result: res });
+            
+            // --- GỌI API LƯU ĐIỂM & NHẬN THƯỞNG ---
+            this.saveProgress();
+
             setTimeout(() => document.getElementById('modal-complete').classList.remove('hidden'), 400);
         } else {
+            // THUA
             this.addToLog('FAIL', `Pattern mismatch (${acc}%). Terminating...`, acc, { fragments: frags, result: res });
-            // Chờ 1 chút để nhìn Log rồi mới Game Over
             setTimeout(() => this.gameOver(`Mismatch detected (${acc}%)`), 500);
+        }
+    },
+
+    // --- HÀM MỚI: Gửi điểm và nhận thưởng ---
+    saveProgress: async function() {
+        // Điểm thưởng qua màn
+        const levelBonus = 200; 
+        const expBonus = 50;
+        game: 'pixel'; 
+        this.score += levelBonus;
+
+        const username = localStorage.getItem('username');
+        if (!username) return;
+
+        try {
+            // 1. Cập nhật HighScore (nếu cao hơn kỷ lục cũ)
+            await fetch('http://localhost:3000/api/user/highscore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username,
+                    game: 'pixel', // Key phải khớp server
+                    score: this.score
+                })
+            });
+
+            // 2. Nhận thưởng Coin & Exp
+            await fetch('http://localhost:3000/api/user/reward', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: username,
+                    coins: 20, // Mỗi màn được 20 coin
+                    exp: expBonus,
+                    game: 'pixel'
+                })
+            });
+            
+            console.log("Đã lưu tiến trình lên server!");
+        } catch (err) {
+            console.error("Lỗi lưu điểm:", err);
         }
     },
 
@@ -190,7 +252,10 @@ const PixelGame = {
         const container = document.getElementById('source-container');
         if(!container) return;
         container.innerHTML = '';
-        document.getElementById('selection-count').innerText = `${this.selectedIndices.length}/3`;
+        // Sửa lỗi null check
+        const countDisplay = document.getElementById('selection-count');
+        if(countDisplay) countDisplay.innerText = `${this.selectedIndices.length}/3`;
+        
         this.sourceGrids.forEach((grid, idx) => {
             const isSelected = this.selectedIndices.includes(idx);
             const isFocused = (this.activeFocusIndex === idx && isSelected);
@@ -265,27 +330,29 @@ const PixelGame = {
     },
     nextLevel: function() {
         document.getElementById('modal-complete').classList.add('hidden');
-        this.level++; this.score += 200;
-        if(typeof ScoreManager !== 'undefined') ScoreManager.save('pixel', this.score);
-        document.getElementById('score-display').innerText = this.score;
-        document.getElementById('level-display').innerText = this.level;
+        this.level++;
+        // Điểm đã được cộng trong hàm saveProgress, chỉ cần update UI
+        const scoreDisplay = document.getElementById('score-display');
+        const levelDisplay = document.getElementById('level-display');
+        
+        if(scoreDisplay) scoreDisplay.innerText = this.score;
+        if(levelDisplay) levelDisplay.innerText = this.level;
+        
         this.generateLevel();
     },
     gameOver: function(reason) {
-        localStorage.setItem('pixel_last_score', this.score);
-        localStorage.setItem('pixel_last_level', this.level);
-        localStorage.setItem('pixel_fail_reason', reason);
-        if(typeof ScoreManager !== 'undefined') ScoreManager.save('pixel', this.score);
-        window.location.href = 'pixel_gameover.html';
-
+        // Lưu log để hiển thị ở trang gameover
         const logContent = document.getElementById('log-container').innerHTML;
         localStorage.setItem('pixel_final_log', logContent);
 
         localStorage.setItem('pixel_last_score', this.score);
         localStorage.setItem('pixel_last_level', this.level);
+        localStorage.setItem('pixel_fail_reason', reason);
         
-        if(typeof ScoreManager !== 'undefined') ScoreManager.save('pixel', this.score);
-        window.location.href = 'pixel_gameover.html';
+        // Gửi điểm lần cuối trước khi chết
+        this.saveProgress().then(() => {
+            window.location.href = 'pixel_gameover.html';
+        });
     }
 };
 

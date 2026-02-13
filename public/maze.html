@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Elite League: Maze Puzzle 1</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/maze.css">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-dark": "#1a120e",
+                        "accent-red": "#ef4444",
+                        "accent-blue": "#3b82f6",
+                        "accent-yellow": "#eab308",
+                    },
+                    fontFamily: { "display": ["Lexend", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-[#f8f6f6] dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 min-h-screen">
+    
+    <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+        
+        <header class="flex items-center justify-between border-b border-primary/20 bg-background-dark/50 backdrop-blur-md px-8 py-4 sticky top-0 z-50 h-20">
+            <div class="flex items-center gap-4 cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                    <span class="material-symbols-outlined text-3xl">grid_view</span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold leading-tight uppercase">Elite<span class="text-primary">League</span></h2>
+                    <p class="text-[10px] text-primary font-semibold tracking-[0.3em] uppercase opacity-80">Maze Protocol 01</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="bg-white/5 border border-primary/20 pl-2 pr-4 py-1.5 rounded-full flex items-center gap-2">
+                    <span class="material-symbols-outlined text-accent-yellow text-xl">monetization_on</span>
+                    <span id="user-coin" class="text-sm font-black text-white">0</span>
+                </div>
+
+                <div class="relative cursor-pointer group" onclick="window.location.href='userProfile.html'">
+                    <svg class="w-12 h-12 -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="8" fill="transparent" class="text-white/10" />
+                        <circle id="level-progress-circle" cx="50" cy="50" r="46" stroke="#25f46a" stroke-width="8" fill="transparent" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <img id="user-avatar-img" src="" class="w-8 h-8 rounded-full border border-white/20">
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 bg-[#25f46a] text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-background-dark shadow-md">
+                        <span id="user-level-badge">1</span>
+                    </div>
+                </div>
+
+                <button onclick="Auth.logout()" class="text-slate-500 hover:text-accent-red transition-colors">
+                    <span class="material-symbols-outlined">logout</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 flex p-8 gap-8">
+            <aside class="w-80 flex flex-col gap-6" id="projection-sidebar">
+                <h3 class="text-[10px] font-black tracking-[0.3em] uppercase text-primary/60 px-1">Data Projections</h3>
+                
+                <div class="glass-panel p-4 rounded-xl border-l-4 border-l-accent-red border-2 shadow-lg shadow-accent-red/5">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-accent-red">Layer: Structural</span>
+                        <span class="material-symbols-outlined text-accent-red text-sm">fence</span>
+                    </div>
+                    <div id="grid-red" class="grid gap-1 aspect-square bg-accent-red/5 p-1 rounded-lg"></div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border-l-4 border-l-accent-blue border-2 shadow-lg shadow-accent-blue/5">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-accent-blue">Layer: Navigation</span>
+                        <span class="material-symbols-outlined text-accent-blue text-sm">my_location</span>
+                    </div>
+                    <div id="grid-blue" class="grid gap-1 aspect-square bg-accent-blue/5 p-1 rounded-lg"></div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border-l-4 border-l-accent-yellow border-2 shadow-lg shadow-accent-yellow/5">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-accent-yellow">Layer: Hazards</span>
+                        <span class="material-symbols-outlined text-accent-yellow text-sm">warning</span>
+                    </div>
+                    <div id="grid-yellow" class="grid gap-1 aspect-square bg-accent-yellow/5 p-1 rounded-lg"></div>
+                </div>
+            </aside>
+
+            <section class="flex-1 flex flex-col items-center">
+                <div class="mb-8 text-center">
+                    <span id="phase-label" class="text-xs font-bold tracking-[0.4em] uppercase text-primary mb-4 block">Memorization Phase</span>
+                    <div class="relative inline-block">
+                        <svg class="w-24 h-24 transform -rotate-90">
+                            <circle class="text-white/5" cx="48" cy="48" r="44" stroke="currentColor" stroke-width="4" fill="transparent"></circle>
+                            <circle id="timer-circle" class="text-primary" cx="48" cy="48" r="44" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="276" stroke-dashoffset="0" stroke-linecap="round" style="transition: stroke-dashoffset 1s linear;"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-3xl font-bold tracking-tighter text-white"><span id="timer-seconds">60</span><span class="text-sm text-primary opacity-60 ml-0.5">s</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative p-3 bg-primary/5 rounded-2xl border border-primary/20 shadow-2xl" id="maze-container">
+                    <div id="main-maze-grid" class="grid gap-3 w-[500px] h-[500px] p-2">
+                        </div>
+                </div>
+
+                <div class="mt-10 flex items-center gap-4 bg-background-dark/80 border border-primary/20 p-2 rounded-2xl shadow-xl">
+                    <button id="btn-synthesize" class="px-8 py-3 bg-primary/10 text-primary border border-primary/30 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all">
+                        Synthesize Data
+                    </button>
+                    <button id="btn-commit" class="px-10 py-3 bg-primary text-white rounded-xl font-bold uppercase tracking-[0.2em] text-xs shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+                        Commit Final Path
+                    </button>
+                </div>
+            </section>
+
+            <aside class="w-80 flex flex-col gap-6">
+                <h3 class="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 px-1">System Status</h3>
+                <div class="glass-panel p-6 rounded-2xl flex flex-col gap-6 border-primary/40 shadow-xl border-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold uppercase text-primary tracking-widest">Draw Mode</span>
+                        <div id="status-badge" class="px-2 py-1 bg-primary/20 rounded text-[9px] font-bold text-primary animate-pulse">LOCKED</div>
+                    </div>
+                    <p id="status-hint" class="text-[11px] text-slate-400 leading-relaxed italic border-l-2 border-primary/30 pl-3">
+                        Draw mode will activate once the memorization timer expires. All projections will be disabled.
+                    </p>
+                    
+                    <div class="mt-4 pt-4 border-t border-primary/10">
+                        <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-3">
+                            <span>Brain Load</span>
+                            <span id="load-percent">24%</span>
+                        </div>
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div id="load-bar" class="h-full bg-accent-blue" style="width: 24%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/userProfile.js"></script>
+    
+    <script src="js/games/maze.js"></script>
+
+</body>
+</html>
