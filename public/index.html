@@ -77,14 +77,27 @@
         </div>
 
         <div class="flex-1 max-w-2xl px-4 lg:px-12">
-            <div class="relative group w-full">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <span class="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-2xl">search</span>
-                </span>
-                <input class="w-full pl-12 pr-4 py-3 bg-[#f0f5f1] dark:bg-[#0f1a14] border-2 border-transparent focus:bg-white dark:focus:bg-[#1a2e20] focus:border-primary/50 rounded-2xl text-base focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder-gray-400" placeholder="Search for games..." type="text"/>
-            </div>
-        </div>
-
+    <form autocomplete="off" class="relative group w-full" onsubmit="return false;">
+        
+        <input type="email" name="fake_email_trap" style="position:fixed; top:-100px; left:-100px; opacity:0; pointer-events:none; height:0; width:0;" tabindex="-1">
+        <input type="password" name="fake_password_trap" style="position:fixed; top:-100px; left:-100px; opacity:0; pointer-events:none; height:0; width:0;" tabindex="-1">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <span class="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-2xl">search</span>
+        </span>
+        
+        <input 
+            id="search-input" 
+            onkeyup="searchGames()" 
+            type="search" 
+            name="search_game_query_unique_v2" 
+            autocomplete="off" 
+            readonly="true" 
+            onfocus="this.removeAttribute('readonly');"
+            class="w-full pl-12 pr-4 py-3 bg-[#f0f5f1] dark:bg-[#0f1a14] border-2 border-transparent focus:bg-white dark:focus:bg-[#1a2e20] focus:border-primary/50 rounded-2xl text-base focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder-gray-400 text-gray-800 dark:text-white" 
+            placeholder="Search for games..." 
+        />
+    </form>
+</div>
         <div class="flex items-center gap-4 shrink-0">
             <div class="flex items-center gap-1 mr-2">
                 <button onclick="window.location.href='leaderboard.html'" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-yellow-600 transition-colors font-bold group" title="Leaderboard">
@@ -127,6 +140,9 @@
                 </div>
             </div>
         </div>
+
+
+        
     </header>
 
     <main class="flex flex-1 flex-col lg:flex-row max-w-[1600px] mx-auto w-full p-4 lg:p-8 gap-8">
@@ -178,6 +194,21 @@
                                 <span>Elite League</span>
                             </div>
                         </button>
+
+                        <button onclick="filterGames('observation')" class="category-btn flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1a2e20] text-gray-600 dark:text-gray-300 hover:bg-[#f0f5f1] rounded-xl font-medium transition-all shadow-sm group" id="cat-observation">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">visibility</span>
+                                <span>Quan sát</span>
+                            </div>
+                        </button>
+                        
+                        <button onclick="filterGames('endless')" class="category-btn flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1a2e20] text-gray-600 dark:text-gray-300 hover:bg-[#f0f5f1] rounded-xl font-medium transition-all shadow-sm group" id="cat-endless">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">all_inclusive</span>
+                                <span>Vô tận</span>
+                            </div>
+                        </button>
+
                     </div>
                 </section>
             </div>
@@ -275,34 +306,38 @@
     </div>
 
     <div class="game-card type-memory type-logic type-elite bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" onclick="MainApp.startGame('maze')">
-        <div class="h-44 relative bg-gray-900 group overflow-hidden">
-            <img alt="Maze Protocol" class="size-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600"/>
-            <div class="absolute inset-0 bg-[radial-gradient(#ec5b13_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-6xl text-[#ec5b13] drop-shadow-[0_0_15px_rgba(236,91,19,0.5)]">grid_view</span>
-            </div>
-            <div class="absolute top-3 right-3 flex gap-1">
-                <span class="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Memory</span>
-                <span class="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Logic</span>
-                <span class="bg-[#ec5b13] backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase shadow-lg shadow-orange-500/20">Elite</span>
-            </div>
-        </div>
-        <div class="p-5">
-            <div class="flex justify-between items-start mb-1">
-                <h4 class="font-bold text-lg text-black dark:text-white">Maze Protocol 01</h4>
-                <span class="text-[10px] font-black text-[#ec5b13] border border-[#ec5b13]/30 px-1.5 py-0.5 rounded">NEW</span>
-            </div>
-            <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">Synthesize 3 color-coded projections to navigate through invisible walls.</p>
-            <button class="w-full bg-[#fdf2eb] dark:bg-[#2a1b15] hover:bg-[#ec5b13] hover:text-white text-[#ec5b13] dark:text-[#ff9d6c] font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
-                <span>Access System</span>
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+    <div class="h-44 relative bg-gray-800">
+        <img alt="Maze Protocol" class="size-full object-cover opacity-80" src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600"/>
+        
+        <div class="absolute top-3 right-3 flex gap-1">
+            <span class="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Memory</span>
+            <span class="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Logic</span>
+            <span class="bg-yellow-500/80 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Elite</span>
         </div>
     </div>
-
+    <div class="p-5">
+        <h4 class="font-bold text-lg mb-1 text-black dark:text-white">Maze Protocol 01</h4>
+        <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">Synthesize 3 color-coded projections to navigate through invisible walls.</p>
+        <button class="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
+    </div>
 </div>
 
-                </div>
+<div class="game-card type-logic type-elite bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" onclick="window.location.href='escape.html'">
+    <div class="h-44 relative bg-gray-800">
+        <img alt="Escape Strategy" class="size-full object-cover opacity-80" src="https://images.unsplash.com/photo-1616499370260-485b3e5ed653?q=80&w=600"/>
+        
+        <div class="absolute top-3 right-3 flex gap-1">
+            <span class="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Logic</span>
+            <span class="bg-yellow-500/80 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">Elite</span>
+        </div>
+    </div>
+    <div class="p-5">
+        <h4 class="font-bold text-lg mb-1 text-black dark:text-white">Chiến Thuật Thoát Hiểm 1</h4>
+        <p class="text-sm text-[#608a6e] mb-5 line-clamp-2">Điều khiển quân cờ thoát khỏi mê cung 11x11 đầy cạm bẫy.</p>
+        <button class="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
+    </div>
+</div>
+
             </section>
         </div>
     </main>
@@ -355,6 +390,7 @@
 <script src="js/auth.js"></script> 
 <script src="js/userProfile.js"></script>
 <script src="js/main.js"></script>
+<script src="js/searchgame.js"></script>
 
 <script>
     function toggleSound(btn) {

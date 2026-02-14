@@ -11,11 +11,30 @@ body {
     padding: 0;
     /* Font mặc định cho các phần chưa có Tailwind */
     font-family: 'Roboto', sans-serif; 
+    
+    /* --- CSS VARIABLES (THEME SYSTEM) --- */
+    :root {
+        --primary-color: #25f46a;       /* Xanh lá Neon */
+        --secondary-color: #00ffff;     /* Xanh dương Neon */
+        --glass-bg: rgba(15, 23, 42, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --blur-amount: 12px;
+        --font-game: 'Orbitron', sans-serif;
+    }
 }
 
 /* 3. LỚP TIỆN ÍCH QUAN TRỌNG */
 .hidden {
     display: none !important;
+}
+
+/* Class dùng chung cho hiệu ứng kính (Xóa ở các file con) */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 /* 4. CẤU HÌNH MÀN HÌNH GAME (Overlay toàn màn hình) */
@@ -38,7 +57,7 @@ body {
 /* Font tiêu đề game */
 .game-header h2, 
 .game-area h2 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-game);
     letter-spacing: 2px;
 }
 
@@ -55,8 +74,8 @@ body {
 }
 
 .game-area input:focus {
-    border-color: #25f46a; /* Màu xanh Primary */
-    box-shadow: 0 0 10px rgba(37, 244, 106, 0.3);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(37, 244, 106, 0.3); /* Có thể dùng biến màu RGB nếu tách riêng */
 }
 
 /* Nút bấm trong game */
@@ -74,11 +93,13 @@ body {
 /* Mặc định (Vũ trụ tối) */
 body.theme-default .game-area {
     background-color: #0a0f0b;
+    --primary-color: #25f46a;
 }
 
 /* Skin Rừng Rậm (Khi mua trong Shop) */
 body.theme-forest .game-area {
     background: linear-gradient(to bottom, #052e16, #022c22);
+    --primary-color: #4ade80; /* Đổi màu chủ đạo sang xanh lá rừng */
 }
 body.theme-forest .star-field {
     opacity: 0.2; /* Giảm sao đi một chút */

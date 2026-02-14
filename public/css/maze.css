@@ -1,9 +1,10 @@
 /* Hiệu ứng kính mờ đặc thù cho game */
+/* Đã chuyển .glass-panel gốc sang main.css, chỉ override nếu cần thiết */
 .glass-panel {
-    background: rgba(34, 22, 16, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(236, 91, 19, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    /* Override màu nền riêng cho Maze nếu muốn nó hơi nâu đỏ */
+    background: rgba(34, 22, 16, 0.7); 
+    /* Chỉ ghi đè màu nền, giữ nguyên border/shadow/blur từ main.css */
+    background: rgba(34, 22, 16, 0.7) !important; 
 }
 
 /* Hiệu ứng rung màn hình khi va chạm tường */
@@ -15,6 +16,7 @@
 }
 
 .shake-effect {
+    /* Sử dụng animation shake đã định nghĩa trong main.css hoặc speed.css nếu đã gộp */
     animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
 }
 
@@ -46,3 +48,4 @@
     background: rgba(236, 91, 19, 0.3);
     border-radius: 10px;
 }
+/* Scrollbar đã được xử lý trong main.css. Nếu muốn màu riêng, hãy dùng biến CSS --scrollbar-color */

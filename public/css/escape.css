@@ -1,0 +1,140 @@
+/* public/css/escape.css */
+
+/* Tùy chỉnh thanh cuộn */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #2a3f31; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #25f46a; }
+
+/* Hiệu ứng ô lưới */
+.grid-cell {
+    background-color: #15201b;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+.grid-cell:hover {
+    background-color: #1e332a;
+}
+
+/* Chướng ngại vật (Tường) */
+.obstacle {
+    background-color: #0f1613;
+    background-image: repeating-linear-gradient(45deg, #1a2e20 0, #1a2e20 2px, transparent 0, transparent 50%);
+    background-size: 8px 8px;
+    border: 1px solid #2a3f31;
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* Quân cờ */
+.piece {
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.piece-glow-blue {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), inset 0 0 5px rgba(255,255,255,0.4);
+}
+.piece-glow-orange {
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.6), inset 0 0 5px rgba(255,255,255,0.4);
+}
+
+/* Lối Thoát */
+.exit-zone {
+    background: rgba(37, 244, 106, 0.05);
+    border: 1px dashed rgba(37, 244, 106, 0.3);
+}
+
+/* Lối Vào */
+.entry-zone {
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+}
+.entry-zone:hover {
+    background: rgba(37, 244, 106, 0.1);
+    border: 1px solid rgba(37, 244, 106, 0.5);
+}
+
+/* Hiệu ứng Active (Người chơi hiện tại) */
+.player-active {
+    opacity: 1 !important;
+    border-color: currentColor !important;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* --- BỔ SUNG VÀO FILE escape.css --- */
+
+/* Quân cờ */
+.piece {
+    width: 70%;
+    height: 70%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: white;
+    font-size: 12px;
+}
+
+.piece-blue {
+    background-color: #3b82f6; /* Màu đội Xanh */
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.piece-orange {
+    background-color: #f97316; /* Màu đội Cam */
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+/* Hiệu ứng khi chọn quân */
+.piece-selected {
+    transform: scale(1.2);
+    border-color: #fff;
+    box-shadow: 0 0 20px #fff;
+    z-index: 20;
+}
+
+/* Gợi ý nước đi (Dấu chấm tròn) */
+.valid-move {
+    background-color: rgba(37, 244, 106, 0.2);
+    cursor: pointer;
+    border: 1px solid rgba(37, 244, 106, 0.6);
+    position: relative;
+}
+.valid-move::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #25f46a;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: pulse 1.5s infinite;
+}
+
+/* Hiệu ứng thoát hiểm thành công */
+.escaped-anim {
+    animation: escapeFly 1s forwards;
+}
+
+@keyframes escapeFly {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5) translateY(-50px); opacity: 0.5; }
+    100% { transform: scale(0) translateY(-100px); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+/* Thêm vào cuối file escape.css */
+.cell-void {
+    background: transparent !important;
+    border: none !important;
+    pointer-events: none;
+}

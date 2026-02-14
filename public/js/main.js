@@ -25,6 +25,9 @@ const MainApp = {
         else if (gameType === 'maze') {
             window.location.href = 'maze.html';
         }
+        else if (gameType === 'escape') {
+            window.location.href = 'escape.html';
+        }
 
         // ---------------------
     },

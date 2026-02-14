@@ -1,99 +1,48 @@
 /* file: public/js/userProfile.js */
 
 const UserProfile = {
-    // Danh sách Avatar có sẵn (Dùng tên file ảnh hoặc class icon)
-    AVATARS: [
-        'avatar_1', 'avatar_2', 'avatar_3', 'avatar_4', 
-        'avatar_5', 'avatar_6', 'avatar_7', 'avatar_8'
+    // 1. Danh sách Avatar đa dạng (Dùng API DiceBear)
+    avatars: [
+        // Style: Adventurer (Thám hiểm)
+        "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix",
+        "https://api.dicebear.com/7.x/adventurer/svg?seed=Chloe",
+        "https://api.dicebear.com/7.x/adventurer/svg?seed=Caleb",
+        
+        // Style: Bottts (Robot)
+        "https://api.dicebear.com/7.x/bottts/svg?seed=Pepper",
+        "https://api.dicebear.com/7.x/bottts/svg?seed=Sasha",
+        
+        // Style: Fun Emoji
+        "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Mario",
+        "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Luigi",
+        
+        // Style: Avataaars (Truyền thống)
+        "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack",
+        "https://api.dicebear.com/7.x/avataaars/svg?seed=Bella",
+        "https://api.dicebear.com/7.x/avataaars/svg?seed=Easton"
     ],
 
-    // Mapping ID sang hình ảnh thực tế (Bạn có thể thay bằng URL ảnh thật)
-    getAvatarImage: function(id) {
-        // Ở đây tôi dùng tạm URL ảnh mẫu từ internet tương ứng với các ID
-        const map = {
-            'avatar_1': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-            'avatar_2': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
-            'avatar_3': 'https://api.dicebear.com/7.x/bottts/svg?seed=Spot',
-            'avatar_4': 'https://api.dicebear.com/7.x/bottts/svg?seed=Zoe',
-            'avatar_5': 'https://api.dicebear.com/7.x/adventurer/svg?seed=Midnight',
-            'avatar_6': 'https://api.dicebear.com/7.x/adventurer/svg?seed=Coco',
-            'avatar_7': 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Happy',
-            'avatar_8': 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Cool'
-        };
-        return map[id] || map['avatar_1'];
-    },
+    currentSelection: null, // Lưu avatar đang chọn tạm thời
 
-    // --- LOGIC TÍNH LEVEL ---
-    // Công thức: Level = Căn bậc 2 của (EXP / 100) + 1
-    // Càng lên cao càng khó.
-    // Lv 1: 0 exp
-    // Lv 2: 100 exp
-    // Lv 3: 400 exp
-    // Lv 4: 900 exp
-    calculateLevelInfo: function(exp) {
-        const LEVEL_FACTOR = 100; // Hệ số khó
-        
-        // 1. Tính Level hiện tại
-        let level = Math.floor(Math.sqrt(exp / LEVEL_FACTOR)) + 1;
-        
-        // 2. Tính EXP cần cho Level hiện tại và Level kế tiếp
-        let currentLevelBaseExp = Math.pow(level - 1, 2) * LEVEL_FACTOR;
-        let nextLevelBaseExp = Math.pow(level, 2) * LEVEL_FACTOR;
-        
-        // 3. Tính % tiến trình
-        let expNeeded = nextLevelBaseExp - currentLevelBaseExp;
-        let expGainedInLevel = exp - currentLevelBaseExp;
-        let percent = (expGainedInLevel / expNeeded) * 100;
-
-        // Giới hạn 0-100%
-        percent = Math.min(Math.max(percent, 0), 100);
-
-        return { level, percent, nextLevelExp: nextLevelBaseExp };
-    },
-
-    // --- CẬP NHẬT GIAO DIỆN ---
-    updateUI: function(exp, avatarId) {
-        const info = this.calculateLevelInfo(exp);
-        
-        // 1. Cập nhật số Level (Badge nhỏ góc dưới)
-        const badge = document.getElementById('user-level-badge');
-        if (badge) badge.innerText = info.level;
-
-        // 2. Cập nhật ảnh Avatar
-        const img = document.getElementById('user-avatar-img');
-        if (img) img.src = this.getAvatarImage(avatarId);
-
-        // 3. Cập nhật Vòng tròn xanh lá (Progress Ring)
-        const circle = document.getElementById('level-progress-circle');
-        if (circle) {
-            const radius = circle.r.baseVal.value;
-            const circumference = radius * 2 * Math.PI;
-            
-            circle.style.strokeDasharray = `${circumference} ${circumference}`;
-            
-            // Tính toán đoạn bù (offset) để vẽ màu xanh
-            const offset = circumference - (info.percent / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
-        }
-
-        // Lưu thông tin avatar hiện tại để dùng cho modal
-        this.currentAvatarId = avatarId;
-    },
-
-    // --- XỬ LÝ CHỌN AVATAR ---
+    // Mở Modal và render danh sách
     openModal: function() {
         const modal = document.getElementById('avatar-modal');
         const grid = document.getElementById('avatar-grid');
+        
         if (!modal || !grid) return;
 
-        // Xóa cũ, vẽ mới
+        // Reset grid
         grid.innerHTML = '';
-        this.AVATARS.forEach(id => {
+
+        // Render các Avatar có sẵn
+        this.avatars.forEach(url => {
             const div = document.createElement('div');
-            div.className = `p-2 rounded-xl cursor-pointer border-2 transition-all hover:scale-105 ${id === this.currentAvatarId ? 'border-primary bg-green-50' : 'border-transparent hover:bg-gray-100'}`;
-            div.innerHTML = `<img src="${this.getAvatarImage(id)}" class="w-16 h-16 rounded-full">`;
+            div.className = "w-16 h-16 rounded-full border-2 border-transparent hover:border-primary cursor-pointer transition-all overflow-hidden bg-gray-100 p-1";
+            div.innerHTML = `<img src="${url}" class="w-full h-full object-cover rounded-full pointer-events-none">`;
             
-            div.onclick = () => this.selectAvatar(id);
+            div.onclick = () => {
+                this.selectAvatar(url, div);
+            };
             grid.appendChild(div);
         });
 
@@ -104,31 +53,101 @@ const UserProfile = {
         document.getElementById('avatar-modal').classList.add('hidden');
     },
 
-    selectAvatar: async function(newId) {
-        const username = localStorage.getItem('username');
-        if (!username) return;
+    // Xử lý khi chọn Avatar có sẵn
+    selectAvatar: function(url, element) {
+        this.currentSelection = url;
+        
+        // Highlight ô được chọn
+        const all = document.querySelectorAll('#avatar-grid div');
+        all.forEach(el => el.classList.remove('border-primary', 'ring-2', 'ring-primary/50'));
+        element.classList.add('border-primary', 'ring-2', 'ring-primary/50');
 
-        // 1. Gọi API lưu
-        try {
-            const res = await fetch('http://localhost:3000/api/user/avatar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, avatarId: newId })
-            });
-            const data = await res.json();
-            
-            if (data.success) {
-                // 2. Cập nhật UI ngay lập tức
-                const img = document.getElementById('user-avatar-img');
-                if (img) img.src = this.getAvatarImage(newId);
-                
-                // Cập nhật lại Auth user
-                if (Auth.user) Auth.user.avatarId = newId;
-                
-                this.closeModal();
+        // Reset phần xem trước của Upload (nếu có)
+        const preview = document.getElementById('upload-preview');
+        if(preview) preview.src = "https://via.placeholder.com/150?text=Preview";
+    },
+
+    // Xử lý khi người dùng Upload ảnh từ máy
+    handleFileUpload: function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Kiểm tra dung lượng (Max 2MB để tránh nặng server)
+        if (file.size > 2 * 1024 * 1024) {
+            alert("File too large! Please choose an image under 2MB.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64String = e.target.result;
+            this.currentSelection = base64String;
+
+            // Hiển thị preview
+            const preview = document.getElementById('upload-preview');
+            if(preview) {
+                preview.src = base64String;
+                preview.classList.remove('hidden');
             }
-        } catch (err) {
-            console.error("Lỗi đổi avatar:", err);
+
+            // Bỏ chọn các avatar trong lưới
+            const all = document.querySelectorAll('#avatar-grid div');
+            all.forEach(el => el.classList.remove('border-primary', 'ring-2', 'ring-primary/50'));
+        };
+        reader.readAsDataURL(file);
+    },
+
+    // Lưu thay đổi
+    saveAvatar: async function() {
+        if (!this.currentSelection) {
+            this.closeModal();
+            return;
+        }
+
+        const username = localStorage.getItem('username');
+        
+        // Cập nhật giao diện ngay lập tức (Optimistic UI)
+        const avatarImg = document.getElementById('user-avatar-img');
+        if (avatarImg) avatarImg.src = this.currentSelection;
+
+        // Lưu vào LocalStorage
+        localStorage.setItem('user_avatar_custom', this.currentSelection);
+
+        // Gửi lên Server (Nếu bạn đã có API update avatar)
+        // await fetch('/api/user/update-avatar', { ... })
+
+        this.closeModal();
+        alert("Avatar Updated Successfully!");
+    },
+
+    // Cập nhật UI khi tải trang
+    updateUI: function(exp, avatarId) {
+        const avatarImg = document.getElementById('user-avatar-img');
+        
+        // Ưu tiên lấy avatar custom từ localStorage trước
+        const customAvatar = localStorage.getItem('user_avatar_custom');
+        if (avatarImg) {
+            if (customAvatar) {
+                avatarImg.src = customAvatar;
+            } else if (avatarId && avatarId.startsWith('http')) {
+                 avatarImg.src = avatarId;
+            } else {
+                 // Fallback mặc định
+                 avatarImg.src = this.avatars[0];
+            }
+        }
+        
+        // Logic tính Level (Giữ nguyên)
+        const level = Math.floor(Math.sqrt(exp) / 10) + 1;
+        const progress = (Math.sqrt(exp) % 10) * 10;
+        
+        const badge = document.getElementById('user-level-badge');
+        if(badge) badge.innerText = level;
+
+        const circle = document.getElementById('level-progress-circle');
+        if(circle) {
+             const offset = 289 - (progress / 100) * 289;
+             circle.style.strokeDashoffset = offset;
         }
     }
 };
