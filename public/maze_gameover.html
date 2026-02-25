@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SYSTEM FAILURE | Maze Protocol</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "bg-dark": "#0f1219", // Nền cực tối
+                        "surface": "#181c29",
+                        "danger": "#ef4444",  // Đỏ báo lỗi
+                        "warning": "#f97316"  // Cam chủ đạo
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glitch': 'glitch 1s linear infinite',
+                    },
+                    keyframes: {
+                        glitch: {
+                            '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                            '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                            '62%': { transform: 'translate(0,0) skew(5deg)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* Hiệu ứng nhiễu màn hình (Scanline) */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.6;
+        }
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.9) 100%);
+            pointer-events: none;
+            z-index: 40;
+        }
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7), 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-white font-display min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    
+    <div class="absolute inset-0 bg-red-900/10 animate-pulse-fast z-0"></div>
+
+    <div class="relative z-10 w-full max-w-md bg-surface border border-red-500/30 rounded-2xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.2)] text-center overflow-hidden">
+        
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent"></div>
+
+        <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-[bounce_2s_infinite]">
+            <span class="material-symbols-outlined text-5xl text-red-500">gpp_bad</span>
+        </div>
+
+        <h1 class="text-4xl font-black text-red-500 mb-2 uppercase tracking-widest neon-text-red animate-glitch">
+            SYSTEM FAILURE
+        </h1>
+        <p class="text-gray-400 text-sm mb-8 tracking-wider uppercase font-bold">
+            <span class="text-red-400">[ERROR]</span> Structural Collision Detected
+        </p>
+
+        <div class="bg-black/30 rounded-xl p-4 mb-8 border border-white/5 grid grid-cols-2 gap-4">
+            <div class="text-left">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Last Sequence</p>
+                <p class="text-xl font-bold text-white" id="level-display">Level 1</p>
+            </div>
+            <div class="text-left">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">System Status</p>
+                <p class="text-xl font-bold text-red-500">TERMINATED</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <button onclick="retryGame()" class="w-full bg-red-600 hover:bg-red-500 text-white font-black text-lg py-4 rounded-xl shadow-lg shadow-red-600/30 transition-all transform active:scale-95 uppercase tracking-widest flex items-center justify-center gap-2 group">
+                <span class="material-symbols-outlined group-hover:rotate-180 transition-transform">refresh</span>
+                Reboot System
+            </button>
+            
+            <button onclick="window.location.href='index.html'" class="w-full bg-transparent hover:bg-white/5 border border-white/10 text-gray-400 hover:text-white font-bold py-3 rounded-xl transition-all uppercase tracking-wider text-sm">
+                Abort Mission (Exit)
+            </button>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-white/5">
+            <p class="text-[10px] text-gray-600 font-mono">ERROR_CODE: WALL_IMPACT_0x00F</p>
+        </div>
+    </div>
+
+    <script>
+        // Lấy Level hiện tại từ LocalStorage để hiển thị
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lưu ý: maze_level trong maze.js lưu dạng 0, 1, 2... nên hiển thị phải +1
+            const currentLv = parseInt(localStorage.getItem('maze_level') || 0) + 1;
+            document.getElementById('level-display').innerText = `Level ${currentLv}`;
+        });
+
+        function retryGame() {
+            // Reset level về 0 (hoặc giữ nguyên tùy luật chơi của bạn)
+            // Theo logic cũ của bạn là reset về 0 khi thua
+            localStorage.setItem('maze_level', 0);
+            window.location.href = 'maze.html';
+        }
+    </script>
+</body>
+</html>

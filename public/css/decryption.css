@@ -1,0 +1,55 @@
+/* Neon Glow Effects */
+.glow-text {
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+/* Grid Cells (Nút bấm) */
+.signal-cell {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.signal-cell:active {
+    transform: scale(0.95);
+}
+
+/* Hiệu ứng khi ô sáng lên */
+.signal-cell.active {
+    background: rgba(0, 243, 255, 0.2);
+    border-color: #00f3ff;
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4), inset 0 0 20px rgba(0, 243, 255, 0.2);
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* Màu sắc khác nhau cho các ô (Optional: Để game đẹp hơn) */
+.signal-cell[data-color="blue"].active {
+    background: rgba(0, 243, 255, 0.2); border-color: #00f3ff; box-shadow: 0 0 30px #00f3ff;
+}
+.signal-cell[data-color="pink"].active {
+    background: rgba(255, 0, 255, 0.2); border-color: #ff00ff; box-shadow: 0 0 30px #ff00ff;
+}
+.signal-cell[data-color="green"].active {
+    background: rgba(10, 255, 0, 0.2); border-color: #0aff00; box-shadow: 0 0 30px #0aff00;
+}
+.signal-cell[data-color="red"].active { /* Dùng khi sai */
+    background: rgba(255, 0, 0, 0.2); border-color: #ff0000; box-shadow: 0 0 30px #ff0000;
+}
+
+/* Scanlines nền */
+body::before {
+    content: "";
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.3;
+}

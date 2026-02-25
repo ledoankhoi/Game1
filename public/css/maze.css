@@ -1,51 +1,106 @@
-/* Hiệu ứng kính mờ đặc thù cho game */
-/* Đã chuyển .glass-panel gốc sang main.css, chỉ override nếu cần thiết */
-.glass-panel {
-    /* Override màu nền riêng cho Maze nếu muốn nó hơi nâu đỏ */
-    background: rgba(34, 22, 16, 0.7); 
-    /* Chỉ ghi đè màu nền, giữ nguyên border/shadow/blur từ main.css */
-    background: rgba(34, 22, 16, 0.7) !important; 
+/* --- SYSTEM STATUS PANEL (Bên phải) --- */
+#system-status {
+    background: rgba(16, 22, 34, 0.8); /* Nền tối bán trong suốt */
+    border: 1px solid #334155;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px); /* Hiệu ứng kính mờ */
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Hiệu ứng rung màn hình khi va chạm tường */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    50% { transform: translateX(8px); }
-    75% { transform: translateX(-4px); }
+.status-header {
+    background: linear-gradient(90deg, rgba(249, 115, 22, 0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(249, 115, 22, 0.3);
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #f97316; /* Màu cam chủ đạo */
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.shake-effect {
-    /* Sử dụng animation shake đã định nghĩa trong main.css hoặc speed.css nếu đã gộp */
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+.status-content {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
 }
 
-/* Hiệu ứng Grid nền cho khu vực làm việc */
-#main-maze-grid {
-    background-image: 
-        radial-gradient(rgba(236, 91, 19, 0.1) 1px, transparent 1px);
-    background-size: 25px 25px;
+/* Style cho danh sách Level */
+.level-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-/* Cell mượt mà */
-.maze-cell {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.level-item.completed {
+    border-color: rgba(37, 244, 106, 0.3); /* Màu xanh lá */
+    background: linear-gradient(90deg, rgba(37, 244, 106, 0.05) 0%, transparent 100%);
 }
 
-/* Icon Neon */
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.level-item.current {
+    border-color: rgba(249, 115, 22, 0.5); /* Màu cam */
+    background: linear-gradient(90deg, rgba(249, 115, 22, 0.1) 0%, transparent 100%);
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.1);
+    animation: pulseBorder 2s infinite;
 }
 
-/* Custom Scrollbar cho Sidebar (nếu grid to hơn màn hình) */
-::-webkit-scrollbar {
-    width: 4px;
+.level-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
 }
-::-webkit-scrollbar-track {
-    background: transparent;
+
+.level-item.completed .level-name { color: #fff; }
+.level-item.current .level-name { color: #f97316; }
+
+.level-status {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
 }
-::-webkit-scrollbar-thumb {
-    background: rgba(236, 91, 19, 0.3);
-    border-radius: 10px;
+
+.status-done { color: #25f46a; background: rgba(37, 244, 106, 0.1); }
+.status-active { color: #f97316; background: rgba(249, 115, 22, 0.1); }
+
+/* --- NÚT START (Làm đẹp lại) --- */
+#btn-start {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    border: 1px solid #fb923c;
+    box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
+    font-family: 'Lexend', sans-serif;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
 }
-/* Scrollbar đã được xử lý trong main.css. Nếu muốn màu riêng, hãy dùng biến CSS --scrollbar-color */
+
+#btn-start:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(234, 88, 12, 0.6);
+}
+
+#btn-start:disabled {
+    background: #334155;
+    border-color: #475569;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+@keyframes pulseBorder {
+    0% { border-color: rgba(249, 115, 22, 0.3); }
+    50% { border-color: rgba(249, 115, 22, 0.8); }
+    100% { border-color: rgba(249, 115, 22, 0.3); }
+}
