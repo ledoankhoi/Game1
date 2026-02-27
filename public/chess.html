@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Rattan March - Minimalist Mathematical</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/chess.css">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        display: ["Space Grotesk", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col overflow-x-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+    <div class="flex items-center gap-4 text-slate-900 dark:text-slate-100">
+        <div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+            <span class="material-symbols-outlined text-xl">grid_4x4</span>
+        </div>
+        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Rattan March</h2>
+    </div>
+    <div class="flex flex-1 justify-end gap-8 items-center">
+        <div class="flex items-center gap-9 hidden md:flex">
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Lobby</a>
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Tournaments</a>
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Profile</a>
+            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Settings</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary hover:bg-primary/90 text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors">
+                <span class="truncate">Logout</span>
+            </button>
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 dark:border-slate-700" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCUulgwYsZ42hMx4GH-k6rKpfrI03S0EMDdrlxUSLXhChxlWpX__Vn0Ss27yaG0u4cPqB4zBxJLR2QxW7P0J-8auPMCOM2mjK8oz9nP32xZeT7tyk1kvaOVruHh9kvkySqLViEExhs8Q8ymf5nFoh1X0UcSDzMEfGZQwXrRzLKp9-iRZpV1IT0veOHVNHrOjLpzWiKeARU8OqnjCaot-kTSy3hjMCSp3m1M7ihtrIeg_TxkVmAwUcGOZm4t6BOpB-Gik3zcDVix1qM");'></div>
+        </div>
+    </div>
+</header>
+<div class="flex flex-1 w-full max-w-[1440px] mx-auto p-6 gap-6 flex-col lg:flex-row">
+    <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
+        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="flex gap-4 items-center mb-6">
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-14 border-2 border-primary/20" data-alt="Current player avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCq7xk3X1FCyION6uYshk_-7tjmgf9-xPe2Y5xrRBmTrLHcgFHfzSq2yoEvXTvodSgU9RC8UAEyZXAd3A7e0dmh5LKfH8IOPDd40ntYV2Jvk_hNbVXInKAoepcEbcNSrRvjr7p_MrvZmZZUtRgr47jXwBOD5zl_f8VHpc0eF3TaiiEbnOoWPsfHfyzNvxaMfLjdZbD8scqJUZGjX9-Qx1KfA4TYIJZpNOa3nWNSOUXfFkV5ZEWbHdAFO3etpatLpAF9hkMB6d98d7g");'></div>
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-bold leading-tight">Player One</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Elite Rank • Division 1</p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors text-left">
+                    <span class="material-symbols-outlined">sports_esports</span>
+                    <span class="text-sm">Current Match</span>
+                </button>
+                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
+                    <span class="material-symbols-outlined">history</span>
+                    <span class="text-sm">History</span>
+                </button>
+                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="text-sm">Analysis</span>
+                </button>
+                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
+                    <span class="material-symbols-outlined">chat</span>
+                    <span class="text-sm">Chat</span>
+                </button>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm uppercase tracking-wider text-slate-500">Efficiency</h3>
+                <span class="text-primary font-bold text-lg">94.2%</span>
+            </div>
+            <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-primary w-[94.2%] rounded-full relative">
+                    <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/30 to-transparent"></div>
+                </div>
+            </div>
+            <div class="flex justify-between text-xs text-slate-400">
+                <span>Avg: 88%</span>
+                <span>Peak: 99%</span>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex-1">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-base">Live Leaderboard</h3>
+                <span class="material-symbols-outlined text-slate-400 text-sm">refresh</span>
+            </div>
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between p-2 rounded bg-primary/5 border border-primary/10">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-primary w-4">1</span>
+                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMuJboGglRGb6iA1P7Rsoq9zXJi9WKMNvBa_ZxDpW4Fbu4vHyLKEnp2r1BW_Jhpd_kuO4zl-tOJG_XpY1wyxstDBQbhPsdv7kVwmKk9hM4vn6tZt0LcHuuLXbZ34g0Vgn5l5lm0bAcGy7DFQddg7JsdX2oPwjR1v0r79VmyE8JnvM1wNmsD5bowXrg0LKwu5ZwFVPScYRsLUnUizL-eboP6KlU4yKZDAIoRzmqROpukglhuVMThozKI4YMZf0Fadx5KBhSrJ_tGbA");'></div>
+                        <span class="text-sm font-medium">GrandMasterX</span>
+                    </div>
+                    <span class="text-xs font-bold">2450</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium text-slate-400 w-4">2</span>
+                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDt4lm-FftS3IeFwthQmxDTNdDZbE0OM-JUEisx_HgQa9mhCeXaIrZ2JGntjpd4pQPLBaA63I-amWU3WMsM-ppaZhLDVyTNv04LMz2mVAr_1Cqgr9YIz7Rd9pscH69w5HOYzpnNGRoGK0Cqn3UAsMQS4HPNShWMAy8FAqN62Tg3gcIYISkFMe4w1rOShXwx4ZsEuYLoRhIbAqFJzPOlTpMkHOJ7jy5PoXbXhRC9s0yzJq94KGv3HDQ2BLVg_HwaxLPKnUDycVtgFjM");'></div>
+                        <span class="text-sm font-medium">LogicQueen</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-500">2390</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium text-slate-400 w-4">3</span>
+                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA5bdWpkGMqEYEypWmnRpdZ1EYYzFth8ziX-boFdFi0Rn6jLy9JsfTX5a67ZHDCSgqegYS4_zgCY9nyUqGKdG4cKX_OUF4-jC1rC20fT3Gk0O44-RX0SdzR9PnXdFA3-3_roNZt7is4oYNGAfvxBvhCkeb9Sg_Yj_XbNLJrP5ci3kJb9XzR2SkwnSYl8FXvpfAvYPM_c2EtYJ_CbR10bvXf_-eMiQYC0aTHDPiCmSmKQ8OYpD2FJFESDLpPlVrWPegPOU0-sSFOk-o");'></div>
+                        <span class="text-sm font-medium">CalcBot_9000</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-500">2315</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <main class="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 relative">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight">Match #8392</h2>
+                <p class="text-slate-500 text-sm mt-1">Variant: Minimalist Mathematical</p>
+                <p class="text-slate-500 text-sm mt-1">Target Sum: <span id="target-display" class="font-bold text-emerald-500">...</span></p>
+            </div>
+            <div class="flex gap-4">
+                <div class="flex flex-col items-end">
+                    <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Time</span>
+                    <span id="game-timer" class="text-xl font-mono font-bold text-slate-900 dark:text-slate-100">00:00</span>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Turn</span>
+                    <span class="text-xl font-mono font-bold text-primary">Player One</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 flex items-center justify-center py-4 overflow-auto relative">
+            <div id="input-overlay" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-white/60 dark:bg-black/60 rounded-xl backdrop-blur-sm">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-4">
+                    <h3 class="text-slate-700 dark:text-slate-300 font-bold tracking-widest uppercase text-sm">Nhập giá trị ô</h3>
+                    <input type="number" id="cell-input" class="w-32 text-center bg-slate-50 dark:bg-slate-800 border-2 border-primary rounded-lg text-3xl font-black py-2 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-primary/30" autocomplete="off">
+                    <button id="btn-submit-val" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2 rounded-lg transition-colors mt-2">
+                        CONFIRM (Enter)
+                    </button>
+                </div>
+            </div>
+            <div class="relative bg-white dark:bg-slate-900 p-4 rounded shadow-2xl border border-slate-100 dark:border-slate-800">
+                <div id="top-sums" class="grid grid-cols-8 gap-0 mb-2 ml-12 w-[512px]">
+                    </div>
+                <div class="flex">
+                    <div id="left-sums" class="grid grid-rows-8 gap-0 mr-2 h-[512px] flex flex-col justify-around">
+                        </div>
+                    <div id="chessboard" class="grid grid-cols-8 grid-rows-8 w-[512px] h-[512px] border-2 border-slate-800 bg-white">
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-between items-center mt-auto">
+            <div class="flex gap-2 text-slate-500 text-sm">
+                <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Press <kbd class="font-mono font-bold text-slate-700 dark:text-slate-300">Enter</kbd> to confirm</span>
+                <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Press <kbd class="font-mono font-bold text-slate-700 dark:text-slate-300">Esc</kbd> to undo</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="undoMove()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold transition-colors shadow-sm">
+                    Hint (3)
+                </button>
+                <button onclick="resetGame()" class="flex items-center gap-2 px-6 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-colors shadow-sm">
+                    Confirm Move
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="modal-victory" class="fixed inset-0 z-[100] hidden bg-black/90 flex items-center justify-center backdrop-blur-sm">
+    <div class="text-center flex flex-col items-center">
+        <span class="material-symbols-outlined text-8xl text-emerald-500 mb-4">emoji_events</span>
+        <h2 class="text-5xl font-black text-white mb-2 uppercase tracking-widest">MISSION CLEARED</h2>
+        <p class="text-slate-400 text-lg mb-8">Bạn đã giải mã thành công Ma phương!</p>
+        <button onclick="location.reload()" class="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-10 rounded-xl transition-all shadow-[0_0_20px_rgba(17,82,212,0.5)]">
+            CHƠI VÁN MỚI
+        </button>
+    </div>
+</div>
+
+<script src="js/games/chess.js"></script>
+</body>
+</html>
