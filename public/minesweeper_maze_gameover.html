@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BOOM! | Minesweeper Maze</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "bg-dark": "#1a120e", 
+                        "surface": "#251b15",
+                        "danger": "#ef4444",
+                        "primary": "#ec5b13"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.4;
+        }
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 40;
+        }
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7), 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-white font-display min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    
+    <div class="absolute inset-0 bg-red-900/10 animate-pulse z-0"></div>
+
+    <div class="relative z-10 w-full max-w-md bg-surface border border-primary/30 rounded-2xl p-8 shadow-[0_0_50px_rgba(236,91,19,0.2)] text-center">
+        
+        <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+            <span class="material-symbols-outlined text-5xl text-red-500">explosion</span>
+        </div>
+
+        <h1 class="text-4xl font-black text-red-500 mb-2 uppercase tracking-widest neon-text-red">
+            BOOM!
+        </h1>
+        <p class="text-gray-400 text-sm mb-8 tracking-wider uppercase font-bold">
+            <span class="text-red-400">[THẤT BẠI]</span> ĐÃ GIẪM PHẢI MÌN
+        </p>
+
+        <div class="bg-black/30 rounded-xl p-4 mb-8 border border-white/5 grid grid-cols-2 gap-4">
+            <div class="text-left">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Cấp độ</p>
+                <p class="text-xl font-bold text-white" id="level-display">Level 1</p>
+            </div>
+            <div class="text-left">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Trạng thái</p>
+                <p class="text-xl font-bold text-red-500">ĐÃ KẾT THÚC</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <button onclick="retryGame()" class="w-full bg-primary hover:bg-primary/80 text-white font-black text-lg py-4 rounded-xl shadow-lg shadow-primary/30 transition-all transform active:scale-95 uppercase tracking-widest flex items-center justify-center gap-2 group">
+                <span class="material-symbols-outlined group-hover:rotate-180 transition-transform">refresh</span>
+                Thử lại ngay
+            </button>
+            
+            <button onclick="window.location.href='index.html'" class="w-full bg-transparent hover:bg-white/5 border border-white/10 text-gray-400 hover:text-white font-bold py-3 rounded-xl transition-all uppercase tracking-wider text-sm">
+                Về trang chủ
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentLv = parseInt(localStorage.getItem('minesweeper_maze_level') || 0) + 1;
+            document.getElementById('level-display').innerText = `Level ${currentLv}`;
+        });
+
+        function retryGame() {
+            localStorage.setItem('minesweeper_maze_level', 0);
+            window.location.href = 'minesweeper_maze.html';
+        }
+    </script>
+</body>
+</html>

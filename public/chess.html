@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Rattan March - Minimalist Mathematical</title>
+    <title>Rattan March | MathQuest</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/chess.css">
     <script>
@@ -14,191 +14,171 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#1152d4",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
+                        primary: "#3b82f6", // Đổi màu chủ đạo sang Xanh dương cho hợp Trắng/Đen
+                        "background-dark": "#0f172a",
+                        "surface": "#1e293b"
                     },
                     fontFamily: {
-                        display: ["Space Grotesk", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.25rem",
-                        lg: "0.5rem",
-                        xl: "0.75rem",
-                        full: "9999px",
+                        display: ["Lexend", "sans-serif"],
                     },
                 },
             },
         }
     </script>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col overflow-x-hidden">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
-    <div class="flex items-center gap-4 text-slate-900 dark:text-slate-100">
-        <div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
-            <span class="material-symbols-outlined text-xl">grid_4x4</span>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden">
+
+<header class="sticky top-0 z-50 w-full bg-surface border-b border-slate-700 px-6 py-3 flex items-center justify-between gap-4 shadow-sm h-20">
+    <div class="flex items-center gap-3 cursor-pointer group shrink-0" onclick="window.location.href='index.html'">
+        <div class="bg-primary p-2.5 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-white text-3xl">grid_4x4</span>
         </div>
-        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Rattan March</h2>
+        <h2 class="text-2xl font-black tracking-tighter text-white uppercase">
+            Rattan<span class="text-primary">March</span>
+        </h2>
     </div>
-    <div class="flex flex-1 justify-end gap-8 items-center">
-        <div class="flex items-center gap-9 hidden md:flex">
-            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Lobby</a>
-            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Tournaments</a>
-            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Profile</a>
-            <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Settings</a>
+
+    <div class="flex items-center gap-6 shrink-0">
+        <div class="bg-slate-900 border border-slate-700 pl-2 pr-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm cursor-pointer hover:border-yellow-400 transition-colors">
+            <div class="bg-yellow-900/30 p-1 rounded-full">
+                <span class="material-symbols-outlined text-[#facc15] text-xl block">monetization_on</span>
+            </div>
+            <span class="text-sm font-black text-white tracking-wide"><span id="user-coin">0</span></span>
         </div>
-        <div class="flex items-center gap-4">
-            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary hover:bg-primary/90 text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors">
-                <span class="truncate">Logout</span>
-            </button>
-            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 dark:border-slate-700" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCUulgwYsZ42hMx4GH-k6rKpfrI03S0EMDdrlxUSLXhChxlWpX__Vn0Ss27yaG0u4cPqB4zBxJLR2QxW7P0J-8auPMCOM2mjK8oz9nP32xZeT7tyk1kvaOVruHh9kvkySqLViEExhs8Q8ymf5nFoh1X0UcSDzMEfGZQwXrRzLKp9-iRZpV1IT0veOHVNHrOjLpzWiKeARU8OqnjCaot-kTSy3hjMCSp3m1M7ihtrIeg_TxkVmAwUcGOZm4t6BOpB-Gik3zcDVix1qM");'></div>
+        
+        <div class="relative cursor-pointer group" onclick="window.location.href='userProfile.html'">
+            <svg class="w-14 h-14 -rotate-90 transform" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="6" fill="transparent" class="text-slate-700" />
+                <circle id="level-progress-circle" cx="50" cy="50" r="46" stroke="currentColor" stroke-width="6" fill="transparent" class="text-primary transition-all duration-1000 ease-out" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" />
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <img id="user-avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-full border-2 border-slate-800 shadow-sm">
+            </div>
+            <div class="absolute -bottom-1 -right-1 bg-primary text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-slate-800 shadow-md z-10">
+                <span id="user-level-badge">1</span>
+            </div>
         </div>
     </div>
 </header>
+
 <div class="flex flex-1 w-full max-w-[1440px] mx-auto p-6 gap-6 flex-col lg:flex-row">
-    <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
-        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div class="flex gap-4 items-center mb-6">
-                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-14 border-2 border-primary/20" data-alt="Current player avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCq7xk3X1FCyION6uYshk_-7tjmgf9-xPe2Y5xrRBmTrLHcgFHfzSq2yoEvXTvodSgU9RC8UAEyZXAd3A7e0dmh5LKfH8IOPDd40ntYV2Jvk_hNbVXInKAoepcEbcNSrRvjr7p_MrvZmZZUtRgr47jXwBOD5zl_f8VHpc0eF3TaiiEbnOoWPsfHfyzNvxaMfLjdZbD8scqJUZGjX9-Qx1KfA4TYIJZpNOa3nWNSOUXfFkV5ZEWbHdAFO3etpatLpAF9hkMB6d98d7g");'></div>
-                <div class="flex flex-col">
-                    <h1 class="text-lg font-bold leading-tight">Player One</h1>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Elite Rank • Division 1</p>
-                </div>
+    
+    <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0 h-[calc(100vh-120px)]">
+        <div class="bg-surface rounded-xl p-5 border border-slate-700 shadow-sm flex-1 flex flex-col h-full overflow-hidden">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-sm uppercase tracking-wider text-gray-400">Lịch sử nước đi</h3>
+                <span class="text-primary font-bold text-sm bg-primary/10 px-2 py-1 rounded" id="progress-text">0/64</span>
             </div>
-            <div class="flex flex-col gap-2">
-                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors text-left">
-                    <span class="material-symbols-outlined">sports_esports</span>
-                    <span class="text-sm">Current Match</span>
-                </button>
-                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
-                    <span class="material-symbols-outlined">history</span>
-                    <span class="text-sm">History</span>
-                </button>
-                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
-                    <span class="material-symbols-outlined">analytics</span>
-                    <span class="text-sm">Analysis</span>
-                </button>
-                <button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors text-left">
-                    <span class="material-symbols-outlined">chat</span>
-                    <span class="text-sm">Chat</span>
-                </button>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm uppercase tracking-wider text-slate-500">Efficiency</h3>
-                <span class="text-primary font-bold text-lg">94.2%</span>
-            </div>
-            <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div class="h-full bg-primary w-[94.2%] rounded-full relative">
-                    <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white/30 to-transparent"></div>
-                </div>
-            </div>
-            <div class="flex justify-between text-xs text-slate-400">
-                <span>Avg: 88%</span>
-                <span>Peak: 99%</span>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex-1">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-base">Live Leaderboard</h3>
-                <span class="material-symbols-outlined text-slate-400 text-sm">refresh</span>
-            </div>
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between p-2 rounded bg-primary/5 border border-primary/10">
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-primary w-4">1</span>
-                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMuJboGglRGb6iA1P7Rsoq9zXJi9WKMNvBa_ZxDpW4Fbu4vHyLKEnp2r1BW_Jhpd_kuO4zl-tOJG_XpY1wyxstDBQbhPsdv7kVwmKk9hM4vn6tZt0LcHuuLXbZ34g0Vgn5l5lm0bAcGy7DFQddg7JsdX2oPwjR1v0r79VmyE8JnvM1wNmsD5bowXrg0LKwu5ZwFVPScYRsLUnUizL-eboP6KlU4yKZDAIoRzmqROpukglhuVMThozKI4YMZf0Fadx5KBhSrJ_tGbA");'></div>
-                        <span class="text-sm font-medium">GrandMasterX</span>
-                    </div>
-                    <span class="text-xs font-bold">2450</span>
-                </div>
-                <div class="flex items-center justify-between p-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="font-medium text-slate-400 w-4">2</span>
-                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDt4lm-FftS3IeFwthQmxDTNdDZbE0OM-JUEisx_HgQa9mhCeXaIrZ2JGntjpd4pQPLBaA63I-amWU3WMsM-ppaZhLDVyTNv04LMz2mVAr_1Cqgr9YIz7Rd9pscH69w5HOYzpnNGRoGK0Cqn3UAsMQS4HPNShWMAy8FAqN62Tg3gcIYISkFMe4w1rOShXwx4ZsEuYLoRhIbAqFJzPOlTpMkHOJ7jy5PoXbXhRC9s0yzJq94KGv3HDQ2BLVg_HwaxLPKnUDycVtgFjM");'></div>
-                        <span class="text-sm font-medium">LogicQueen</span>
-                    </div>
-                    <span class="text-xs font-bold text-slate-500">2390</span>
-                </div>
-                <div class="flex items-center justify-between p-2 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="font-medium text-slate-400 w-4">3</span>
-                        <div class="size-6 bg-slate-200 rounded-full bg-cover" data-alt="Avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA5bdWpkGMqEYEypWmnRpdZ1EYYzFth8ziX-boFdFi0Rn6jLy9JsfTX5a67ZHDCSgqegYS4_zgCY9nyUqGKdG4cKX_OUF4-jC1rC20fT3Gk0O44-RX0SdzR9PnXdFA3-3_roNZt7is4oYNGAfvxBvhCkeb9Sg_Yj_XbNLJrP5ci3kJb9XzR2SkwnSYl8FXvpfAvYPM_c2EtYJ_CbR10bvXf_-eMiQYC0aTHDPiCmSmKQ8OYpD2FJFESDLpPlVrWPegPOU0-sSFOk-o");'></div>
-                        <span class="text-sm font-medium">CalcBot_9000</span>
-                    </div>
-                    <span class="text-xs font-bold text-slate-500">2315</span>
-                </div>
+            <div id="move-log" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-2">
+                <div class="text-center text-sm text-gray-500 mt-4 italic">Hệ thống đang thiết lập ô xuất phát...</div>
             </div>
         </div>
     </aside>
-    <main class="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 relative">
-        <div class="flex justify-between items-center mb-6">
+
+    <main class="flex-1 flex flex-col bg-surface rounded-xl border border-slate-700 shadow-sm p-6 relative">
+        <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-xl border border-slate-700">
             <div>
-                <h2 class="text-2xl font-bold tracking-tight">Match #8392</h2>
-                <p class="text-slate-500 text-sm mt-1">Variant: Minimalist Mathematical</p>
-                <p class="text-slate-500 text-sm mt-1">Target Sum: <span id="target-display" class="font-bold text-emerald-500">...</span></p>
+                <h2 class="text-2xl font-black text-white uppercase tracking-widest">Logic Puzzle</h2>
+                <p class="text-gray-400 text-sm mt-1">Target Sum (Mục tiêu tổng): <span id="target-display" class="font-bold text-primary text-lg">---</span></p>
             </div>
-            <div class="flex gap-4">
-                <div class="flex flex-col items-end">
-                    <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Time</span>
-                    <span id="game-timer" class="text-xl font-mono font-bold text-slate-900 dark:text-slate-100">00:00</span>
-                </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-xs uppercase tracking-wider text-slate-400 font-bold">Turn</span>
-                    <span class="text-xl font-mono font-bold text-primary">Player One</span>
-                </div>
+            <div class="flex flex-col items-end">
+                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Thời gian</span>
+                <span id="game-timer" class="text-3xl font-mono font-black text-white tracking-widest">00:00</span>
             </div>
         </div>
+
         <div class="flex-1 flex items-center justify-center py-4 overflow-auto relative">
-            <div id="input-overlay" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-white/60 dark:bg-black/60 rounded-xl backdrop-blur-sm">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-4">
-                    <h3 class="text-slate-700 dark:text-slate-300 font-bold tracking-widest uppercase text-sm">Nhập giá trị ô</h3>
-                    <input type="number" id="cell-input" class="w-32 text-center bg-slate-50 dark:bg-slate-800 border-2 border-primary rounded-lg text-3xl font-black py-2 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-primary/30" autocomplete="off">
-                    <button id="btn-submit-val" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2 rounded-lg transition-colors mt-2">
-                        CONFIRM (Enter)
+            
+            <div id="input-overlay" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 rounded-xl backdrop-blur-sm">
+                <div class="bg-surface border border-slate-600 p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col items-center gap-4">
+                    <h3 class="text-gray-300 font-bold tracking-widest uppercase text-xs mb-2">Nhập giá trị tại ô hiện tại</h3>
+                    
+                    <input type="text" inputmode="numeric" id="cell-input" 
+                           class="w-40 text-center bg-[#0f1a14] border-2 border-slate-600 focus:border-primary rounded-xl text-4xl font-black py-4 text-primary outline-none focus:ring-4 focus:ring-primary/20 transition-all" 
+                           autocomplete="off" 
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           onkeydown="if(event.key === 'Enter' || event.keyCode === 13) { event.preventDefault(); window.submitMove(); }">
+                    
+                    <button id="btn-submit-val" onclick="window.submitMove()" class="w-full bg-primary hover:bg-blue-500 text-white font-black py-3 rounded-xl transition-all mt-4 uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95">
+                        Xác nhận (Enter)
                     </button>
+                    <p class="text-[10px] text-gray-500 mt-2 uppercase">Hoặc nhấn phím Enter trên bàn phím</p>
                 </div>
             </div>
-            <div class="relative bg-white dark:bg-slate-900 p-4 rounded shadow-2xl border border-slate-100 dark:border-slate-800">
-                <div id="top-sums" class="grid grid-cols-8 gap-0 mb-2 ml-12 w-[512px]">
-                    </div>
+
+            <div class="relative bg-slate-900 p-6 rounded-2xl shadow-2xl border border-slate-700">
+                <div id="top-sums" class="grid grid-cols-8 gap-0 mb-3 ml-12 w-[480px]"></div>
                 <div class="flex">
-                    <div id="left-sums" class="grid grid-rows-8 gap-0 mr-2 h-[512px] flex flex-col justify-around">
-                        </div>
-                    <div id="chessboard" class="grid grid-cols-8 grid-rows-8 w-[512px] h-[512px] border-2 border-slate-800 bg-white">
+                    <div id="left-sums" class="grid grid-rows-8 gap-0 mr-3 h-[480px] flex flex-col justify-around"></div>
+                    
+                    <div id="chessboard" class="grid grid-cols-8 grid-rows-8 w-[480px] h-[480px] border-4 border-slate-800 rounded-sm overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                         </div>
                 </div>
             </div>
         </div>
-        <div class="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-between items-center mt-auto">
-            <div class="flex gap-2 text-slate-500 text-sm">
-                <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Press <kbd class="font-mono font-bold text-slate-700 dark:text-slate-300">Enter</kbd> to confirm</span>
-                <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded">Press <kbd class="font-mono font-bold text-slate-700 dark:text-slate-300">Esc</kbd> to undo</span>
+
+        <div class="border-t border-slate-700 pt-6 mt-auto flex justify-between items-center">
+            <div class="flex gap-4 text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+                <span class="px-3 py-1.5 bg-slate-900 rounded border border-slate-700">Click ô sáng để đi Mã</span>
+                <span class="px-3 py-1.5 bg-slate-900 rounded border border-slate-700"><kbd class="font-mono text-primary font-black">ESC</kbd> = Hoàn tác</span>
             </div>
             <div class="flex gap-3">
-                <button onclick="undoMove()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold transition-colors shadow-sm">
-                    Hint (3)
+                <button onclick="window.undoMove()" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white font-bold transition-all uppercase text-sm tracking-wider">
+                    <span class="material-symbols-outlined text-sm">undo</span> Hoàn tác
                 </button>
-                <button onclick="resetGame()" class="flex items-center gap-2 px-6 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold transition-colors shadow-sm">
-                    Confirm Move
+                <button onclick="window.surrenderGame()" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600/20 border border-red-500/50 hover:bg-red-600 text-red-500 hover:text-white font-bold transition-all uppercase text-sm tracking-wider">
+                    <span class="material-symbols-outlined text-sm">flag</span> Chịu Thua
                 </button>
             </div>
         </div>
     </main>
 </div>
 
-<div id="modal-victory" class="fixed inset-0 z-[100] hidden bg-black/90 flex items-center justify-center backdrop-blur-sm">
-    <div class="text-center flex flex-col items-center">
-        <span class="material-symbols-outlined text-8xl text-emerald-500 mb-4">emoji_events</span>
-        <h2 class="text-5xl font-black text-white mb-2 uppercase tracking-widest">MISSION CLEARED</h2>
-        <p class="text-slate-400 text-lg mb-8">Bạn đã giải mã thành công Ma phương!</p>
-        <button onclick="location.reload()" class="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-10 rounded-xl transition-all shadow-[0_0_20px_rgba(17,82,212,0.5)]">
-            CHƠI VÁN MỚI
-        </button>
-    </div>
-</div>
-
+<script src="js/auth.js"></script> 
 <script src="js/games/chess.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof Auth !== 'undefined' && Auth.user) {
+            const coinEl = document.getElementById('user-coin');
+            const lvlEl = document.getElementById('user-level-badge');
+            if(coinEl) coinEl.innerText = (Auth.user.coins || 0).toLocaleString();
+            if(lvlEl) lvlEl.innerText = Auth.user.level || 1;
+        }
+    });
+</script>
+<script src="js/auth.js"></script> 
+<script src="js/userProfile.js"></script> <script src="js/games/chess.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Đồng bộ dữ liệu người dùng thật lên Header
+        if (typeof Auth !== 'undefined' && Auth.user) {
+            // 1. Cập nhật Vàng (Coins)
+            const coinEl = document.getElementById('user-coin');
+            if (coinEl) {
+                coinEl.innerText = (Auth.user.coins || 0).toLocaleString();
+            }
+
+            // 2. Cập nhật Avatar và Vòng Level (Dùng chung hàm với trang chủ)
+            if (typeof UserProfile !== 'undefined' && typeof UserProfile.updateUI === 'function') {
+                UserProfile.updateUI(Auth.user.exp || 0, Auth.user.avatarId || 'avatar_1');
+            } else {
+                // Fallback dự phòng nếu UserProfile chưa tải kịp
+                const lvlEl = document.getElementById('user-level-badge');
+                const avatarImg = document.getElementById('user-avatar-img');
+                
+                if (lvlEl) lvlEl.innerText = Auth.user.level || 1;
+                if (avatarImg) {
+                    // Nếu hệ thống lưu avatar dạng URL
+                    if (Auth.user.avatarUrl) avatarImg.src = Auth.user.avatarUrl;
+                    // Nếu hệ thống lưu avatar dạng ID (vd: avatar_2)
+                    else if (Auth.user.avatarId) avatarImg.src = `assets/avatars/${Auth.user.avatarId}.png`; 
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
 </body>
 </html>

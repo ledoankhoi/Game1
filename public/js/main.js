@@ -28,6 +28,12 @@ const MainApp = {
         else if (gameType === 'escape') {
             window.location.href = 'escape.html';
         }
+        else if (gameType === 'chess') {
+            window.location.href = 'chess.html';
+        }
+        else if (gameType === 'puzzle') {
+            window.location.href = 'puzzle.html'
+        }
 
         // ---------------------
     },
