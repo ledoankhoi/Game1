@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MathQuest - Game Library</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/main.css"> <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#25f46a",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Lexend', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .card-hover:hover { transform: translateY(-4px); transition: transform 0.2s ease-in-out; cursor: pointer; }
+        .hidden { display: none !important; }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .active-category {
+            background-color: #25f46a !important; 
+            color: white !important;
+        }
+        .active-category .material-symbols-outlined {
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111813] dark:text-white min-h-screen">
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+    <script src="/js/soundManager.js"></script>
+    <script src="/js/auth.js"></script> 
+    <script src="/js/userProfile.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/searchgame.js"></script>
+
+    <script>
+        window.toggleSound = function(btn) {
+            if (typeof SoundManager !== 'undefined') {
+                const icon = SoundManager.toggleMute();
+                btn.innerText = icon;
+            }
+        }
+
+        window.toggleAuthMode = function() {
+            const isLogin = !document.getElementById('btn-login').classList.contains('hidden');
+            document.getElementById('auth-feedback').innerText = "";
+            if (isLogin) {
+                document.getElementById('auth-title').innerText = "Create Account";
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('btn-register').classList.remove('hidden');
+                document.getElementById('group-username').classList.remove('hidden');
+                document.getElementById('text-switch').innerText = "Already have an account?";
+            } else {
+                document.getElementById('auth-title').innerText = "Login";
+                document.getElementById('btn-login').classList.remove('hidden');
+                document.getElementById('btn-register').classList.add('hidden');
+                document.getElementById('group-username').classList.add('hidden');
+                document.getElementById('text-switch').innerText = "Don't have an account?";
+            }
+        }
+
+        window.filterGames = function(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active-category', 'bg-primary', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-600', 'dark:bg-[#1a2e20]', 'dark:text-gray-300');
+                const check = btn.querySelector('.material-symbols-outlined:last-child');
+                if(check && check.innerText === 'check_circle') check.remove();
+            });
+
+            const activeBtn = document.getElementById('cat-' + category);
+            if (activeBtn) {
+                activeBtn.classList.add('active-category', 'bg-primary', 'text-white');
+                activeBtn.classList.remove('bg-white', 'dark:bg-[#1a2e20]');
+                activeBtn.insertAdjacentHTML('beforeend', '<span class="material-symbols-outlined text-sm">check_circle</span>');
+            }
+
+            document.querySelectorAll('.game-card').forEach(game => {
+                if (category === 'all' || game.classList.contains('type-' + category)) {
+                    game.classList.remove('hidden');
+                } else {
+                    game.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

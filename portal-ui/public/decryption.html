@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>DECRYPTION | Elite League</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/decryption.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "bg-dark": "#050505",
+                        "surface": "#121212",
+                        "neon-blue": "#00f3ff",
+                        "neon-pink": "#ff00ff",
+                        "neon-green": "#0aff00"
+                    },
+                    fontFamily: { "display": ["Lexend", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-bg-dark text-white font-display min-h-screen flex flex-col items-center justify-center overflow-hidden select-none">
+
+    <header class="fixed top-0 w-full h-16 border-b border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-between px-6 z-50">
+        <div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition" onclick="window.location.href='/'">
+            <div class="w-8 h-8 rounded bg-neon-blue/20 flex items-center justify-center border border-neon-blue/50">
+                <span class="material-symbols-outlined text-neon-blue text-sm">arrow_back</span>
+            </div>
+            <div>
+                <h1 class="text-xs font-bold tracking-[0.2em] text-gray-400">ELITE LEAGUE</h1>
+                <p class="text-sm font-black text-white tracking-widest uppercase glow-text">SIGNAL DECRYPTION</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</p>
+                <p id="score-display" class="text-2xl font-black text-neon-green font-mono leading-none">0</p>
+            </div>
+            <div class="h-8 w-px bg-white/10"></div>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Level</p>
+                <p id="level-display" class="text-2xl font-black text-neon-blue font-mono leading-none">1</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex flex-col items-center gap-8">
+        
+        <div id="status-bar" class="h-2 w-64 bg-surface rounded-full overflow-hidden border border-white/10">
+            <div id="status-fill" class="h-full w-0 bg-neon-blue shadow-[0_0_10px_#00f3ff] transition-all duration-300"></div>
+        </div>
+        <p id="game-msg" class="text-neon-blue text-sm font-bold tracking-[0.2em] uppercase animate-pulse h-6">WAITING FOR SIGNAL...</p>
+
+        <div class="relative p-6 bg-surface/50 border border-white/10 rounded-3xl backdrop-blur-sm shadow-2xl">
+            <div id="game-grid" class="grid grid-cols-3 gap-4">
+                </div>
+            
+            <div id="overlay-start" class="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center z-20">
+                <button id="btn-start" class="group relative px-8 py-4 bg-transparent overflow-hidden rounded-xl">
+                    <div class="absolute inset-0 w-full h-full bg-neon-blue/10 group-hover:bg-neon-blue/20 transition-all border border-neon-blue/50 rounded-xl"></div>
+                    <div class="absolute inset-0 w-0 bg-neon-blue transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
+                    <span class="relative text-neon-blue font-black tracking-[0.2em] text-xl group-hover:text-white transition-colors">INITIATE_HACK</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-neon-blue/5 rounded-full blur-[100px] animate-pulse"></div>
+    </div>
+
+    <script src="js/soundManager.js"></script>
+    <script src="./js/games/decryption.js"></script>
+</body>
+</html>

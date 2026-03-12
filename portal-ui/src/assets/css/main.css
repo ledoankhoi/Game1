@@ -1,0 +1,157 @@
+/* css/main.css */
+
+/* 1. IMPORT FONTS (Dùng cho cả Game và Lobby) */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* 2. CẤU HÌNH BODY */
+/* Lưu ý: Không đặt background-image ở đây để tránh đè lên giao diện Lobby mới */
+body {
+    margin: 0;
+    padding: 0;
+    /* Font mặc định cho các phần chưa có Tailwind */
+    font-family: 'Roboto', sans-serif; 
+    
+    /* --- CSS VARIABLES (THEME SYSTEM) --- */
+    :root {
+        --primary-color: #25f46a;       /* Xanh lá Neon */
+        --secondary-color: #00ffff;     /* Xanh dương Neon */
+        --glass-bg: rgba(15, 23, 42, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --blur-amount: 12px;
+        --font-game: 'Orbitron', sans-serif;
+    }
+}
+
+/* 3. LỚP TIỆN ÍCH QUAN TRỌNG */
+.hidden {
+    display: none !important;
+}
+
+/* Class dùng chung cho hiệu ứng kính (Xóa ở các file con) */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* 4. CẤU HÌNH MÀN HÌNH GAME (Overlay toàn màn hình) */
+/* Class này giúp các game cũ hiển thị đè lên Lobby khi được kích hoạt */
+.game-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999; /* Luôn nổi trên cùng */
+    background-color: #0a0f0b; /* Nền tối mặc định cho game */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài (như BXH) */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 5. STYLE CHO CÁC THÀNH PHẦN TRONG GAME (Legacy) */
+
+/* Font tiêu đề game */
+.game-header h2, 
+.game-area h2 {
+    font-family: var(--font-game);
+    letter-spacing: 2px;
+}
+
+/* Ô nhập liệu trong game (Sequence, Monster) */
+.game-area input[type="tel"], 
+.game-area input[type="text"],
+.game-area input[type="password"],
+.game-area input[type="email"] {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #333;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+.game-area input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(37, 244, 106, 0.3); /* Có thể dùng biến màu RGB nếu tách riêng */
+}
+
+/* Nút bấm trong game */
+.game-area button {
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    transition: transform 0.1s;
+}
+.game-area button:active {
+    transform: scale(0.95);
+}
+
+/* 6. STYLE CHO SHOP & SKINS (Đổi màu nền game) */
+
+/* Mặc định (Vũ trụ tối) */
+body.theme-default .game-area {
+    background-color: #0a0f0b;
+    --primary-color: #25f46a;
+}
+
+/* Skin Rừng Rậm (Khi mua trong Shop) */
+body.theme-forest .game-area {
+    background: linear-gradient(to bottom, #052e16, #022c22);
+    --primary-color: #4ade80; /* Đổi màu chủ đạo sang xanh lá rừng */
+}
+body.theme-forest .star-field {
+    opacity: 0.2; /* Giảm sao đi một chút */
+}
+
+/* Skin Băng Giá (Khi mua trong Shop) */
+body.theme-ice .game-area {
+    background: linear-gradient(to bottom, #082f49, #0c4a6e);
+}
+
+/* 7. BẢNG XẾP HẠNG & TABLE */
+#leaderboard-screen table {
+    width: 100%;
+    border-collapse: collapse;
+}
+#leaderboard-screen th {
+    text-align: left;
+    color: #25f46a;
+    padding: 15px;
+    border-bottom: 2px solid #333;
+}
+#leaderboard-screen td {
+    padding: 15px;
+    border-bottom: 1px solid #222;
+    color: white;
+}
+#leaderboard-screen tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+/* 8. SCROLLBAR ĐẸP */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #000;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #25f46a;
+}
+/* --- NHÂN VẬT GUNDAM --- */
+.shin-character {
+    width: 100px;  /* Tăng lên 100px để Gundam nhìn cho ngầu */
+    height: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    image-rendering: auto;
+    transition: all 0.3s ease;
+    display: block !important; /* Ép buộc hiển thị */
+}
