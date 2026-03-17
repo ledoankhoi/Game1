@@ -7,6 +7,7 @@
     
     <link rel="stylesheet" href="sequence.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
@@ -16,6 +17,7 @@
                 extend: {
                     colors: {
                         "primary": "#258cf4",
+                        "danger": "#ef4444",
                         "background-light": "#f5f7f8",
                         "background-dark": "#101922",
                     },
@@ -24,21 +26,27 @@
                     },
                     backgroundImage: {
                         'grid-pattern': "radial-gradient(circle, #258cf4 1px, transparent 1px)",
+                    },
+                    boxShadow: { 
+                        'neon-red': '0 0 15px rgba(239, 68, 68, 0.4)', 
+                        'neon-intense-red': '0 0 30px rgba(239, 68, 68, 0.6)' 
                     }
                 },
             },
         }
     </script>
     <style>
-        /* CSS dùng để xóa dấu mũi tên tăng giảm của input number */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        
+        /* Cập nhật CSS cho Overlay */
+        .glass-panel-danger { background: rgba(16, 25, 34, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .neon-text-red { text-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
+        .scan-line-red { background: linear-gradient(to bottom, transparent 50%, rgba(239, 68, 68, 0.05) 50%); background-size: 100% 4px; pointer-events: none; }
+        @keyframes blink-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-blink-red { animation: blink-red 2s infinite; }
+        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(3px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen overflow-hidden flex flex-col relative select-none">
@@ -48,40 +56,6 @@
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-primary/10 blur-[120px] rounded-full"></div>
         <div class="absolute inset-0 scan-line z-50 opacity-20"></div>
     </div>
-
-    <nav class="relative z-10 w-full border-b border-primary/20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                
-                <div class="flex items-center gap-3">
-                    <a href="/" class="flex items-center gap-3 group cursor-pointer transition-transform hover:scale-105">
-                        <div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/50 shadow-neon group-hover:bg-primary group-hover:border-primary transition-colors duration-300">
-                            <span class="material-icons text-primary text-sm group-hover:text-white transition-colors">science</span>
-                        </div>
-                        <span class="text-xl font-bold tracking-widest uppercase dark:text-white neon-text group-hover:text-primary transition-colors">Neon Labs</span>
-                    </a>
-                </div>
-
-                <div class="hidden md:flex items-center gap-6 text-xs tracking-widest font-bold text-primary/70">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        SYSTEM ONLINE
-                    </div>
-                    <div class="h-4 w-px bg-primary/20"></div>
-                    <div id="score-display" class="text-primary font-bold text-sm">PTS: 0</div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="flex flex-col items-end">
-                        <span id="level-indicator" class="text-sm font-bold text-primary">Protocol Level: 1</span>
-                    </div>
-                    <div class="w-10 h-10 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center">
-                        <span class="material-icons text-primary text-lg">person</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <main class="relative z-10 flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8 flex flex-col lg:flex-row gap-8">
         
@@ -123,29 +97,113 @@
         </section>
 
         <aside class="w-full lg:w-80 flex flex-col gap-6">
-            <div class="glass-panel rounded-xl border border-primary/20 flex flex-col flex-1 min-h-[400px]">
+            
+            <div class="glass-panel p-6 rounded-xl border border-primary/20 bg-background-dark/50">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] text-primary/70 uppercase tracking-widest font-bold">System Status</span>
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                </div>
+                <div class="flex justify-between items-end border-b border-primary/10 pb-3 mb-3">
+                    <span class="text-xs text-slate-400">Total Score</span>
+                    <span id="score-display" class="text-xl font-black text-primary font-mono">0</span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <span class="text-xs text-slate-400">Protocol Variant</span>
+                    <span id="level-indicator" class="text-sm font-bold text-white uppercase tracking-widest">Level 1</span>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-xl border border-primary/20 flex flex-col flex-1 min-h-[300px]">
                 <div class="p-4 border-b border-primary/10 flex items-center justify-between">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                         <span class="material-icons text-primary text-sm">history_edu</span> Lab Notes
                     </h3>
                     <button id="btn-clear-log" class="text-[10px] text-primary hover:text-white underline decoration-dotted">CLEAR</button>
                 </div>
-                <div id="lab-notes-content" class="p-4 overflow-y-auto space-y-3 flex-1 max-h-[500px] custom-scrollbar">
+                <div id="lab-notes-content" class="p-4 overflow-y-auto space-y-3 flex-1 max-h-[400px] custom-scrollbar">
                 </div>
             </div>
 
             <button id="btn-hint" class="w-full py-3 border border-primary/30 rounded-lg text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 group">
                 <span class="material-icons text-sm">lightbulb</span> 
-                REQUEST HINT (-20 PTS)
+                REQUEST HINT (-50 PTS)
             </button>
         </aside>
     </main>
 
-    <div class="fixed bottom-4 left-4 text-[8px] text-primary/30 font-mono hidden md:block z-0 tracking-widest">
-        LAT: 45.201 // LON: -12.44 // SECURE CONNECTION
+    <div id="seq-gameover-overlay" class="fixed inset-0 z-[99999] hidden items-center justify-center bg-background-dark/95 backdrop-blur-md opacity-0 transition-opacity duration-500 overflow-hidden">
+        
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <div class="absolute inset-0 bg-[radial-gradient(circle,#ef4444_1px,transparent_1px)] bg-[length:24px_24px] opacity-[0.08]"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-danger/10 blur-[120px] rounded-full"></div>
+            <div class="absolute inset-0 scan-line-red z-50 opacity-20"></div>
+        </div>
+
+        <div id="seq-gameover-panel" class="relative z-10 w-full max-w-3xl flex flex-col justify-center items-center transform scale-95 transition-transform duration-500">
+            
+            <div class="relative w-full mb-6">
+                <div class="absolute inset-0 bg-danger/10 rounded-full blur-xl animate-pulse"></div>
+                <div class="relative w-full py-6 glass-panel-danger rounded-xl flex items-center justify-center shadow-neon-red border-t border-b border-danger/50 overflow-hidden">
+                    <div class="absolute inset-x-0 top-1 h-px bg-danger/20"></div>
+                    <div class="absolute inset-x-0 bottom-1 h-px bg-danger/20"></div>
+                    <h1 class="text-3xl md:text-4xl font-black text-white tracking-[0.25em] neon-text-red animate-blink-red leading-none z-10">
+                        CONNECTION SEVERED
+                    </h1>
+                </div>
+            </div>
+
+            <div class="w-full glass-panel-danger p-6 rounded-xl border border-danger/30 relative">
+                <div class="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-danger"></div>
+                <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-danger"></div>
+                
+                <div class="flex items-center justify-between border-b border-danger/20 pb-3 mb-4">
+                    <h2 class="text-sm font-bold text-danger uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-icons text-sm">analytics</span> Mission Report
+                    </h2>
+                    <span id="fail-level-indicator" class="text-xs font-mono text-slate-400">Variant --</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-background-dark/60 p-4 rounded-lg border border-danger/20 flex flex-col items-center justify-center text-center">
+                        <div class="text-[10px] text-danger font-bold uppercase tracking-wider mb-1">Expected Sequence Value</div>
+                        <div class="text-5xl font-mono font-bold text-white tracking-tighter neon-text-red mt-1" id="correct-answer-display">?</div>
+                        <div class="text-[10px] text-slate-500 mt-2">Logic Core Synchronization Failed</div>
+                    </div>
+
+                    <div class="flex flex-col justify-center space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-danger/5 rounded border border-danger/10">
+                            <span class="text-slate-400 text-xs uppercase tracking-wider pl-2">Total Score Earned</span>
+                            <span class="text-danger font-mono font-black text-xl pr-2" id="final-score-display">0</span>
+                        </div>
+                        
+                        <div id="go-reward-container" class="grid grid-cols-2 gap-2 mt-2 hidden">
+                            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded p-2 text-center">
+                                <span class="text-[9px] text-yellow-500/70 uppercase block mb-1">Coins Earned</span>
+                                <span id="go-earned-coins" class="text-yellow-400 font-bold">+0</span>
+                            </div>
+                            <div class="bg-green-500/10 border border-green-500/30 rounded p-2 text-center">
+                                <span class="text-[9px] text-green-500/70 uppercase block mb-1">EXP Gained</span>
+                                <span id="go-earned-exp" class="text-green-400 font-bold">+0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6 pt-4 border-t border-danger/20">
+                    <button onclick="location.reload()" class="flex-1 py-3 bg-transparent border border-danger/50 text-danger hover:bg-danger/10 rounded-lg font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02]">
+                        <span class="material-icons text-sm">refresh</span> Reboot System
+                    </button>
+                    <button onclick="window.location.href='/'" class="flex-1 py-3 bg-danger hover:bg-red-600 text-white border border-danger rounded-lg shadow-neon-red font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.02]">
+                        <span class="material-icons text-sm">home</span> Return to Hub
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="js/scoreManager.js"></script>
+    <script src="js/game-header.js"></script>
+    <script src="js/rewardManager.js"></script>
     <script src="./js/games/sequence.js"></script>
+
 </body>
 </html>

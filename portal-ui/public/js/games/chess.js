@@ -57,7 +57,6 @@ function generateHiddenSolution() {
 
 function generateLevel() {
     let success = false;
-    
     while (!success) {
         let visited = Array(SIZE).fill(0).map(() => Array(SIZE).fill(false));
         let sr = Math.floor(Math.random() * SIZE);
@@ -70,14 +69,11 @@ function generateLevel() {
 
         for (let i = 1; i < 64; i++) {
             let moves = getKnightMoves(r, c).filter(m => !visited[m.r][m.c]);
-            if (moves.length === 0) {
-                deadEnd = true; break;
-            }
+            if (moves.length === 0) { deadEnd = true; break; }
             moves.sort((a, b) => {
                 return getKnightMoves(a.r, a.c).filter(m => !visited[m.r][m.c]).length 
                      - getKnightMoves(b.r, b.c).filter(m => !visited[m.r][m.c]).length;
             });
-            
             r = moves[0].r; c = moves[0].c;
             correctPath.push([r, c]);
             visited[r][c] = true;
@@ -112,27 +108,19 @@ function renderBoard() {
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             const cell = document.createElement('div');
-            
             const isDark = (r + c) % 2 !== 0;
             const baseColor = isDark ? 'bg-[#3b4759]' : 'bg-[#e2e8f0]'; 
             const textColor = isDark ? 'text-gray-300' : 'text-gray-500';
             
             cell.className = `flex items-center justify-center font-bold text-2xl relative board-cell ${baseColor} ${textColor}`;
-            
             const data = board[r][c];
 
-            // 1. CHÈN TỌA ĐỘ BÀN CỜ (1-8, a-h)
-            const rank = 8 - r; // Hàng ngang: 8 tới 1
-            const file = String.fromCharCode(97 + c); // Cột dọc: a tới h
+            const rank = 8 - r;
+            const file = String.fromCharCode(97 + c);
             
-            if (c === 0) { // Cột đầu tiên bên trái (Hiện số)
-                cell.innerHTML += `<span class="absolute top-1 left-1.5 text-[10px] font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'} leading-none pointer-events-none">${rank}</span>`;
-            }
-            if (r === 7) { // Hàng cuối cùng bên dưới (Hiện chữ)
-                cell.innerHTML += `<span class="absolute bottom-1 right-1.5 text-[10px] font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'} leading-none pointer-events-none">${file}</span>`;
-            }
+            if (c === 0) cell.innerHTML += `<span class="absolute top-1 left-1.5 text-[10px] font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'} leading-none pointer-events-none">${rank}</span>`;
+            if (r === 7) cell.innerHTML += `<span class="absolute bottom-1 right-1.5 text-[10px] font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'} leading-none pointer-events-none">${file}</span>`;
 
-            // 2. GIÁ TRỊ VÀ QUÂN MÃ
             if (data.visited) {
                 cell.innerHTML += `<span class="${isDark ? 'text-white' : 'text-black'} z-10">${data.val}</span>`;
                 cell.innerHTML += `<div class="absolute inset-0 bg-blue-500/${isDark ? '20' : '30'} pointer-events-none"></div>`;
@@ -155,13 +143,8 @@ function renderBoard() {
                 cell.onclick = () => handleCellClick(r, c);
             }
 
-            // 3. CHỮ START / END (Chỉ là text nổi bật, bỏ nền viền)
-            if (data.isStart && !data.visited) {
-                cell.innerHTML += `<span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-blue-500 font-black uppercase tracking-widest pointer-events-none drop-shadow-md">START</span>`;
-            }
-            if (data.isEnd && !data.visited) {
-                cell.innerHTML += `<span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-red-500 font-black uppercase tracking-widest pointer-events-none drop-shadow-md">END</span>`;
-            }
+            if (data.isStart && !data.visited) cell.innerHTML += `<span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-blue-500 font-black uppercase tracking-widest pointer-events-none drop-shadow-md">START</span>`;
+            if (data.isEnd && !data.visited) cell.innerHTML += `<span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-red-500 font-black uppercase tracking-widest pointer-events-none drop-shadow-md">END</span>`;
 
             boardEl.appendChild(cell);
         }
@@ -171,11 +154,10 @@ function renderBoard() {
 function updateUI() {
     const topSumsEl = document.getElementById('top-sums');
     const leftSumsEl = document.getElementById('left-sums');
-    topSumsEl.innerHTML = ''; leftSumsEl.innerHTML = '';
+    if (topSumsEl) topSumsEl.innerHTML = ''; 
+    if (leftSumsEl) leftSumsEl.innerHTML = '';
 
-    let colSums = Array(SIZE).fill(0);
-    let rowSums = Array(SIZE).fill(0);
-
+    let colSums = Array(SIZE).fill(0), rowSums = Array(SIZE).fill(0);
     for (let r=0; r<SIZE; r++) {
         for (let c=0; c<SIZE; c++) {
             let val = board[r][c].val || 0;
@@ -183,85 +165,62 @@ function updateUI() {
         }
     }
 
-    for (let c=0; c<SIZE; c++) {
-        let div = document.createElement('div');
-        let isMatch = colSums[c] === TARGET_SUM && colSums[c] !== 0;
-        div.className = `text-center font-bold text-lg flex items-end justify-center pb-2 ${isMatch ? 'text-primary' : 'text-gray-500'}`;
-        div.innerText = colSums[c] || '-';
-        topSumsEl.appendChild(div);
+    for (let i=0; i<SIZE; i++) {
+        if (topSumsEl) {
+            let div = document.createElement('div');
+            div.className = `text-center font-bold text-lg ${colSums[i] === TARGET_SUM ? 'text-primary' : 'text-gray-500'}`;
+            div.innerText = colSums[i] || '-';
+            topSumsEl.appendChild(div);
+        }
+        if (leftSumsEl) {
+            let div = document.createElement('div');
+            div.className = `flex items-center justify-end font-bold text-lg pr-4 ${rowSums[i] === TARGET_SUM ? 'text-primary' : 'text-gray-500'}`;
+            div.innerText = rowSums[i] || '-';
+            leftSumsEl.appendChild(div);
+        }
     }
 
-    for (let r=0; r<SIZE; r++) {
-        let div = document.createElement('div');
-        let isMatch = rowSums[r] === TARGET_SUM && rowSums[r] !== 0;
-        div.className = `flex items-center justify-end font-bold text-lg pr-4 w-12 ${isMatch ? 'text-primary' : 'text-gray-500'}`;
-        div.innerText = rowSums[r] || '-';
-        leftSumsEl.appendChild(div);
-    }
-
-    document.getElementById('progress-text').innerText = `${path.length}/64`;
-    document.getElementById('progress-bar').style.width = `${(path.length/64)*100}%`;
+    // Cập nhật điểm lên Header hệ thống
+    const headerScore = document.getElementById('current-score');
+    if(headerScore) headerScore.innerText = currentScore.toLocaleString();
+    
+    const progressText = document.getElementById('progress-text');
+    if (progressText) progressText.innerText = `${path.length}/64`;
 }
 
 function handleCellClick(r, c) {
     pendingMove = {r, c};
     const overlay = document.getElementById('input-overlay');
     const input = document.getElementById('cell-input');
-    
     overlay.classList.remove('hidden');
-
-    // LUÔN LUÔN TRỐNG (Yêu cầu loại bỏ số ngẫu nhiên)
     input.value = '';
-
-    setTimeout(() => {
-        input.focus();
-    }, 50);
+    setTimeout(() => { input.focus(); }, 50);
 }
 
 function bindInputEvents() {
     const input = document.getElementById('cell-input');
     const btn = document.getElementById('btn-submit-val');
     
-    if (btn) {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            submitMove();
-        };
-    }
+    if (btn) btn.onclick = (e) => { e.preventDefault(); submitMove(); };
 
     document.addEventListener('keydown', (e) => {
         const overlay = document.getElementById('input-overlay');
         const isOverlayOpen = overlay && !overlay.classList.contains('hidden');
 
         if (isOverlayOpen) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                submitMove();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                overlay.classList.add('hidden'); 
-            }
+            if (e.key === 'Enter') { e.preventDefault(); submitMove(); } 
+            else if (e.key === 'Escape') { e.preventDefault(); overlay.classList.add('hidden'); }
         } else {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                window.undoMove(); 
-            }
+            if (e.key === 'Escape') { e.preventDefault(); window.undoMove(); }
         }
     });
 }
 
 window.submitMove = function() {
     const input = document.getElementById('cell-input');
-    
-    if (!input || input.value.trim() === '') {
-        return alert("Vui lòng nhập một số hợp lệ!");
-    }
-
+    if (!input || input.value.trim() === '') return alert("Vui lòng nhập một số hợp lệ!");
     const val = parseInt(input.value);
-    
-    if (isNaN(val)) {
-        return alert("Vui lòng nhập một số hợp lệ!");
-    }
+    if (isNaN(val)) return alert("Vui lòng nhập một số hợp lệ!");
     
     document.getElementById('input-overlay').classList.add('hidden');
     executeMove(pendingMove.r, pendingMove.c, val);
@@ -279,10 +238,9 @@ function executeMove(r, c, val) {
     currentCell = {r, c}; 
     path.push({r, c, val});
 
-    // 4. LỊCH SỬ DÙNG TỌA ĐỘ CỜ VUA (a1, b2, h8...)
     const log = document.getElementById('move-log');
     const rank = 8 - r;
-    const file = String.fromCharCode(97 + c).toUpperCase(); // Chữ in hoa (A-H)
+    const file = String.fromCharCode(97 + c).toUpperCase();
     
     log.innerHTML += `
         <div class="flex items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700 mb-2">
@@ -302,10 +260,7 @@ function executeMove(r, c, val) {
 }
 
 function updateValidMoves() {
-    if (!currentCell) {
-        validMoves = [startCell]; 
-        return;
-    }
+    if (!currentCell) { validMoves = [startCell]; return; }
     validMoves = getKnightMoves(currentCell.r, currentCell.c).filter(m => !board[m.r][m.c].visited);
 }
 
@@ -330,28 +285,14 @@ window.undoMove = function() {
     }
     
     const log = document.getElementById('move-log');
-    if (log.lastElementChild && path.length > 0) {
-        log.removeChild(log.lastElementChild);
-    }
+    if (log.lastElementChild && path.length > 0) log.removeChild(log.lastElementChild);
     
-    renderBoard(); 
-    updateUI();
+    renderBoard(); updateUI();
 }
 
-window.resetGame = function() {
-    if(confirm("Xác nhận chơi lại từ đầu? Mọi tiến độ sẽ bị xóa.")) {
-        clearInterval(timerInterval);
-        secondsElapsed = 0;
-        document.getElementById('game-timer').innerText = "00:00";
-        gameStarted = false;
-        path = [];
-        currentCell = null;
-        document.getElementById('move-log').innerHTML = '<div class="text-center text-sm text-gray-500 mt-4 italic">Hãy chọn ô START để bắt đầu...</div>';
-        initGame(); 
-    }
-}
-
+// HÀM CHỊU THUA ĐÃ ĐƯỢC THÊM LOG ĐỂ KIỂM TRA
 window.surrenderGame = function() {
+    console.log("[HỆ THỐNG] Đã nhấn nút Chịu Thua!");
     if(confirm("Bạn chịu thua? Trò chơi sẽ kết thúc và hiển thị đáp án đúng!")) {
         endGame(false);
     }
@@ -369,25 +310,8 @@ function checkWinCondition() {
     }
     const isWin = rowSums.every(s => s === TARGET_SUM) && colSums.every(s => s === TARGET_SUM);
 
-    if (isWin) {
-        endGame(true);
-    } else {
-        alert("Bàn cờ đã đầy nhưng tổng không bằng " + TARGET_SUM + ". Hãy Undo để sửa lại!");
-    }
-}
-
-function endGame(isWin) {
-    clearInterval(timerInterval);
-    const payload = {
-        targetSum: TARGET_SUM,
-        correctGrid: correctGrid,
-        correctPath: correctPath,
-        playerPath: path,
-        timeElapsed: secondsElapsed,
-        isWin: isWin
-    };
-    localStorage.setItem('chess_game_data', JSON.stringify(payload));
-    window.location.href = 'chess_gameover.html'; 
+    if (isWin) endGame(true);
+    else alert("Bàn cờ đã đầy nhưng tổng không bằng " + TARGET_SUM + ". Hãy Undo để sửa lại!");
 }
 
 function startTimer() {
@@ -398,4 +322,117 @@ function startTimer() {
         const s = (secondsElapsed % 60).toString().padStart(2, '0');
         document.getElementById('game-timer').innerText = `${m}:${s}`;
     }, 1000);
+}
+async function endGame(isWin) {
+    console.log("[HỆ THỐNG] Đang chạy kết thúc ván đấu. Thắng:", isWin);
+    clearInterval(timerInterval);
+
+    try {
+        // 1. TÍNH ĐIỂM DỰA TRÊN CÁC BƯỚC ĐÃ ĐI
+        let correctMovesCount = 0;
+        path.forEach((pMove, i) => {
+            const cMove = correctPath[i];
+            if(pMove && cMove && pMove.r === cMove[0] && pMove.c === cMove[1]) {
+                const solutionVal = correctGrid[cMove[0]][cMove[1]];
+                if(pMove.val === solutionVal) correctMovesCount++;
+            }
+        });
+
+        let baseScore = correctMovesCount * 50;
+        let timePenalty = secondsElapsed * 2;
+        let finalScore = Math.max(0, baseScore - timePenalty);
+        if(isWin) finalScore += 5000;
+
+        // 2. GỬI ĐIỂM VÀ NHẬN THƯỞNG TỪ SERVER
+        if (typeof RewardManager !== 'undefined') {
+            const reward = await RewardManager.submitScore('chess', finalScore);
+            if (reward) {
+                // Hiện khung thưởng và nạp số liệu
+                const rewardContainer = document.getElementById('go-reward-container');
+                const coinsEl = document.getElementById('go-earned-coins');
+                const expEl = document.getElementById('go-earned-exp');
+                
+                if (rewardContainer) rewardContainer.classList.remove('hidden');
+                if (coinsEl) coinsEl.innerText = `+${reward.coins}`;
+                if (expEl) expEl.innerText = `+${reward.exp}`;
+            }
+        }
+
+        // 3. CẬP NHẬT UI OVERLAY
+        const title = document.getElementById('status-title');
+        if (title) {
+            title.innerText = isWin ? "MISSION ACCOMPLISHED" : "MISSION FAILED";
+            title.className = `text-3xl font-black uppercase tracking-widest ${isWin ? 'text-emerald-500' : 'text-red-500'}`;
+        }
+
+        const scoreGo = document.getElementById('go-score-display');
+        if (scoreGo) scoreGo.innerText = finalScore.toLocaleString();
+
+        const targetSumEl = document.getElementById('go-target-sum-display');
+        if (targetSumEl) targetSumEl.innerText = TARGET_SUM;
+
+        // Vẽ bàn cờ đáp án (Post-Mortem)
+        const boardEl = document.getElementById('correct-board');
+        if (boardEl) {
+            boardEl.innerHTML = '';
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const cell = document.createElement('div');
+                    const isDark = (r + c) % 2 !== 0;
+                    cell.className = `flex items-center justify-center font-bold text-lg relative ${isDark ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`;
+                    cell.innerText = correctGrid[r][c];
+                    
+                    // Highlight start/end trên bàn cờ đáp án
+                    if(r === correctPath[0][0] && c === correctPath[0][1]) cell.innerHTML += `<div class="absolute inset-0 border-2 border-blue-500 z-10"></div>`;
+                    if(r === correctPath[63][0] && c === correctPath[63][1]) cell.innerHTML += `<div class="absolute inset-0 border-2 border-red-500 z-10"></div>`;
+                    
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Vẽ danh sách Log nước đi đúng/sai (2 cột trái phải)
+        const correctLog = document.getElementById('correct-log');
+        const playerLog = document.getElementById('player-log');
+        if (correctLog) correctLog.innerHTML = ''; 
+        if (playerLog) playerLog.innerHTML = '';
+
+        for(let i=0; i<64; i++) {
+            const cMove = correctPath[i];
+            const cVal = correctGrid[cMove[0]][cMove[1]];
+            
+            if (correctLog) {
+                correctLog.innerHTML += `<div class="flex justify-between items-center bg-slate-800/50 p-2 rounded border border-emerald-500/20 text-[10px]"><span class="text-gray-500">${i+1}.</span><span class="font-bold text-gray-300">R${cMove[0]+1}C${cMove[1]+1}</span><span class="font-black text-emerald-400">${cVal}</span></div>`;
+            }
+
+            if (playerLog) {
+                const pMove = path[i];
+                if(pMove) {
+                    const isMatch = (pMove.r === cMove[0] && pMove.c === cMove[1] && pMove.val === cVal);
+                    const border = isMatch ? 'border-emerald-500/50' : 'border-red-500/50';
+                    const text = isMatch ? 'text-emerald-400' : 'text-red-400';
+                    playerLog.innerHTML += `<div class="flex justify-between items-center bg-slate-800/50 p-2 rounded border ${border} text-[10px]"><span class="text-gray-500">${i+1}.</span><span class="font-bold text-gray-300">R${pMove.r+1}C${pMove.c+1}</span><span class="font-black ${text}">${pMove.val}</span></div>`;
+                } else {
+                    playerLog.innerHTML += `<div class="p-2 border border-white/5 opacity-20 text-[10px]">---</div>`;
+                }
+            }
+        }
+
+        // 4. HIỂN THỊ OVERLAY
+        const overlay = document.getElementById('chess-gameover-overlay');
+        const panel = document.getElementById('go-panel-scale');
+        if (overlay && panel) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+                panel.classList.add('scale-100');
+            }, 50);
+        }
+
+    } catch (e) {
+        console.error("Lỗi nghiêm trọng khi hiển thị kết quả:", e);
+    }
+
 }

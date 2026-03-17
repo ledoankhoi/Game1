@@ -10,8 +10,15 @@ const ItemSchema = new mongoose.Schema({
         enum: ['skin', 'face', 'hair', 'shirt', 'pants', 'shoes', 'accessory', 'wings'], 
         required: true 
     },
+
+    rarity: {
+        type: String,
+        enum: ['silver', 'green', 'blue', 'purple', 'gold', 'rainbow'], // Giới hạn các bậc
+        default: 'silver' // Mặc định nếu thêm item mà quên set độ hiếm thì là hạng Thường
+    },
+
     imageUrl: { type: String, required: true }, // Ảnh hiển thị trong Shop
-    assetUrl: { type: String, required: true }  // Ảnh xé nền (PNG trong suốt) để đắp lên nhân vật
+    assetUrl: { type: String, }  // Ảnh xé nền (PNG trong suốt) để đắp lên nhân vật
 }, { timestamps: true });
 
 module.exports = mongoose.model('Item', ItemSchema);

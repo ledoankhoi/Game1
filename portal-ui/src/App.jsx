@@ -5,8 +5,13 @@ import Shop from './pages/Shop';
 import UserProfile from './pages/UserProfile';
 import Leaderboard from './pages/Leaderboard'; 
 import { GoogleLogin } from '@react-oauth/google';
+import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
+  // --- 1. THÊM STATE ĐỂ LƯU CHỮ TÌM KIẾM ---
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [showAuth, setShowAuth] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
   
@@ -105,37 +110,60 @@ function App() {
   return (
     <div id="app-lobby" className="relative flex flex-col w-full min-h-screen">
       {/* HEADER TỔNG */}
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#1a2e20] border-b border-[#e0e8e2] dark:border-[#2a3f31] px-6 py-3 flex items-center justify-between gap-4 shadow-sm h-20">
+      <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#1a2e20] border-b border-[#e0e8e2] dark:border-[#2a3f31] px-4 md:px-6 py-3 flex items-center justify-between gap-4 shadow-sm h-auto md:h-20 flex-wrap md:flex-nowrap">
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 cursor-pointer group shrink-0">
           <div className="bg-primary p-2.5 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-105 transition-transform">
             <span className="material-symbols-outlined text-white text-3xl">calculate</span>
           </div>
-          <h2 className="text-2xl font-black tracking-tighter text-gray-800 dark:text-white uppercase">
+          <h2 className="text-2xl font-black tracking-tighter text-gray-800 dark:text-white uppercase hidden sm:block">
             Math<span className="text-primary">Quest</span>
           </h2>
         </Link>
 
-        {/* Thanh tìm kiếm */}
-        <div className="flex-1 max-w-2xl px-4 lg:px-12 hidden md:block">
-          <form autoComplete="off" className="relative group w-full" onSubmit={(e) => e.preventDefault()}>
+        {/* --- 2. THANH TÌM KIẾM ĐÃ NỐI DÂY ĐIỆN VÀ ĐIỀU CHỈNH RESPONSIVE --- */}
+        {/* Loại bỏ 'hidden md:block' để luôn hiển thị, dùng flex-1 để chiếm không gian trống */}
+        <div className="flex-1 w-full md:w-auto max-w-2xl px-2 lg:px-12 order-3 md:order-none mt-3 md:mt-0">
+          <div className="relative group w-full">
             <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
               <span className="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-2xl">search</span>
             </span>
-            <input type="search" className="w-full pl-12 pr-4 py-3 bg-[#f0f5f1] dark:bg-[#0f1a14] border-2 border-transparent focus:bg-white dark:focus:bg-[#1a2e20] focus:border-primary/50 rounded-2xl text-base focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder-gray-400 text-gray-800 dark:text-white" placeholder="Search for games..." />
-          </form>
+            <input 
+              type="search" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-10 py-2.5 md:py-3 bg-[#f0f5f1] dark:bg-[#0f1a14] border-2 border-transparent focus:bg-white dark:focus:bg-[#1a2e20] focus:border-primary/50 rounded-2xl text-base focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder-gray-400 text-gray-800 dark:text-white outline-none" 
+              placeholder="Search for games..." 
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            )}
+          </div>
         </div>
         
         {/* Nút bấm bên phải */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="flex items-center gap-1 mr-2">
-            <Link to="/leaderboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-yellow-600 transition-colors font-bold group">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0 order-2 md:order-none">
+
+
+          
+          <div className="flex items-center gap-1 md:mr-2">
+
+{user && user.role === 'admin' && (
+              <Link to="/admin" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors font-bold group">
+                <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">admin_panel_settings</span>
+                <span className="hidden lg:block">Admin</span>
+              </Link>
+            )}
+            
+            <Link to="/leaderboard" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-yellow-600 transition-colors font-bold group">
               <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">emoji_events</span>
               <span className="hidden lg:block">Rank</span>
             </Link>
 
-            <Link to="/shop" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors font-bold group">
+            <Link to="/shop" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-colors font-bold group">
               <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">storefront</span>
               <span className="hidden lg:block">Shop</span>
             </Link>
@@ -144,30 +172,30 @@ function App() {
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden md:block"></div>
 
           {!user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <button onClick={() => { setShowAuth(true); setIsLoginMode(true); setAuthMessage(""); }} className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary transition-colors px-2">Log In</button>
-              <button onClick={() => { setShowAuth(true); setIsLoginMode(false); setAuthMessage(""); }} className="bg-primary hover:bg-green-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-green-500/30 transition-all transform active:scale-95 hover:-translate-y-0.5">Sign Up</button>
+              <button onClick={() => { setShowAuth(true); setIsLoginMode(false); setAuthMessage(""); }} className="bg-primary hover:bg-green-500 text-white text-sm font-bold px-3 py-2 md:px-5 md:py-2.5 rounded-xl shadow-lg shadow-green-500/30 transition-all transform active:scale-95 hover:-translate-y-0.5 whitespace-nowrap">Sign Up</button>
             </div>
           ) : (
-            <div className="flex items-center gap-6">
-              <div className="bg-white dark:bg-[#0f1a14] border border-gray-100 dark:border-gray-700 pl-2 pr-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm cursor-pointer hover:border-yellow-400 transition-colors" onClick={() => navigate('/shop')}>
+            <div className="flex items-center gap-2 md:gap-6">
+              <div className="bg-white dark:bg-[#0f1a14] border border-gray-100 dark:border-gray-700 pl-2 pr-2 md:pr-4 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-2 shadow-sm cursor-pointer hover:border-yellow-400 transition-colors" onClick={() => navigate('/shop')}>
                 <div className="bg-yellow-100 dark:bg-yellow-900/30 p-1 rounded-full">
-                  <span className="material-symbols-outlined text-[#facc15] text-xl block">monetization_on</span>
+                  <span className="material-symbols-outlined text-[#facc15] text-lg md:text-xl block">monetization_on</span>
                 </div>
-                <span className="text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
+                <span className="text-xs md:text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
               </div>
 
-              {/* NÚT AVATAR ĐÃ ĐƯỢC BỌC TRONG <Link> ĐỂ BẤM ĐƯỢC */}
-              <div className="relative flex items-center gap-3 group">
-                <Link to="/profile" className="flex items-center gap-3 cursor-pointer hover:opacity-70 transition-opacity" title="Vào trang Hồ Sơ">
-                  <span className="font-bold text-gray-800 dark:text-white hidden sm:block">Chào, {user.username}</span>
+              {/* NÚT AVATAR */}
+              <div className="relative flex items-center gap-2 md:gap-3 group">
+                <Link to="/profile" className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-70 transition-opacity" title="Vào trang Hồ Sơ">
+                  <span className="font-bold text-gray-800 dark:text-white hidden lg:block text-sm">Chào, {user.username}</span>
                   <img 
                     src={localStorage.getItem('user_avatar_custom') || user.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.equippedSkin !== 'default' ? user.equippedSkin : user.username}`} 
-                    className="w-10 h-10 rounded-full border-2 border-primary shadow-sm bg-white object-cover" 
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-primary shadow-sm bg-white object-cover" 
                     alt="Avatar" 
                   />
                 </Link>
-                <button onClick={handleLogout} className="text-xs text-red-500 font-bold hover:underline px-2">Đăng xuất</button>
+                <button onClick={handleLogout} className="text-[10px] md:text-xs text-red-500 font-bold hover:underline px-1 md:px-2">Đăng xuất</button>
               </div>
 
             </div>
@@ -178,10 +206,15 @@ function App() {
       {/* KHU VỰC THAY ĐỔI TRANG */}
       <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* --- 3. TRUYỀN BIẾN XUỐNG HOME ĐỂ LỌC --- */}
+          <Route path="/" element={<Home searchQuery={searchQuery} />} />
+          
           <Route path="/shop" element={<Shop />} />
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="/leaderboard" element={<Leaderboard />} /> 
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          {/* Note: Bạn đang import 2 component profile, nên có 2 route. Tôi giữ nguyên code của bạn */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminDashboard />} /> 
           <Route path="*" element={<h1 className="text-center text-2xl mt-10">404 - Không tìm thấy trang</h1>} />
         </Routes>
       </main>
@@ -212,7 +245,7 @@ function App() {
             {isLoginMode ? "Login" : "Register"}
           </button>
 
-          {/* --- NÚT GOOGLE ĐƯỢC CHÈN VÀO ĐÂY --- */}
+          {/* --- NÚT GOOGLE --- */}
           <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
               <span className="text-sm text-gray-400 font-bold uppercase">Hoặc</span>

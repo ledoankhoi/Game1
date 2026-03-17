@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-function Home() {
+// Thêm searchQuery vào props để nhận dữ liệu từ App.jsx
+function Home({ searchQuery = '' }) {
   // 1. Tạo cái "giỏ" (state) để chứa dữ liệu game và trạng thái đang tải
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // --- THÊM STATE CHO THỂ LOẠI (Bỏ state searchQuery vì đã nhận từ Props) ---
+  const [categories, setCategories] = useState(['All']);
+  const [activeCategory, setActiveCategory] = useState('All');
 
   // 2. Dùng useEffect để gọi API xuống Backend khi trang vừa mở
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        // Gọi API tới cổng 5000 của Node.js
-        const response = await fetch('http://localhost:3000/api/games/list');
+        // Gọi API tới cổng 3000
+        const response = await fetch('http://localhost:3000/api/game/list');
         const result = await response.json();
 
         // Nếu gọi thành công, bỏ dữ liệu vào cái "giỏ" setGames
         if (result.success) {
           setGames(result.games);
+
+          // Tự động rút trích danh sách Thể loại (Category) từ CSDL
+          const uniqueCategories = ['All', ...new Set(result.games.map(g => g.category).filter(Boolean))];
+          setCategories(uniqueCategories);
         }
       } catch (error) {
         console.error("Lỗi khi kết nối với Backend:", error);
@@ -28,22 +37,46 @@ function Home() {
     fetchGames(); // Kích hoạt hàm
   }, []); // Mảng rỗng [] nghĩa là chỉ gọi API 1 lần duy nhất khi vào trang
 
+  // --- THUẬT TOÁN LỌC GAME (Theo Tên và Thể loại) ---
+  const filteredGames = games.filter(game => {
+    const matchSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchCategory = activeCategory === 'All' || game.category === activeCategory;
+    return matchSearch && matchCategory;
+  });
+
   return (
     <div className="flex flex-col lg:flex-row w-full gap-8">
-      {/* CỘT TRÁI: Danh mục Game (Giữ nguyên) */}
+      
+      {/* CỘT TRÁI: Danh mục Game (Đã tự động hóa) */}
       <aside className="w-full lg:w-64 flex flex-col gap-8 shrink-0">
         <div className="flex flex-col gap-6">
           <section>
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Danh mục</h3>
             <div className="flex flex-col gap-2">
-              <button onClick={() => window.filterGames && window.filterGames('all')} className="category-btn active-category flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1a2e20] text-gray-600 dark:text-gray-300 hover:bg-[#f0f5f1] rounded-xl font-medium transition-all shadow-sm group" id="cat-all">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-lg">grid_view</span>
-                  <span>Tất cả game</span>
-                </div>
-                <span className="material-symbols-outlined text-sm opacity-0 group-[.active-category]:opacity-100">check_circle</span>
-              </button>
-              {/* Các nút danh mục khác... (để code gọn, tôi thu gọn phần này, bạn có thể giữ nguyên các nút cũ của bạn) */}
+              
+              {/* Render danh sách thể loại động từ Database */}
+              {categories.map(cat => (
+                <button 
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)} 
+                  className={`category-btn flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all shadow-sm group ${
+                    activeCategory === cat 
+                      ? 'active-category bg-white dark:bg-[#1a2e20] text-primary border-l-4 border-primary' 
+                      : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-[#1a2e20]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-lg">
+                      {cat === 'All' ? 'grid_view' : 'stadia_controller'}
+                    </span>
+                    <span>{cat === 'All' ? 'Tất cả game' : cat}</span>
+                  </div>
+                  <span className={`material-symbols-outlined text-sm transition-opacity ${activeCategory === cat ? 'opacity-100 text-primary' : 'opacity-0 group-hover:opacity-30'}`}>
+                    check_circle
+                  </span>
+                </button>
+              ))}
+
             </div>
           </section>
         </div>
@@ -76,7 +109,9 @@ function Home() {
               <div className="size-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
                 <span className="material-symbols-outlined text-orange-500">calculate</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">Popular Games</h2>
+              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">
+                {activeCategory === 'All' ? (searchQuery ? `Kết quả cho "${searchQuery}"` : 'Popular Games') : `Thể loại: ${activeCategory}`}
+              </h2>
             </div>
           </div>
           
@@ -85,15 +120,15 @@ function Home() {
             {/* 3. Vòng lặp render dữ liệu */}
             {loading ? (
               <p className="text-gray-500 dark:text-gray-300">Đang tải dữ liệu từ máy chủ...</p>
-            ) : games.length > 0 ? (
-              games.map((game) => (
+            ) : filteredGames.length > 0 ? (
+              filteredGames.map((game) => (
                 <div 
                   key={game._id} 
-                  className="game-card bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31]" 
+                  className="game-card bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer" 
                   onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
                 >
                   <div className="h-44 relative bg-gray-800">
-                    <img alt={game.title} className="size-full object-cover opacity-80" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
+                    <img alt={game.title} className="size-full object-cover opacity-80 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
                     <div className="absolute top-3 right-3 flex gap-1">
                       <span className="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">{game.category}</span>
                     </div>
@@ -106,7 +141,10 @@ function Home() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-300">Chưa có game nào trong hệ thống.</p>
+              <div className="col-span-full py-10 text-center">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-3">search_off</span>
+                <p className="text-gray-500 dark:text-gray-300 font-bold">Không tìm thấy game nào phù hợp.</p>
+              </div>
             )}
 
           </div>

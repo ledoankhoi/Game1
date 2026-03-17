@@ -7,4 +7,6 @@ router.get('/items', shopController.getAllItems); // Ai cũng xem được đồ
 router.post('/buy', authMiddleware, shopController.buyItem); // Phải có vé (token) mới mua được
 router.post('/equip', authMiddleware, shopController.equipItem); // Phải có vé mới mặc được
 
+
+
 module.exports = router;

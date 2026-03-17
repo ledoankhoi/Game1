@@ -53,6 +53,7 @@ const login = async (req, res) => {
                 email: user.email,
                 coins: user.coins || 0,
                 level: user.level || 1,
+                inventory: user.inventory || [], // <--- THÊM DÒNG NÀY ĐỂ TRẢ VỀ TÚI ĐỒ
                 equipped: user.equipped,
                 avatarUrl: user.avatarUrl
             }
@@ -105,8 +106,10 @@ const googleLogin = async (req, res) => {
                 email: user.email,
                 coins: user.coins,
                 level: user.level,
+                inventory: user.inventory,
                 avatarUrl: user.avatarUrl,
-                equipped: user.equipped
+                equipped: user.equipped,
+                role: user.role
             }
         });
     } catch (error) {
@@ -140,16 +143,32 @@ const updateScore = async (req, res) => {
             leveledUp = true;
         }
 
-        if (!user.highScores) user.highScores = new Map();
-        if (score > (user.highScores.get(gameId) || 0)) {
-            user.highScores.set(gameId, score);
+        // 4. Lưu kỷ lục cao nhất (Bọc thép 2 lớp)
+        if (!user.highScores) user.highScores = {}; 
+        
+        // Kiểm tra kỷ lục cũ một cách an toàn
+        let currentHighScore = 0;
+        if (typeof user.highScores.get === 'function') {
+            currentHighScore = user.highScores.get(gameId) || 0;
+        } else {
+            currentHighScore = user.highScores[gameId] || 0;
         }
 
-        await user.save();
+        // Nếu điểm mới cao hơn thì phá kỷ lục
+        if (score > currentHighScore) {
+            if (typeof user.highScores.set === 'function') {
+                user.highScores.set(gameId, score);
+            } else {
+                user.highScores[gameId] = score;
+                user.markModified('highScores'); 
+            }
+        }
+
 
         // Ghi lại lịch sử chơi game
         await GameHistory.create({
             userId: userId,
+            username: user.username,
             gameId: gameId,
             score: score
         });
@@ -160,7 +179,8 @@ const updateScore = async (req, res) => {
             coinsEarned,
             expEarned,
             newLevel: user.level,
-            newCoins: user.coins
+            newCoins: user.coins,
+            role: user.role
         });
     } catch (error) {
         console.error("❌ Lỗi xử lý điểm số:", error);
@@ -207,6 +227,58 @@ const buyItem = async (req, res) => {
     }
 };
 
+// --- 7. LẤY THÔNG TIN PROFILE ---
+const getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('-password'); // Lấy hết trừ mật khẩu
+        
+        // Đếm xem người này đã chơi bao nhiêu ván game
+        const gamesPlayed = await GameHistory.countDocuments({ userId: userId });
+
+        res.json({ success: true, user, gamesPlayed });
+    } catch (error) {
+        console.error("Lỗi lấy Profile:", error);
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+};
+
+// --- 8. CẬP NHẬT AVATAR ---
+const updateAvatar = async (req, res) => {
+    try {
+        const { avatarUrl } = req.body;
+        const userId = req.user.id;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy User" });
+
+        user.avatarUrl = avatarUrl;
+        await user.save();
+
+        res.json({ success: true, message: "Đã cập nhật Avatar!", avatarUrl });
+    } catch (error) {
+        console.error("Lỗi cập nhật Avatar:", error);
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+
+};
+
+// --- 9. LẤY THÔNG TIN USER (Dành cho đồng bộ Shop) ---
+const getUserInfo = async (req, res) => {
+    try {
+        // req.user.id có được là nhờ authMiddleware đã giải mã token
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy User" });
+        }
+
+        res.json({ success: true, user: user });
+    } catch (error) {
+        console.error("Lỗi lấy thông tin User:", error);
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+};
+
 // --- XUẤT TẤT CẢ CÁC HÀM ---
 module.exports = { 
     register, 
@@ -214,5 +286,8 @@ module.exports = {
     leaderboard, 
     updateScore, 
     buyItem,
-    googleLogin
+    googleLogin,
+    getProfile, 
+    updateAvatar,
+    getUserInfo
 };

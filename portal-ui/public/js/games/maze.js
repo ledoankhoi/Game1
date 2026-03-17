@@ -2,11 +2,14 @@
 
 const MazeGame = {
     size: 5,
-    memoTime: 60,   // 60 giây để ghi nhớ
-    actionTime: 60, // 60 giây để thoát hiểm (MỚI)
+    memoTime: 60,   
+    actionTime: 60, 
     currentTime: 60,
     timerInterval: null,
-    phase: 'MEMO',  // MEMO -> ACTION
+    phase: 'MEMO',  
+
+    currentScore: 0,
+    history: [], // MỚI: Mảng lưu trữ nhật ký di chuyển
 
     hWalls: [], 
     vWalls: [],
@@ -23,41 +26,85 @@ const MazeGame = {
     pathTaken: [0],
 
     init: function() {
-        console.log("Maze Protocol: Dual Timer System Activated.");
+        console.log("Maze Protocol: Initialized.");
         this.resetGame();
         this.generateWalls();
         this.renderProjections(); 
         this.renderMainGrid();
         this.bindEvents();
         
-        // Hiển thị lại sidebar hình chiếu (nếu bị ẩn từ ván trước)
         const sidebar = document.getElementById('projection-sidebar');
         if(sidebar) sidebar.style.display = 'flex'; 
 
-        // Khởi động đồng hồ Ghi nhớ ngay lập tức
         this.startTimer(); 
-        setTimeout(() => this.updateHeaderUI(), 500);
     },
 
     resetGame: function() {
         this.phase = 'MEMO';
-        this.currentTime = this.memoTime; // Đặt lại thời gian ghi nhớ
+        this.currentTime = this.memoTime; 
         this.hWalls = []; this.vWalls = [];
         this.layers = { red: {h:[], v:[]}, yellow: {h:[], v:[]}, blue: {h:[], v:[]} };
         this.currentPos = 0;
         this.pathTaken = [0];
+        this.history = []; // Xóa log cũ
+        
+        this.currentScore = 0;
+        this.updateLiveScore();
+        
+        const inGameLog = document.getElementById('in-game-log');
+        if (inGameLog) inGameLog.innerHTML = '<div class="text-[10px] text-slate-500 italic text-center mt-4">Waiting for movement...</div>';
 
         const lv = parseInt(localStorage.getItem('maze_level') || 0);
         this.size = 5 + Math.floor(lv / 3); 
         this.endIdx = (this.size * this.size) - 1;
         
-        // Reset UI nút bấm
         const btnStart = document.getElementById('btn-start');
         if (btnStart) {
-            btnStart.innerText = "BẮT ĐẦU (START)";
+            btnStart.innerText = "BẮT ĐẦU CHẠY";
             btnStart.disabled = false;
             btnStart.classList.remove('opacity-50');
         }
+        
+        const phaseLabel = document.getElementById('phase-label');
+        if (phaseLabel) {
+            phaseLabel.innerText = "Memorization Phase";
+            phaseLabel.className = "text-xs font-bold tracking-[0.4em] uppercase text-primary mb-4 block animate-pulse";
+        }
+    },
+
+    updateLiveScore: function() {
+        const sidebarScore = document.getElementById('maze-live-score');
+        if (sidebarScore) sidebarScore.innerText = this.currentScore.toLocaleString();
+        
+        const headerScore = document.getElementById('current-score');
+        if (headerScore) headerScore.innerText = this.currentScore.toLocaleString();
+    },
+
+    // 🌟 HÀM MỚI: GHI NHẬN VÀ HIỂN THỊ LOG TRỰC TIẾP
+    logAction: function(message, isSuccess, scoreAdded = 0) {
+        this.history.push({ msg: message, success: isSuccess, score: scoreAdded });
+        
+        const container = document.getElementById('in-game-log');
+        if (!container) return;
+        
+        // Xóa dòng waiting ban đầu
+        if (this.history.length === 1) container.innerHTML = '';
+
+        const colorClass = isSuccess ? 'text-green-400 border-green-500/50 bg-green-500/10' : 'text-red-400 border-red-500/50 bg-red-500/10';
+        const icon = isSuccess ? 'check_circle' : 'warning';
+        const scoreHTML = scoreAdded > 0 ? `<span class="text-[9px] text-yellow-500 font-black">+${scoreAdded} pts</span>` : '';
+
+        const html = `
+            <div class="flex items-center justify-between p-2 rounded border-l-2 ${colorClass} text-[10px] animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[14px]">${icon}</span>
+                    <span class="font-mono">${message}</span>
+                </div>
+                ${scoreHTML}
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('afterbegin', html); // Đẩy lên đầu
     },
 
     generateWalls: function() {
@@ -124,8 +171,7 @@ const MazeGame = {
 
         for (let i = 0; i < this.size * this.size; i++) {
             const cell = document.createElement('div');
-            // Nếu đang ACTION thì cho phép click, ngược lại thì không
-            cell.className = `maze-cell relative flex items-center justify-center rounded-sm bg-slate-800/40 border border-white/5 aspect-square transition-all ${this.phase === 'ACTION' ? 'cursor-pointer hover:bg-primary/5' : 'cursor-not-allowed opacity-50'}`;
+            cell.className = `maze-cell relative flex items-center justify-center rounded-sm bg-slate-800/40 border border-white/5 aspect-square transition-all duration-200 ${this.phase === 'ACTION' ? 'cursor-pointer hover:bg-primary/20' : 'cursor-not-allowed opacity-50'}`;
             
             if (i === this.startIdx) cell.innerHTML = '<span class="material-symbols-outlined text-accent-blue text-2xl">person</span>';
             if (i === this.endIdx) cell.innerHTML = '<span class="material-symbols-outlined text-accent-blue text-2xl">door_open</span>';
@@ -139,81 +185,70 @@ const MazeGame = {
     bindEvents: function() {
         const btnStart = document.getElementById('btn-start');
         if (btnStart) {
-            // Xóa sự kiện cũ để tránh bị gán chồng chéo
-            btnStart.onclick = null; 
             btnStart.onclick = () => {
-                if (this.phase === 'MEMO') {
-                    this.switchToActionPhase();
-                }
+                if (this.phase === 'MEMO') this.switchToActionPhase();
             };
         }
     },
 
-    // --- HỆ THỐNG ĐỒNG HỒ (Đã sửa) ---
     startTimer: function() {
-        // Xóa timer cũ nếu đang chạy
         if (this.timerInterval) clearInterval(this.timerInterval);
 
         const timerSeconds = document.getElementById('timer-seconds');
         const timerCircle = document.getElementById('timer-circle');
-        
-        // Xác định tổng thời gian của giai đoạn hiện tại để tính toán vòng tròn SVG
         const maxDuration = this.phase === 'MEMO' ? this.memoTime : this.actionTime;
 
         this.timerInterval = setInterval(() => {
             this.currentTime--;
-            
-            // Cập nhật số giây hiển thị
             if (timerSeconds) timerSeconds.innerText = this.currentTime;
-            
-            // Cập nhật vòng tròn đếm ngược (Giả sử chu vi là 276)
             if (timerCircle) {
                 const offset = 276 - (this.currentTime / maxDuration) * 276;
                 timerCircle.style.strokeDashoffset = offset;
             }
-            
-            // Xử lý khi hết giờ
             if (this.currentTime <= 0) {
-                clearInterval(this.timerInterval); // Dừng timer hiện tại
-                
+                clearInterval(this.timerInterval); 
                 if (this.phase === 'MEMO') {
-                    // Hết giờ ghi nhớ -> Tự động chuyển sang chạy
                     this.switchToActionPhase();
                 } else {
-                    // Hết giờ chạy -> Thua cuộc
-                    this.gameOver("Hết thời gian! (Time Out)");
+                    this.logAction("TIMEOUT ERROR", false);
+                    this.gameOver("Hết thời gian!");
                 }
             }
         }, 1000);
     },
 
     switchToActionPhase: function() {
-        clearInterval(this.timerInterval); // Dừng timer MEMO
+        clearInterval(this.timerInterval); 
         this.phase = 'ACTION';
-        
-        // RESET THỜI GIAN VỀ 60s CHO GIAI ĐOẠN 2
         this.currentTime = this.actionTime; 
         
-        // Cập nhật UI ngay lập tức để người chơi thấy 60s
         const timerSeconds = document.getElementById('timer-seconds');
         if (timerSeconds) timerSeconds.innerText = this.currentTime;
 
-        // 1. Ẩn hoàn toàn 3 hình chiếu bên trái
+        const phaseLabel = document.getElementById('phase-label');
+        if (phaseLabel) {
+            phaseLabel.innerText = "Escape Phase";
+            phaseLabel.className = "text-xs font-bold tracking-[0.4em] uppercase text-red-500 mb-4 block animate-pulse";
+        }
+
         const sidebar = document.getElementById('projection-sidebar');
         if(sidebar) sidebar.style.display = 'none';
 
-        // 2. Cập nhật nút Bắt đầu
         const btnStart = document.getElementById('btn-start');
         if(btnStart) {
-            btnStart.innerText = "ĐANG CHẠY... (ESCAPING)";
+            btnStart.innerText = "ĐANG THOÁT HIỂM...";
             btnStart.disabled = true;
-            btnStart.classList.add('opacity-50');
+            btnStart.classList.add('opacity-50', 'bg-red-500');
         }
 
-        // 3. Render lại lưới để cho phép click
-        this.renderMainGrid();
+        const badge = document.getElementById('status-badge');
+        if(badge) {
+            badge.innerText = "UNLOCKED";
+            badge.className = "px-2 py-1 bg-green-500/20 rounded text-[9px] font-bold text-green-400 animate-pulse";
+        }
 
-        // 4. BẮT ĐẦU ĐỒNG HỒ CHO GIAI ĐOẠN THOÁT
+        this.logAction("Protocol Unlocked. Escape started.", true);
+        this.renderMainGrid();
         this.startTimer();
     },
 
@@ -228,6 +263,19 @@ const MazeGame = {
         const isAdjacent = (Math.abs(curR - tarR) + Math.abs(curC - tarC)) === 1;
         if (!isAdjacent) return;
 
+        // CẤM ĐI LÙI
+        if (this.pathTaken.includes(targetIdx)) {
+            const grid = document.getElementById('main-maze-grid');
+            if (grid && grid.children[targetIdx]) {
+                const cell = grid.children[targetIdx];
+                cell.classList.add('border-red-500', 'shake-effect', 'bg-red-500/30');
+                setTimeout(() => cell.classList.remove('border-red-500', 'shake-effect', 'bg-red-500/30'), 400);
+            }
+            this.logAction(`Blocked: Node ${targetIdx} already visited.`, false);
+            return; 
+        }
+
+        // KIỂM TRA TƯỜNG
         let hasWall = false;
         if (curR === tarR) { 
             const vIdx = curR * (this.size - 1) + Math.min(curC, tarC);
@@ -238,9 +286,15 @@ const MazeGame = {
         }
 
         if (hasWall) {
-            this.gameOver("Đâm phải tường tàng hình!");
+            this.logAction(`FATAL: Collision at Node ${targetIdx}`, false);
+            this.gameOver("Structural Collision Detected");
             return;
         }
+
+        // ĐI ĐÚNG -> +10 ĐIỂM & LOG
+        this.currentScore += 10; 
+        this.updateLiveScore();
+        this.logAction(`Path clear: Node ${targetIdx}`, true, 10);
 
         this.currentPos = targetIdx;
         this.pathTaken.push(targetIdx);
@@ -263,50 +317,99 @@ const MazeGame = {
                 cell.classList.add('bg-primary/10');
             }
             if (idx === this.currentPos) {
-                cell.innerHTML = '<span class="material-symbols-outlined text-primary text-3xl animate-bounce">person</span>';
-                cell.classList.add('border-primary/50');
+                cell.innerHTML = '<span class="material-symbols-outlined text-primary text-3xl animate-pulse">person</span>';
+                cell.classList.add('border-primary', 'bg-primary/20');
             }
         });
     },
 
     victory: async function() {
-        clearInterval(this.timerInterval); // Dừng đồng hồ
-        const score = 2000 + (this.size * 200) + (this.currentTime * 10); // Cộng điểm thưởng thời gian
-        setTimeout(() => alert(`THÀNH CÔNG! +${score} điểm`), 100);
+        clearInterval(this.timerInterval); 
+        this.logAction("DESTINATION REACHED!", true);
         
-        const username = localStorage.getItem('username');
-        if (username) {
-            // API calls...
+        const completionBonus = 1000 + (this.size * 100) + (this.currentTime * 10); 
+        const finalTotalScore = this.currentScore + completionBonus;
+        
+        const container = document.getElementById('maze-container');
+        if(container) container.style.boxShadow = '0 0 50px #25f46a';
+
+        if (typeof RewardManager !== 'undefined' && typeof RewardManager.submitScore === 'function') {
+            await RewardManager.submitScore('maze', finalTotalScore);
         }
-        localStorage.setItem('maze_level', (parseInt(localStorage.getItem('maze_level') || 0) + 1));
-        location.reload();
+
+        const currentLv = parseInt(localStorage.getItem('maze_level') || 0);
+        localStorage.setItem('maze_level', currentLv + 1);
+        
+        setTimeout(() => location.reload(), 800);
     },
 
-    gameOver: function(msg) {
-        clearInterval(this.timerInterval); // Dừng đồng hồ
-        const grid = document.getElementById('main-maze-grid');
-        if(grid) grid.classList.add('shake-effect');
+    gameOver: async function(msg) {
+        clearInterval(this.timerInterval); 
         
-        setTimeout(() => {
-            // Thay đổi ở đây: Chuyển hướng sang trang maze_gameover.html thay vì alert
-            // Bạn có thể truyền thông báo lỗi qua URL parameters nếu cần hiển thị chi tiết lỗi
-            // Ví dụ: window.location.href = `maze_gameover.html?error=${encodeURIComponent(msg)}`;
-            
-            // Đặt lại level về 0 (theo logic cũ của bạn) trước khi chuyển trang
-            localStorage.setItem('maze_level', 0);
-            
-            window.location.href = 'maze_gameover.html'; 
-        }, 500);
-    },
-
-    // ... (các phương thức khác giữ nguyên)
-
-
-    updateHeaderUI: function() {
-        const coinEl = document.getElementById('user-coin');
-        if (typeof Auth !== 'undefined' && Auth.user && coinEl) {
-            coinEl.innerText = (Auth.user.coins || 0).toLocaleString();
+        const container = document.getElementById('maze-container');
+        if(container) container.classList.add('shake-effect');
+        
+        // 1. GỬI ĐIỂM (Chỉ tính điểm đi đường, không có bonus hoàn thành)
+        if (typeof RewardManager !== 'undefined' && typeof RewardManager.submitScore === 'function') {
+            const reward = await RewardManager.submitScore('maze', this.currentScore);
+            if (reward) {
+                document.getElementById('go-score').innerText = this.currentScore.toLocaleString();
+                document.getElementById('go-coins').innerText = '+' + reward.coins;
+                document.getElementById('go-exp').innerText = '+' + reward.exp;
+            }
         }
+
+        // 2. Cập nhật Text
+        const currentLv = parseInt(localStorage.getItem('maze_level') || 0) + 1;
+        const levelDisplay = document.getElementById('go-level-display');
+        const errorMsg = document.getElementById('maze-error-msg');
+        if(levelDisplay) levelDisplay.innerText = `Level ${currentLv}`;
+        if(errorMsg) errorMsg.innerText = msg;
+
+        // 3. CLONE MÊ CUNG VÀO MINI-MAP
+        const mainGrid = document.getElementById('main-maze-grid');
+        const miniMap = document.getElementById('go-minimap');
+        if (mainGrid && miniMap) {
+            miniMap.innerHTML = mainGrid.innerHTML; // Copy toàn bộ HTML bên trong
+            miniMap.style.gridTemplateColumns = `repeat(${this.size}, minmax(0, 1fr))`;
+            
+            // Xóa hết class hover và kích thước lớn trên các ô clone để vừa mini-map
+            Array.from(miniMap.children).forEach(cell => {
+                cell.classList.remove('hover:bg-primary/20', 'cursor-pointer');
+                cell.classList.add('text-[10px]'); // Chữ/Icon nhỏ lại
+            });
+        }
+
+        // 4. RENDER LOG RA GAMEOVER
+        const logContainer = document.getElementById('go-log-container');
+        if (logContainer) {
+            logContainer.innerHTML = '';
+            this.history.forEach((item, index) => {
+                const color = item.success ? 'text-green-400' : 'text-red-400 font-bold';
+                logContainer.innerHTML += `
+                    <div class="flex items-center justify-between border-b border-white/5 pb-1">
+                        <span class="text-[9px] text-gray-500 uppercase">SEQ_${index}</span>
+                        <span class="text-[10px] font-mono ${color}">${item.msg}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // 5. TRƯỢT GIAO DIỆN LÊN
+        const overlay = document.getElementById('maze-gameover-overlay');
+        const panel = document.getElementById('maze-gameover-panel');
+        if(overlay && panel) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+                panel.classList.add('scale-100');
+            }, 50);
+        }
+
+        // Reset Level về 0
+        localStorage.setItem('maze_level', 0);
     }
 };
 

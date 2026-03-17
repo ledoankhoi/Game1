@@ -15,27 +15,44 @@ exports.getAllGames = async (req, res) => {
     }
 };
 
-// 1. Lấy Bảng xếp hạng của 1 game cụ thể (VD: Top 10 người bắn quái vật giỏi nhất)
+// 1. Lấy Bảng xếp hạng của 1 game cụ thể
 exports.getGameLeaderboard = async (req, res) => {
     try {
-        const { gameId } = req.params; // Lấy tên game từ URL (VD: /api/game/leaderboard/monster)
+        const { gameId } = req.params;
 
-        // Tìm những user có điểm của game này, xếp từ cao xuống thấp, lấy 10 người
-        const topUsers = await User.find({ [`highScores.${gameId}`]: { $exists: true } })
-                                   .sort({ [`highScores.${gameId}`]: -1 })
-                                   .limit(10)
-                                   .select('username avatarUrl equipped highScores level');
+        // Lấy TẤT CẢ user có trường highScores
+        const users = await User.find({ 'highScores': { $exists: true } })
+            .select('username avatarUrl equipped highScores level');
 
-        // Gọt đẽo lại dữ liệu cho gọn gàng trước khi gửi về Web
-        const formattedBoard = topUsers.map(u => ({
-            username: u.username,
-            avatarUrl: u.avatarUrl,
-            equipped: u.equipped,
-            level: u.level,
-            score: u.highScores.get(gameId) // Chỉ lấy điểm của đúng game đang cần
-        }));
+        // Lọc và sắp xếp thủ công (chắc chắn nhất)
+        let topUsers = users.map(u => {
+            let score = 0;
+            // Kiểm tra xem highScores là Map hay Object
+            if (u.highScores instanceof Map) {
+                score = u.highScores.get(gameId) || 0;
+            } else if (u.highScores && typeof u.highScores === 'object') {
+                score = u.highScores[gameId] || 0;
+            }
 
-        res.json({ success: true, leaderboard: formattedBoard });
+            return {
+                username: u.username,
+                avatarUrl: u.avatarUrl,
+                equipped: u.equipped,
+                level: u.level,
+                score: score
+            };
+        });
+
+        // Chỉ lấy những người có điểm > 0 ở game này
+        topUsers = topUsers.filter(u => u.score > 0);
+
+        // Sắp xếp từ cao xuống thấpa
+        topUsers.sort((a, b) => b.score - a.score);
+
+        // Lấy Top 10
+        const formattedUsers = topUsers.slice(0, 10);
+
+        res.json({ success: true, leaderboard: formattedUsers });
     } catch (error) {
         console.error("Lỗi lấy BXH Game:", error);
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -81,5 +98,85 @@ exports.getTopScore = async (req, res) => {
     } catch (error) {
         console.error("Lỗi lấy Top Điểm:", error);
         res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// --- THÊM ĐOẠN NÀY VÀO CUỐI FILE gameController.js ---
+
+// 3. Xử lý nhận thưởng sau khi chơi xong (Lưu điểm, Vàng, EXP)
+exports.saveGameResult = async (req, res) => {
+    try {
+        const { gameId, score, coinsEarned, expEarned } = req.body;
+        
+        // Lấy ID user từ token (do middleware auth cung cấp)
+        const userId = req.user.id; 
+
+        // 1. Tìm User
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy User" });
+
+        // 2. Cộng Vàng và EXP
+        user.coins = (user.coins || 0) + coinsEarned;
+        user.exp = (user.exp || 0) + expEarned;
+        user.level = user.level || 1;
+        user.totalScore = (user.totalScore || 0) + score;
+
+        // 3. Kiểm tra và Lưu Điểm Cao (High Score) cho Game hiện tại
+        if (!user.highScores) user.highScores = {};
+        
+        // Xử lý an toàn cho cả Object thường và Mongoose Map
+        let currentHighScore = 0;
+        if (user.highScores instanceof Map) {
+            currentHighScore = user.highScores.get(gameId) || 0;
+            if (score > currentHighScore) user.highScores.set(gameId, score);
+        } else {
+            currentHighScore = user.highScores[gameId] || 0;
+            if (score > currentHighScore) user.highScores[gameId] = score;
+        }
+
+        // 4. Thuật toán thăng cấp (Level Up)
+        let leveledUp = false;
+        const baseLevelExp = 1000;
+        const expMultiplier = 1.5;
+        let expNeeded = Math.floor(baseLevelExp * Math.pow(expMultiplier, user.level - 1));
+
+        // Dùng vòng lặp while đề phòng trường hợp nhận 1 lúc quá nhiều EXP lên 2, 3 cấp
+        while (user.exp >= expNeeded) {
+            user.exp -= expNeeded;
+            user.level += 1;
+            leveledUp = true;
+            expNeeded = Math.floor(baseLevelExp * Math.pow(expMultiplier, user.level - 1));
+        }
+
+        // Lưu User cập nhật vào CSDL
+        await user.save();
+
+        // 5. Ghi nhận vào Bảng Lịch Sử (Để làm BXH Lịch sử)
+        await GameHistory.create({
+            userId: user._id,
+            username: user.username,
+            gameId: gameId,
+            score: score,
+            coinsEarned: coinsEarned,
+            expEarned: expEarned
+        });
+
+        // 6. Trả kết quả về cho Frontend (rewardManager.js)
+        res.json({ 
+            success: true, 
+            leveledUp: leveledUp,
+            user: {
+                id: user._id,
+                username: user.username,
+                coins: user.coins,
+                exp: user.exp,
+                level: user.level,
+                avatarUrl: user.avatarUrl
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi lưu kết quả Game:", error);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lưu điểm' });
     }
 };

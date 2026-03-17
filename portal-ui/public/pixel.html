@@ -20,35 +20,29 @@
             },
         }
     </script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        /* Style cho Mini Grid trong Log */
+        .bg-red { background-color: #ef4444; }
+        .bg-yellow { background-color: #facc15; }
+        .bg-blue { background-color: #3b82f6; }
+        .bg-orange { background-color: #f97316; }
+        .bg-purple { background-color: #a855f7; }
+        .bg-green { background-color: #22c55e; }
+
+        .mini-grid-container { display: flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .mini-pixel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; width: 24px; height: 24px; background: #000; border: 1px solid rgba(255,255,255,0.1); }
+        .mini-pixel-cell { width: 100%; height: 100%; }
+        .log-arrow { font-size: 14px !important; color: rgba(255,255,255,0.4); }
+    </style>
 </head>
 <body class="bg-background-dark text-slate-300 font-display h-screen w-screen flex flex-col overflow-hidden select-none">
     
-    <header class="border-b border-white/10 bg-background-dark/50 backdrop-blur-sm h-14 flex items-center justify-between px-6 shrink-0 z-20">
-        <div class="flex items-center space-x-4">
-            <a href="/" class="flex items-center space-x-2 hover:text-white transition-colors">
-                <span class="material-icons text-primary text-xl">view_comfy</span>
-                <span class="font-light tracking-[0.2em] text-xs text-white uppercase">Elite Studio</span>
-            </a>
-            <div class="h-4 w-px bg-white/10"></div>
-            <span class="text-[10px] font-medium text-slate-400 tracking-wider uppercase">Pixel Painting 3</span>
-        </div>
-        <div class="flex items-center space-x-6">
-            <div class="text-right">
-                <span class="text-[10px] uppercase text-slate-500 block leading-none mb-1">Level</span>
-                <span id="level-display" class="text-xs font-mono text-white font-bold">1</span>
-            </div>
-            <div class="text-right">
-                <span class="text-[10px] uppercase text-slate-500 block leading-none mb-1">Score</span>
-                <span id="score-display" class="text-xs font-mono text-primary font-bold">0</span>
-            </div>
-            <button onclick="PixelGame.gameOver('Manual Termination')" class="text-red-500 hover:text-red-400 transition-colors">
-                <span class="material-icons text-lg">power_settings_new</span>
-            </button>
-        </div>
-    </header>
-
-    <main class="flex-1 flex overflow-hidden">
-        
+    <main class="flex-1 flex overflow-hidden mt-4">
         <section class="w-64 xl:w-72 flex flex-col items-center justify-center gap-6 p-4 border-r border-white/5 bg-black/20">
             <div class="flex flex-col items-center gap-2">
                 <span class="text-[10px] uppercase tracking-[0.2em] text-white/40">Target Protocol</span>
@@ -56,9 +50,7 @@
                     <div id="target-grid" class="pixel-grid w-32 h-32 bg-background-dark border border-white/10"></div>
                 </div>
             </div>
-
             <span class="material-icons text-white/10 text-2xl">arrow_downward</span>
-
             <div class="flex flex-col items-center gap-2">
                 <span class="text-[10px] uppercase tracking-[0.2em] text-white/40">Simulation</span>
                 <div class="relative p-1 bg-black/40 border border-white/10 rounded">
@@ -69,7 +61,6 @@
                     </div>
                 </div>
             </div>
-
             <button id="btn-submit" class="w-full mx-4 py-2 bg-primary hover:bg-blue-600 text-white text-xs font-bold uppercase rounded shadow-lg transition active:scale-95">Verify</button>
         </section>
 
@@ -79,9 +70,7 @@
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Source Fragments <span id="selection-count" class="text-primary ml-2 font-bold">0/3</span></span>
                     <span class="text-[10px] text-slate-600 italic uppercase">Select & Use ◄ ► to Rotate</span>
                 </div>
-
-                <div id="source-container" class="grid grid-cols-3 gap-6 p-6 bg-white/[0.02] rounded-xl border border-white/5 shadow-2xl">
-                    </div>
+                <div id="source-container" class="grid grid-cols-3 gap-6 p-6 bg-white/[0.02] rounded-xl border border-white/5 shadow-2xl"></div>
             </div>
         </section>
 
@@ -90,8 +79,7 @@
                 <h2 class="text-[10px] uppercase tracking-[0.2em] text-white font-medium">System Log</h2>
                 <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
             </div>
-            <div id="log-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col">
-                </div>
+            <div id="log-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col"></div>
         </aside>
     </main>
 
@@ -103,7 +91,59 @@
         </div>
     </div>
 
-    <script src="js/scoreManager.js"></script>
+    <div id="pixel-gameover-overlay" class="fixed inset-0 z-[99999] hidden flex-col items-center justify-center bg-[#101922]/95 backdrop-blur-xl opacity-0 transition-opacity duration-500">
+        <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M54.627 0l.83.828-1.415 1.415-.828-.828-.828.828-1.415-1.415.828-.828-.828-.828 1.415-1.415.828.828.828-.828 1.415 1.415-.828.828z\' fill=\'%23ffffff\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
+        
+        <div class="relative z-10 w-full max-w-5xl flex flex-col md:flex-row gap-6 h-[550px] transform scale-95 transition-transform duration-500" id="pixel-gameover-panel">
+            <div class="flex-1 bg-black/40 border border-white/10 rounded-2xl p-8 text-center flex flex-col justify-center shadow-2xl relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
+                <span class="material-icons text-5xl text-white/20 mb-4">gpp_bad</span>
+                <h1 class="text-2xl font-bold text-white tracking-widest uppercase mb-1">Session Terminated</h1>
+                <p class="text-[10px] text-slate-500 font-mono mb-8 uppercase">Neural link severed</p>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white/5 rounded-lg p-4 border border-white/5">
+                        <span class="text-[9px] uppercase text-slate-500 tracking-widest block">Final Level</span>
+                        <p class="text-2xl font-bold text-white mt-1" id="go-final-level">1</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-4 border border-white/5">
+                        <span class="text-[9px] uppercase text-slate-500 tracking-widest block">Total Score</span>
+                        <p class="text-2xl font-bold text-primary mt-1" id="go-final-score">0</p>
+                    </div>
+                </div>
+
+                <div id="go-reward-container" class="mb-8 hidden">
+                    <div class="inline-flex items-center gap-3 px-6 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full">
+                        <div class="flex items-center gap-1">
+                            <span class="material-icons text-yellow-500 text-xs">monetization_on</span>
+                            <span id="go-earned-coins" class="text-yellow-500 text-[10px] font-bold tracking-widest">+0</span>
+                        </div>
+                        <div class="w-px h-3 bg-white/10"></div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-icons text-green-400 text-xs">star</span>
+                            <span id="go-earned-exp" class="text-green-400 text-[10px] font-bold tracking-widest">+0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-auto">
+                    <button onclick="location.reload()" class="flex-1 py-4 bg-primary hover:bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-primary/20">Re-Initialize</button>
+                    <button onclick="window.location.href='/'" class="flex-1 py-4 border border-white/10 hover:bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Return to Menu</button>
+                </div>
+            </div>
+
+            <div class="w-full md:w-80 bg-background-dark border border-white/5 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+                <div class="p-4 border-b border-white/5 bg-black/20 flex justify-between items-center shrink-0">
+                    <h2 class="text-[10px] uppercase tracking-[0.2em] text-white font-medium">Post-Mortem Log</h2>
+                    <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                </div>
+                <div id="go-log-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col gap-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game-header.js"></script>
+    <script src="js/rewardManager.js"></script>
     <script src="./js/games/pixel.js"></script>
 </body>
 </html>

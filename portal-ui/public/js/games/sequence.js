@@ -1,34 +1,29 @@
 /**
- * SEQUENCE.JS - GENIUS EDITION (Integrated with Server)
- * Hệ thống sinh dãy số ngẫu nhiên với độ khó "Siêu Trí Tuệ"
+ * SEQUENCE.JS - GENIUS EDITION (Integrated with RewardManager)
  */
 
-// Cấu hình Game
 const GameConfig = {
     baseScore: 100,
-    scoreMultiplier: 1.2, // Mỗi cấp khó điểm tăng 20%
+    scoreMultiplier: 1.2, 
     hintCost: 50
 };
 
 let gameState = {
     level: 1,
     score: 0,
-    currentSequence: null // Lưu trữ dãy số hiện tại
+    currentSequence: null 
 };
 
 document.addEventListener('DOMContentLoaded', () => { initGame(); });
 
 function initGame() {
     console.log("Neon Lab: GENIUS CORE ACTIVATED");
-    
-    // Reset điểm về 0 mỗi khi chơi mới (để công bằng cho BXH)
     gameState.score = 0;
     gameState.level = 1;
 
     generateNewLevel();
     updateScoreUI();
 
-    // Gắn sự kiện
     const btnPredict = document.getElementById('btn-predict');
     if(btnPredict) {
         const newBtn = btnPredict.cloneNode(true);
@@ -42,6 +37,14 @@ function initGame() {
         btnHint.parentNode.replaceChild(newHint, btnHint);
         newHint.addEventListener('click', showHint);
     }
+    
+    const btnClearLog = document.getElementById('btn-clear-log');
+    if(btnClearLog) {
+        btnClearLog.addEventListener('click', () => {
+            const logContainer = document.getElementById('lab-notes-content');
+            if(logContainer) logContainer.innerHTML = '';
+        });
+    }
 
     const inputElement = document.getElementById('rule-input');
     if(inputElement) {
@@ -52,97 +55,39 @@ function initGame() {
     }
 }
 
-// --- BỘ TẠO THUẬT TOÁN (THE CORE) ---
+// BỘ TẠO THUẬT TOÁN (Giữ nguyên siêu cấp trí tuệ của bạn)
 const LevelGenerator = {
-    // 1. Dãy số học cơ bản (Cấp 1-3)
     generateArithmetic: (level) => {
         const start = Math.floor(Math.random() * 50);
         const diff = Math.floor(Math.random() * 10) + 2; 
         const seq = [start, start + diff, start + diff*2, start + diff*3];
-        return {
-            sequence: seq,
-            next: start + diff*4,
-            hint: `Cấp số cộng: Tăng đều ${diff} đơn vị.`,
-            points: 100
-        };
+        return { sequence: seq, next: start + diff*4, hint: `Cấp số cộng: Tăng đều ${diff} đơn vị.`, points: 100 };
     },
-
-    // 2. Dãy số nhân / Lũy thừa (Cấp 4-6)
     generateGeometric: (level) => {
         const start = Math.floor(Math.random() * 5) + 2;
         const ratio = Math.floor(Math.random() * 2) + 2; 
         const seq = [start, start * ratio, start * ratio*ratio, start * ratio*ratio*ratio];
-        return {
-            sequence: seq,
-            next: start * Math.pow(ratio, 4),
-            hint: `Cấp số nhân: Gấp ${ratio} lần số trước.`,
-            points: 200
-        };
+        return { sequence: seq, next: start * Math.pow(ratio, 4), hint: `Cấp số nhân: Gấp ${ratio} lần số trước.`, points: 200 };
     },
-
-    // 3. Fibonacci & Tribonacci (Cấp 7-10)
     generateFibonacci: (level) => {
         const type = Math.random() > 0.5 ? 'fib' : 'tri';
-        let seq = [];
-        
         if (type === 'fib') {
-            let a = Math.floor(Math.random() * 5) + 1;
-            let b = Math.floor(Math.random() * 5) + 1;
-            seq = [a, b, a+b, a+b+b]; 
-            return {
-                sequence: seq,
-                next: seq[2] + seq[3],
-                hint: "Tổng hai số liền trước (Fibonacci variation).",
-                points: 300
-            };
+            let a = Math.floor(Math.random() * 5) + 1, b = Math.floor(Math.random() * 5) + 1;
+            return { sequence: [a, b, a+b, a+b+b], next: (a+b) + (a+b+b), hint: "Tổng hai số liền trước.", points: 300 };
         } else {
             let a=1, b=1, c=2;
-            seq = [a, b, c, a+b+c];
-            return {
-                sequence: seq,
-                next: seq[1] + seq[2] + seq[3],
-                hint: "Tổng ba số liền trước (Tribonacci).",
-                points: 400
-            };
+            return { sequence: [a, b, c, a+b+c], next: b + c + (a+b+c), hint: "Tổng ba số liền trước (Tribonacci).", points: 400 };
         }
     },
-
-    // 4. SIÊU TRÍ TUỆ: Dãy đan xen (Cấp 11-15)
     generateInterleaved: (level) => {
-        const startA = Math.floor(Math.random() * 10);
-        const diffA = 2; 
-        const startB = Math.floor(Math.random() * 50) + 50;
-        const diffB = 5; 
-
-        const seq = [
-            startA, 
-            startB, 
-            startA + diffA, 
-            startB - diffB, 
-            startA + diffA*2
-        ];
-
-        return {
-            sequence: seq,
-            next: startB - diffB*2,
-            hint: "Hai quy luật đan xen nhau (vị trí chẵn/lẻ).",
-            points: 600
-        };
+        const startA = Math.floor(Math.random() * 10), diffA = 2; 
+        const startB = Math.floor(Math.random() * 50) + 50, diffB = 5; 
+        return { sequence: [startA, startB, startA + diffA, startB - diffB, startA + diffA*2], next: startB - diffB*2, hint: "Hai quy luật đan xen nhau.", points: 600 };
     },
-
-    // 5. SIÊU TRÍ TUỆ: Logic chữ số (Cấp 16+)
     generateDigitalSum: (level) => {
         const start = Math.floor(Math.random() * 3) + 1;
         const logic = (n) => (n*n) + n; 
-        
-        const seq = [logic(start), logic(start+1), logic(start+2), logic(start+3)];
-        
-        return {
-            sequence: seq,
-            next: logic(start+4),
-            hint: "Quy luật: n² + n (Hoặc khoảng cách tăng dần chẵn).",
-            points: 800
-        };
+        return { sequence: [logic(start), logic(start+1), logic(start+2), logic(start+3)], next: logic(start+4), hint: "Quy luật: n² + n.", points: 800 };
     }
 };
 
@@ -165,7 +110,7 @@ function renderGame(data) {
     const levelIndicator = document.getElementById('level-indicator');
     const inputEl = document.getElementById('rule-input');
     
-    if(levelIndicator) levelIndicator.innerText = `Protocol Level: ${gameState.level}`;
+    if(levelIndicator) levelIndicator.innerText = `Level ${gameState.level}`;
     if(inputEl) { inputEl.value = ''; inputEl.focus(); }
 
     if(container) {
@@ -208,8 +153,8 @@ async function checkAnswer() {
     }
 
     if (userVal === targetVal) {
-        // --- VICTORY (TRẢ LỜI ĐÚNG) ---
-        addLogEntry('Success', `Calculation Correct. Target: ${userVal}`, 'success');
+        // --- TRẢ LỜI ĐÚNG ---
+        addLogEntry('Success', `Calculation Correct. Added ${gameState.currentSequence.points} PTS.`, 'success');
         
         const targetBlock = document.getElementById('target-block');
         if(targetBlock) {
@@ -217,76 +162,47 @@ async function checkAnswer() {
             targetBlock.innerHTML = `<div class="w-16 h-20 md:w-20 md:h-24 bg-primary border-2 border-primary rounded-lg flex items-center justify-center shadow-neon-intense"><span class="text-3xl md:text-4xl font-bold text-white">${userVal}</span></div>`;
         }
 
-        // Tính toán phần thưởng
-        const pointsEarned = gameState.currentSequence.points;
-        const coinsEarned = Math.floor(pointsEarned / 10); // 10% điểm thành coin
-        const expEarned = Math.floor(pointsEarned / 5);   // 20% điểm thành exp
-
-        gameState.score += pointsEarned;
+        gameState.score += gameState.currentSequence.points;
         gameState.level++; 
         updateScoreUI();
 
-        // --- GỌI API CỘNG THƯỞNG (COIN + EXP + PLAY COUNT) ---
-        await sendReward(coinsEarned, expEarned);
-
-        setTimeout(() => {
-            generateNewLevel();
-        }, 1000);
+        setTimeout(() => { generateNewLevel(); }, 1000);
 
     } else {
-        // --- DEFEAT (THUA CUỘC) ---
+        // --- THUA CUỘC ---
         shakeElement(inputEl);
         
-        // --- GỌI API LƯU KỶ LỤC (HIGH SCORE) ---
-        await saveHighScore(gameState.score);
+        // 1. Gửi TỔNG ĐIỂM lên Server qua RewardManager
+        if (typeof RewardManager !== 'undefined' && typeof RewardManager.submitScore === 'function') {
+            const reward = await RewardManager.submitScore('sequence', gameState.score);
+            if (reward) {
+                document.getElementById('go-reward-container').classList.remove('hidden');
+                document.getElementById('go-earned-coins').innerText = '+' + reward.coins;
+                document.getElementById('go-earned-exp').innerText = '+' + reward.exp;
+            }
+        }
 
-        // Chuyển trang Game Over
+        // 2. Điền số liệu vào màn hình Overlay
+        document.getElementById('correct-answer-display').innerText = targetVal;
+        document.getElementById('fail-level-indicator').innerText = "Variant " + gameState.level + " Failed";
+        
+        // Chạy hiệu ứng số điểm
+        animateValue("final-score-display", 0, gameState.score, 1000);
+
+        // 3. Hiển thị Overlay
         setTimeout(() => {
-            window.location.href = 'sequence_gameover.html'; 
+            const overlay = document.getElementById('seq-gameover-overlay');
+            const panel = document.getElementById('seq-gameover-panel');
+            if(overlay && panel) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    panel.classList.remove('scale-95');
+                    panel.classList.add('scale-100');
+                }, 50);
+            }
         }, 800);
-    }
-}
-
-// --- CÁC HÀM GỌI API SERVER (MỚI THÊM) ---
-
-async function sendReward(coins, exp) {
-    const username = localStorage.getItem('username');
-    if (!username) return;
-
-    try {
-        await fetch('http://localhost:3000/api/user/reward', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: username,
-                coins: coins,
-                exp: exp,
-                game: 'sequence' // <--- QUAN TRỌNG: Để server đếm số lần chơi
-            })
-        });
-        console.log(`[Server] Reward sent: +${coins} Coins, +${exp} EXP`);
-    } catch (err) {
-        console.error("Lỗi gửi thưởng:", err);
-    }
-}
-
-async function saveHighScore(score) {
-    const username = localStorage.getItem('username');
-    if (!username) return;
-
-    try {
-        await fetch('http://localhost:3000/api/user/highscore', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: username,
-                game: 'sequence', // Key phải khớp với server
-                score: score
-            })
-        });
-        console.log(`[Server] Highscore saved: ${score}`);
-    } catch (err) {
-        console.error("Lỗi lưu điểm:", err);
     }
 }
 
@@ -301,13 +217,31 @@ function showHint() {
     }
 }
 
-// --- TIỆN ÍCH ---
 function addLogEntry(title, message, type) {
     const logContainer = document.getElementById('lab-notes-content');
     if(!logContainer) return;
     const colors = type === 'error' ? 'border-red-500 bg-red-500/10 text-red-400' : (type === 'success' ? 'border-primary bg-primary/10 text-primary' : (type === 'hint' ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500' : 'border-slate-600 bg-slate-800/50 text-slate-400'));
-    logContainer.insertAdjacentHTML('afterbegin', `<div class="${colors.split(' ').slice(0,2).join(' ')} border-l-2 p-3 rounded-r-lg mb-3 animate-fade-in-up"><div class="flex justify-between items-start mb-1"><span class="text-[10px] ${colors.split(' ')[2]} font-bold uppercase">${title}</span><span class="text-[10px] text-slate-500">NOW</span></div><div class="text-xs text-slate-300">${message}</div></div>`);
+    logContainer.insertAdjacentHTML('afterbegin', `<div class="${colors.split(' ').slice(0,2).join(' ')} border-l-2 p-3 rounded-r-lg mb-3 animate-fade-in-up"><div class="flex justify-between items-start mb-1"><span class="text-[10px] ${colors.split(' ')[2]} font-bold uppercase">${title}</span></div><div class="text-xs text-slate-300">${message}</div></div>`);
 }
 
-function updateScoreUI() { const s = document.getElementById('score-display'); if(s) s.innerText = `PTS: ${gameState.score}`; }
-function shakeElement(e) { if(e) { e.classList.add('animate-shake'); setTimeout(() => e.classList.remove('animate-shake'), 500); } }
+function updateScoreUI() { 
+    const s = document.getElementById('score-display'); 
+    if(s) s.innerText = gameState.score.toLocaleString(); 
+}
+
+function shakeElement(e) { 
+    if(e) { e.classList.add('animate-shake'); setTimeout(() => e.classList.remove('animate-shake'), 500); } 
+}
+
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    if(!obj) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}

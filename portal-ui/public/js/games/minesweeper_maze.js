@@ -4,7 +4,7 @@ const MinesweeperMaze = {
     rows: 10,
     cols: 10,
     mineCount: 15,
-    grid: [], // Matrix of cell objects: { type: 'path'|'wall', isMine: bool, count: 0, revealed: bool, flagged: bool, sensed: bool, mineDetected: bool }
+    grid: [], 
     currentPos: { r: 0, c: 0 },
     startPos: { r: 0, c: 0 },
     endPos: { r: 9, c: 9 },
@@ -13,12 +13,14 @@ const MinesweeperMaze = {
     isGameOver: false,
     steps: 0,
     shields: 3,
+    
+    currentScore: 0, // Hệ thống điểm nội bộ
 
     init: function() {
         console.log("Minesweeper Maze Protocol: Initializing v2...");
         this.resetGame();
         this.generateLevel();
-        this.updateScanner(); // Initial scan
+        this.updateScanner(); 
         this.renderGrid();
         this.startTimer();
         this.bindEvents();
@@ -38,6 +40,7 @@ const MinesweeperMaze = {
         this.timer = 0;
         this.steps = 0;
         this.shields = 3;
+        this.currentScore = 0;
 
         if (this.timerInterval) clearInterval(this.timerInterval);
         
@@ -57,15 +60,8 @@ const MinesweeperMaze = {
             this.grid[r] = [];
             for (let c = 0; c < this.cols; c++) {
                 this.grid[r][c] = {
-                    type: 'wall',
-                    isMine: false,
-                    count: 0,
-                    revealed: false,
-                    flagged: false,
-                    sensed: false,
-                    mineDetected: false,
-                    r: r,
-                    c: c
+                    type: 'wall', isMine: false, count: 0, revealed: false, 
+                    flagged: false, sensed: false, mineDetected: false, r: r, c: c
                 };
             }
         }
@@ -79,7 +75,6 @@ const MinesweeperMaze = {
             this.grid[curr.r][curr.c].type = 'path';
 
             const neighbors = this.getCardinals(curr.r, curr.c).filter(n => !visited.has(`${n.r},${n.c}`));
-            
             if (neighbors.length > 0) {
                 const next = neighbors[Math.floor(Math.random() * neighbors.length)];
                 visited.add(`${next.r},${next.c}`);
@@ -94,8 +89,7 @@ const MinesweeperMaze = {
         const goldenPath = this.findPath(this.startPos, this.endPos);
         const goldenSet = new Set(goldenPath.map(p => `${p.r},${p.c}`));
 
-        let minesPlaced = 0;
-        let attempts = 0;
+        let minesPlaced = 0, attempts = 0;
         while (minesPlaced < this.mineCount && attempts < 2000) {
             attempts++;
             const r = Math.floor(Math.random() * this.rows);
@@ -177,51 +171,58 @@ const MinesweeperMaze = {
         const container = document.getElementById('minesweeper-grid');
         if (!container) return;
         container.innerHTML = '';
-        container.style.gridTemplateColumns = `repeat(${this.cols}, 45px)`;
+        
+        // Dynamic grid sizing based on level
+        const cellSize = this.cols > 15 ? '35px' : '45px';
+        container.style.gridTemplateColumns = `repeat(${this.cols}, ${cellSize})`;
 
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 const cellData = this.grid[r][c];
                 const cellEl = document.createElement('div');
-                cellEl.className = 'cell';
+                cellEl.className = 'cell flex items-center justify-center font-bold font-mono text-lg rounded-sm cursor-pointer transition-all';
+                cellEl.style.width = cellSize;
+                cellEl.style.height = cellSize;
                 
                 if (cellData.type === 'wall' && !cellData.sensed) {
-                    cellEl.classList.add('fog-hidden');
+                    cellEl.classList.add('bg-slate-800/80');
                 } else if (cellData.type === 'wall') {
-                    cellEl.classList.add('wall-cell');
+                    cellEl.classList.add('bg-slate-700', 'border', 'border-slate-600');
                 } else {
                     if (!cellData.sensed && !cellData.revealed) {
-                        cellEl.classList.add('fog-hidden');
+                        cellEl.classList.add('bg-slate-800/80');
                     } else {
-                        if (r === this.startPos.r && c === this.startPos.c) cellEl.classList.add('start-cell');
-                        if (r === this.endPos.r && c === this.endPos.c) cellEl.classList.add('end-cell');
+                        if (r === this.startPos.r && c === this.startPos.c) cellEl.classList.add('bg-primary/20');
+                        if (r === this.endPos.r && c === this.endPos.c) cellEl.classList.add('bg-green-500/20');
                         
                         if (cellData.revealed) {
-                            cellEl.classList.add('revealed');
+                            cellEl.classList.add('bg-slate-900', 'border', 'border-white/5');
                         } else if (cellData.sensed) {
-                            cellEl.classList.add('sensed');
+                            cellEl.classList.add('bg-slate-800', 'hover:bg-slate-700');
                         }
 
                         if (cellData.mineDetected) {
-                            cellEl.classList.add('mine-detected');
+                            cellEl.classList.add('bg-red-500/40', 'border-red-500');
                         } else if (cellData.revealed || cellData.sensed) {
                             if (cellData.isMine && cellData.revealed) {
-                                cellEl.classList.add('mine');
-                                cellEl.innerHTML = '<span class="material-symbols-outlined">explosion</span>';
+                                cellEl.classList.add('bg-red-600');
+                                cellEl.innerHTML = '<span class="material-symbols-outlined text-white">explosion</span>';
                             } else if (!cellData.isMine && cellData.count > 0) {
                                 cellEl.innerText = cellData.count;
-                                cellEl.classList.add(`n-${cellData.count}`);
+                                // Number colors
+                                const colors = ['text-blue-400', 'text-green-400', 'text-red-400', 'text-purple-400', 'text-yellow-400'];
+                                cellEl.classList.add(colors[(cellData.count - 1) % colors.length]);
                             }
                         }
 
-                        if (cellData.flagged) {
-                            cellEl.classList.add('flagged');
+                        if (cellData.flagged && !cellData.revealed) {
+                            cellEl.innerHTML = '<span class="material-symbols-outlined text-accent-yellow">flag</span>';
                         }
                     }
                 }
 
                 if (r === this.currentPos.r && c === this.currentPos.c) {
-                    cellEl.classList.add('current-pos');
+                    cellEl.classList.add('border-2', 'border-primary', 'bg-primary/10');
                     cellEl.innerHTML = '<span class="material-symbols-outlined text-primary animate-bounce">person</span>';
                 }
 
@@ -240,34 +241,46 @@ const MinesweeperMaze = {
         if (this.isGameOver) return;
         
         const cell = this.grid[r][c];
-        if (cell.type === 'wall') return;
+        if (cell.type === 'wall' || cell.flagged) return;
 
         const dist = Math.abs(this.currentPos.r - r) + Math.abs(this.currentPos.c - c);
         
+        // CHỈ CHO PHÉP ĐI TỪNG BƯỚC MỘT
         if (dist === 1) {
             this.steps++;
             
             if (cell.isMine && !cell.mineDetected) {
+                // ĐẠP TRÚNG MÌN
                 this.shields--;
                 cell.mineDetected = true;
                 cell.revealed = true;
-                document.getElementById('minesweeper-grid').classList.add('shake-effect');
-                setTimeout(() => document.getElementById('minesweeper-grid').classList.remove('shake-effect'), 500);
+                
+                const gridEl = document.getElementById('minesweeper-grid');
+                if(gridEl) {
+                    gridEl.classList.add('shake-effect');
+                    setTimeout(() => gridEl.classList.remove('shake-effect'), 500);
+                }
                 
                 if (this.shields <= 0) {
-                    this.gameOver(false);
+                    this.gameOver(false); // CHẾT CHẮC
                 } else {
                     this.updateUI();
                     this.renderGrid();
                 }
             } else if (!cell.isMine) {
+                // ĐI AN TOÀN
+                if (!cell.revealed) {
+                    this.currentScore += 20; // +20 điểm cho mỗi ô mới mở
+                }
+                
                 this.currentPos = { r, c };
                 cell.revealed = true;
                 this.updateScanner();
                 this.renderGrid();
                 this.updateUI();
+                
                 if (r === this.endPos.r && c === this.endPos.c) {
-                    this.gameOver(true);
+                    this.gameOver(true); // THẮNG
                 }
             }
         }
@@ -280,7 +293,6 @@ const MinesweeperMaze = {
 
         cell.flagged = !cell.flagged;
         this.renderGrid();
-        this.updateUI();
     },
 
     startTimer: function() {
@@ -298,12 +310,14 @@ const MinesweeperMaze = {
     },
 
     updateUI: function() {
-        const flaggedCount = this.grid.flat().filter(c => c.flagged).length;
-        const mineCountEl = document.getElementById('mine-count');
-        if (mineCountEl) mineCountEl.innerText = Math.max(0, this.mineCount - flaggedCount);
-        
         const stepsEl = document.getElementById('steps-count');
         if (stepsEl) stepsEl.innerText = this.steps;
+        
+        const coordsEl = document.getElementById('coords-display');
+        if (coordsEl) coordsEl.innerText = `[${this.currentPos.r},${this.currentPos.c}]`;
+
+        const scoreEl = document.getElementById('live-score');
+        if (scoreEl) scoreEl.innerText = this.currentScore.toLocaleString();
         
         const shieldContainer = document.getElementById('shield-container');
         if (shieldContainer) {
@@ -316,63 +330,104 @@ const MinesweeperMaze = {
             }
         }
 
-        const coinEl = document.getElementById('user-coin');
-        if (typeof Auth !== 'undefined' && Auth.user && coinEl) {
-            coinEl.innerText = (Auth.user.coins || 0).toLocaleString();
-        }
-
         const lv = parseInt(localStorage.getItem('minesweeper_maze_level') || 0);
         const diffText = document.getElementById('difficulty-text');
-        if (diffText) diffText.innerText = lv < 3 ? "Dễ" : (lv < 7 ? "Trung bình" : "Khó");
-        
+        if (diffText) diffText.innerText = lv < 3 ? "Cơ bản" : (lv < 7 ? "Nâng cao" : "Nguy hiểm");
         const diffBar = document.getElementById('difficulty-bar');
         if (diffBar) diffBar.style.width = `${Math.min(100, 20 + lv * 10)}%`;
     },
 
-    gameOver: function(isWin) {
+    // ==========================================
+    // XỬ LÝ KẾT THÚC GAME VỚI OVERLAY MỚI
+    // ==========================================
+    gameOver: async function(isWin) {
         this.isGameOver = true;
         clearInterval(this.timerInterval);
+        
+        const lv = parseInt(localStorage.getItem('minesweeper_maze_level') || 0);
 
-        const statusEl = document.getElementById('status-label');
         if (isWin) {
-            if (statusEl) {
-                statusEl.innerText = "THÀNH CÔNG!";
-                statusEl.classList.remove('text-primary');
-                statusEl.classList.add('text-accent-green');
+            // --- XỬ LÝ THẮNG ---
+            const timeBonus = Math.max(0, 1000 - (this.timer * 5));
+            const shieldBonus = this.shields * 500;
+            const finalScore = this.currentScore + timeBonus + shieldBonus + (lv * 200);
+
+            document.getElementById('vic-total-score').innerText = finalScore.toLocaleString();
+
+            // Lưu điểm lên server
+            if (typeof RewardManager !== 'undefined') {
+                await RewardManager.submitScore('minesweeper', finalScore);
             }
-            
-            const lv = parseInt(localStorage.getItem('minesweeper_maze_level') || 0);
+
+            // Bật Overlay Thắng
+            const overlay = document.getElementById('ms-victory-overlay');
+            if(overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.children[0].classList.remove('scale-95');
+                    overlay.children[0].classList.add('scale-100');
+                }, 50);
+            }
+
+            // Tăng level
             localStorage.setItem('minesweeper_maze_level', lv + 1);
-            
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+
         } else {
-            if (statusEl) {
-                statusEl.innerText = "BOOM! GAME OVER";
-                statusEl.classList.remove('text-primary');
-                statusEl.classList.add('text-accent-red');
-            }
-            const gridEl = document.getElementById('minesweeper-grid');
-            if (gridEl) gridEl.classList.add('shake-effect');
+            // --- XỬ LÝ THUA (ĐẠP MÌN) ---
+            document.getElementById('minesweeper-grid').classList.add('shake-effect');
             
+            // Lật tung tất cả mìn
             this.grid.flat().forEach(c => {
-                if (c.isMine) {
-                    c.revealed = true;
-                    c.sensed = true;
-                }
+                if (c.isMine) { c.revealed = true; c.sensed = true; }
             });
             this.renderGrid();
 
-            setTimeout(() => {
-                window.location.href = 'minesweeper_maze_gameover.html';
-            }, 1500);
+            // Lưu phần điểm đi đường vớt vát lại
+            if (typeof RewardManager !== 'undefined') {
+                const reward = await RewardManager.submitScore('minesweeper', this.currentScore);
+                if (reward) {
+                    document.getElementById('go-reward-container').classList.remove('hidden');
+                    document.getElementById('go-earned-coins').innerText = '+' + reward.coins;
+                    document.getElementById('go-earned-exp').innerText = '+' + reward.exp;
+                }
+            }
+
+            // Bơm data vào màn hình
+            document.getElementById('go-level-display').innerText = `Level ${lv + 1}`;
+            document.getElementById('go-score-display').innerText = this.currentScore;
+
+            // Bật Overlay BOOM
+            const overlay = document.getElementById('ms-gameover-overlay');
+            const panel = document.getElementById('ms-gameover-panel');
+            if(overlay && panel) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    panel.classList.remove('scale-95');
+                    panel.classList.add('scale-100');
+                }, 50);
+            }
+
+            // Reset Level về 0
+            localStorage.setItem('minesweeper_maze_level', 0);
         }
     },
 
     bindEvents: function() {
         const btnRestart = document.getElementById('btn-restart');
-        if (btnRestart) btnRestart.onclick = () => location.reload();
+        if (btnRestart) btnRestart.onclick = () => {
+            if(confirm("Khởi tạo lại trận địa sẽ mất toàn bộ tiến trình hiện tại. Trừ 1 Giáp. Chấp nhận?")) {
+                this.shields--;
+                if(this.shields <= 0) this.gameOver(false);
+                else {
+                    this.updateUI();
+                    location.reload();
+                }
+            }
+        };
     }
 };
 

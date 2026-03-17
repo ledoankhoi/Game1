@@ -1,5 +1,5 @@
 /**
- * PIXEL.JS - Elite League Logic (Integrated with Server)
+ * PIXEL.JS - Elite League Logic (Integrated with RewardManager)
  */
 
 const PixelGame = {
@@ -23,7 +23,6 @@ const PixelGame = {
     init: function() {
         this.level = 1;
         this.score = 0;
-        // Xóa log hoàn toàn chỉ khi BẮT ĐẦU game mới
         const log = document.getElementById('log-container');
         if(log) log.innerHTML = ''; 
         
@@ -32,30 +31,12 @@ const PixelGame = {
         const submitBtn = document.getElementById('btn-submit');
         if(submitBtn) submitBtn.onclick = () => this.checkWin();
 
-        // Lấy lại điểm cũ nếu có
-        this.loadUserData();
-
         document.addEventListener('keydown', (e) => {
             if (this.activeFocusIndex === null) return;
             if (!this.selectedIndices.includes(this.activeFocusIndex)) return;
             if (e.key === 'ArrowRight') { e.preventDefault(); this.rotateGrid(this.activeFocusIndex, 1); }
             else if (e.key === 'ArrowLeft') { e.preventDefault(); this.rotateGrid(this.activeFocusIndex, -1); }
         });
-    },
-
-    loadUserData: async function() {
-        const username = localStorage.getItem('username');
-        if (!username) return;
-        try {
-            // Lấy thông tin user để hiển thị tiền (nếu cần)
-            const res = await fetch('http://localhost:3000/api/user/info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username })
-            });
-            const data = await res.json();
-            // Có thể cập nhật UI tiền ở đây nếu trang game có hiển thị tiền
-        } catch (e) {}
     },
 
     createMiniGridHTML: function(colorClasses) {
@@ -67,23 +48,18 @@ const PixelGame = {
         return html;
     },
 
-    // --- HÀM GHI LOG (GIỮ NGUYÊN DỮ LIỆU CŨ) ---
     addToLog: function(status, message, accuracy = null, visualData = null) {
         const container = document.getElementById('log-container');
         if(!container) return;
 
         const entry = document.createElement('div');
-        
-        // Style cho tiêu đề Level (Nếu message chứa từ Level)
         const isHeader = status === 'LEVEL_START';
-        
         let colorCls = status === 'SUCCESS' ? 'text-primary border-primary/30' : 
                       (status === 'FAIL' ? 'text-red-400 border-red-500/30' : 'text-white border-white/10 bg-white/5');
-        
         let icon = status === 'SUCCESS' ? 'check_circle' : 
                   (status === 'FAIL' ? 'sensors_off' : 'api');
 
-        entry.className = `p-3 mb-2 border-l-2 bg-white/5 animate-log ${colorCls} ${isHeader ? 'mt-6 mb-4 border-l-primary bg-primary/10' : ''}`;
+        entry.className = `p-3 mb-2 border-l-2 bg-white/5 ${colorCls} ${isHeader ? 'mt-6 mb-4 border-l-primary bg-primary/10' : ''}`;
         
         let html = `
             <div class="flex justify-between items-center mb-1">
@@ -112,7 +88,7 @@ const PixelGame = {
         }
         
         entry.innerHTML = html;
-        container.prepend(entry); // Log mới nhất lên đầu
+        container.prepend(entry);
     },
 
     generateLevel: function() {
@@ -120,11 +96,8 @@ const PixelGame = {
         this.selectedIndices = [];
         this.rotations = {};
         this.sourceGrids = [];
-
-        // Ghi tiêu đề cho Level mới trong Log
         this.addToLog('LEVEL_START', `>>> INITIATING LEVEL ${this.level} <<<`);
 
-        // Logic sinh đề
         let keys = [[], [], []];
         for (let i = 0; i < 9; i++) {
             const layers = Math.random() < 0.3 ? 0 : (Math.random() < 0.6 ? 1 : 2);
@@ -146,21 +119,16 @@ const PixelGame = {
     },
 
     checkWin: function() {
-        this.attemptCount++;
         if (this.selectedIndices.length !== 3) {
             this.addToLog('FAIL', 'Incomplete sequence. Need 3 fragments.');
             return;
         }
-
         const overlay = document.getElementById('status-overlay');
         if (overlay && !overlay.classList.contains('hidden')) {
             this.gameOver("Overlap Conflict");
             return;
         }
-        
-        const frags = this.selectedIndices.map(idx => 
-            this.getRotatedValues(this.sourceGrids[idx], this.rotations[idx] || 0)
-        );
+        const frags = this.selectedIndices.map(idx => this.getRotatedValues(this.sourceGrids[idx], this.rotations[idx] || 0));
         const res = this.calculateMix(frags[0], frags[1], frags[2]);
 
         let match = 0;
@@ -168,62 +136,67 @@ const PixelGame = {
         const acc = Math.round((match/9)*100);
 
         if(acc === 100) {
-            // THẮNG
-            this.addToLog('SUCCESS', `Level ${this.level} Matched!`, 100, { fragments: frags, result: res });
-            
-            // --- GỌI API LƯU ĐIỂM & NHẬN THƯỞNG ---
-            this.saveProgress();
-
+            this.score += 200;
+            this.addToLog('SUCCESS', `Level ${this.level} Matched! (+200 PTS)`, 100, { fragments: frags, result: res });
             setTimeout(() => document.getElementById('modal-complete').classList.remove('hidden'), 400);
         } else {
-            // THUA
             this.addToLog('FAIL', `Pattern mismatch (${acc}%). Terminating...`, acc, { fragments: frags, result: res });
             setTimeout(() => this.gameOver(`Mismatch detected (${acc}%)`), 500);
         }
     },
 
-    // --- HÀM MỚI: Gửi điểm và nhận thưởng ---
-    saveProgress: async function() {
-        // Điểm thưởng qua màn
-        const levelBonus = 200; 
-        const expBonus = 50;
-        game: 'pixel'; 
-        this.score += levelBonus;
+    gameOver: async function(reason) {
+        // 1. GỬI ĐIỂM LÊN SERVER
+        if (typeof RewardManager !== 'undefined' && typeof RewardManager.submitScore === 'function') {
+            const reward = await RewardManager.submitScore('pixel', this.score);
+            if (reward) {
+                document.getElementById('go-reward-container').classList.remove('hidden');
+                document.getElementById('go-earned-coins').innerText = `+${reward.coins} COINS`;
+                document.getElementById('go-earned-exp').innerText = `+${reward.exp} EXP`;
+            }
+        }
 
-        const username = localStorage.getItem('username');
-        if (!username) return;
+        // 2. CẬP NHẬT UI OVERLAY
+        document.getElementById('go-final-level').innerText = this.level;
+        document.getElementById('go-final-score').innerText = this.score.toLocaleString();
+        
+        // Copy Log hiện tại sang màn hình kết thúc
+        document.getElementById('go-log-container').innerHTML = document.getElementById('log-container').innerHTML;
 
-        try {
-            // 1. Cập nhật HighScore (nếu cao hơn kỷ lục cũ)
-            await fetch('http://localhost:3000/api/user/highscore', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: username,
-                    game: 'pixel', // Key phải khớp server
-                    score: this.score
-                })
-            });
-
-            // 2. Nhận thưởng Coin & Exp
-            await fetch('http://localhost:3000/api/user/reward', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: username,
-                    coins: 20, // Mỗi màn được 20 coin
-                    exp: expBonus,
-                    game: 'pixel'
-                })
-            });
-            
-            console.log("Đã lưu tiến trình lên server!");
-        } catch (err) {
-            console.error("Lỗi lưu điểm:", err);
+        // 3. HIỂN THỊ OVERLAY
+        const overlay = document.getElementById('pixel-gameover-overlay');
+        const panel = document.getElementById('pixel-gameover-panel');
+        if(overlay && panel) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+                panel.classList.add('scale-100');
+            }, 50);
         }
     },
 
-    // --- CÁC HÀM PHỤ TRỢ (GIỮ NGUYÊN) ---
+    nextLevel: function() {
+        // Ẩn modal chiến thắng
+        const modal = document.getElementById('modal-complete');
+        if(modal) modal.classList.add('hidden');
+
+        // Tăng cấp độ
+        this.level++;
+
+        // CẬP NHẬT UI AN TOÀN (Đây là đoạn gây lỗi ở dòng 183 của bạn)
+        const lvEl = document.getElementById('level-display');
+        const scEl = document.getElementById('score-display');
+        
+        if (lvEl) lvEl.innerText = this.level;
+        if (scEl) scEl.innerText = this.score;
+
+        // Sinh màn mới
+        this.generateLevel();
+    },
+
+    // CÁC HÀM CƠ BẢN GIỮ NGUYÊN
     calculateMix: function(g1, g2, g3) {
         let final = [];
         for (let i = 0; i < 9; i++) {
@@ -252,7 +225,6 @@ const PixelGame = {
         const container = document.getElementById('source-container');
         if(!container) return;
         container.innerHTML = '';
-        // Sửa lỗi null check
         const countDisplay = document.getElementById('selection-count');
         if(countDisplay) countDisplay.innerText = `${this.selectedIndices.length}/3`;
         
@@ -313,47 +285,41 @@ const PixelGame = {
     updateResultPreview: function() {
         const container = document.getElementById('result-grid');
         const overlay = document.getElementById('status-overlay');
-        if(!container) return;
-        Array.from(container.children).forEach(c => { if(c.id !== 'status-overlay') c.remove(); });
-        if (this.selectedIndices.length === 0) { overlay.classList.add('hidden'); return; }
+        if (!container) return;
+
+        // Xóa các ô cũ nhưng giữ lại overlay báo lỗi
+        Array.from(container.children).forEach(c => { 
+            if(c.id !== 'status-overlay') c.remove(); 
+        });
+
+        if (this.selectedIndices.length === 0) {
+            if(overlay) overlay.classList.add('hidden');
+            return;
+        }
+
         const gA = this.selectedIndices[0] !== undefined ? this.getRotatedValues(this.sourceGrids[this.selectedIndices[0]], this.rotations[this.selectedIndices[0]]||0) : null;
         const gB = this.selectedIndices[1] !== undefined ? this.getRotatedValues(this.sourceGrids[this.selectedIndices[1]], this.rotations[this.selectedIndices[1]]||0) : null;
         const gC = this.selectedIndices[2] !== undefined ? this.getRotatedValues(this.sourceGrids[this.selectedIndices[2]], this.rotations[this.selectedIndices[2]]||0) : null;
+        
         const res = this.calculateMix(gA, gB, gC);
+
         if (res === 'INVALID') {
-            overlay.classList.remove('hidden');
-            for(let i=0; i<9; i++) { let d = document.createElement('div'); d.className = 'pixel-cell bg-invalid opacity-50'; container.appendChild(d); }
+            if(overlay) overlay.classList.remove('hidden');
+            // Vẽ các ô màu xám báo lỗi
+            for(let i=0; i<9; i++) {
+                let d = document.createElement('div');
+                d.className = 'pixel-cell bg-slate-700 opacity-50';
+                container.appendChild(d);
+            }
         } else {
-            overlay.classList.add('hidden');
-            res.forEach(cls => { let d = document.createElement('div'); d.className = `pixel-cell ${cls||''}`; container.appendChild(d); });
+            if(overlay) overlay.classList.add('hidden');
+            res.forEach(cls => {
+                let d = document.createElement('div');
+                d.className = `pixel-cell ${cls || ''}`;
+                container.appendChild(d);
+            });
         }
     },
-    nextLevel: function() {
-        document.getElementById('modal-complete').classList.add('hidden');
-        this.level++;
-        // Điểm đã được cộng trong hàm saveProgress, chỉ cần update UI
-        const scoreDisplay = document.getElementById('score-display');
-        const levelDisplay = document.getElementById('level-display');
-        
-        if(scoreDisplay) scoreDisplay.innerText = this.score;
-        if(levelDisplay) levelDisplay.innerText = this.level;
-        
-        this.generateLevel();
-    },
-    gameOver: function(reason) {
-        // Lưu log để hiển thị ở trang gameover
-        const logContent = document.getElementById('log-container').innerHTML;
-        localStorage.setItem('pixel_final_log', logContent);
-
-        localStorage.setItem('pixel_last_score', this.score);
-        localStorage.setItem('pixel_last_level', this.level);
-        localStorage.setItem('pixel_fail_reason', reason);
-        
-        // Gửi điểm lần cuối trước khi chết
-        this.saveProgress().then(() => {
-            window.location.href = 'pixel_gameover.html';
-        });
-    }
 };
 
 window.onload = () => PixelGame.init();

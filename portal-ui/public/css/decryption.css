@@ -1,6 +1,13 @@
+/* file: public/css/decryption.css */
+
 /* Neon Glow Effects */
 .glow-text {
     text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.glitch-text {
+    text-shadow: 2px 0 #ff003c, -2px 0 #00f3ff;
+    animation: glitch 1s infinite linear alternate-reverse;
 }
 
 /* Grid Cells (Nút bấm) */
@@ -22,34 +29,65 @@
 
 /* Hiệu ứng khi ô sáng lên */
 .signal-cell.active {
-    background: rgba(0, 243, 255, 0.2);
-    border-color: #00f3ff;
-    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4), inset 0 0 20px rgba(0, 243, 255, 0.2);
     transform: scale(1.05);
     z-index: 10;
 }
 
-/* Màu sắc khác nhau cho các ô (Optional: Để game đẹp hơn) */
+/* Đa dạng màu sắc tín hiệu */
 .signal-cell[data-color="blue"].active {
-    background: rgba(0, 243, 255, 0.2); border-color: #00f3ff; box-shadow: 0 0 30px #00f3ff;
+    background: rgba(0, 243, 255, 0.2); 
+    border-color: #00f3ff; 
+    box-shadow: 0 0 30px #00f3ff, inset 0 0 15px rgba(0, 243, 255, 0.3);
 }
 .signal-cell[data-color="pink"].active {
-    background: rgba(255, 0, 255, 0.2); border-color: #ff00ff; box-shadow: 0 0 30px #ff00ff;
+    background: rgba(255, 0, 255, 0.2); 
+    border-color: #ff00ff; 
+    box-shadow: 0 0 30px #ff00ff, inset 0 0 15px rgba(255, 0, 255, 0.3);
 }
 .signal-cell[data-color="green"].active {
-    background: rgba(10, 255, 0, 0.2); border-color: #0aff00; box-shadow: 0 0 30px #0aff00;
+    background: rgba(10, 255, 0, 0.2); 
+    border-color: #0aff00; 
+    box-shadow: 0 0 30px #0aff00, inset 0 0 15px rgba(10, 255, 0, 0.3);
 }
-.signal-cell[data-color="red"].active { /* Dùng khi sai */
-    background: rgba(255, 0, 0, 0.2); border-color: #ff0000; box-shadow: 0 0 30px #ff0000;
+.signal-cell[data-color="red"] { /* Dùng khi hệ thống sập */
+    border-color: rgba(255, 0, 60, 0.2);
+}
+.signal-cell[data-color="red"].active {
+    background: rgba(255, 0, 60, 0.3); 
+    border-color: #ff003c; 
+    box-shadow: 0 0 30px #ff003c;
 }
 
-/* Scanlines nền */
+/* Hiệu ứng Rung (Shake) khi sai */
+.shake-effect { 
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; 
+}
+
+/* Animations */
+@keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Scanlines nền CRT */
 body::before {
     content: "";
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06));
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;
-    z-index: 999;
+    z-index: 9999;
     opacity: 0.3;
 }

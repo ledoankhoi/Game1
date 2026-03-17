@@ -11,8 +11,8 @@ const app = express();
 
 // 3. Cấu hình Middleware (Bảo vệ và xử lý dữ liệu)
 app.use(cors()); // Cho phép Frontend (cổng 5173) gọi dữ liệu từ Backend (cổng 5000)
-app.use(express.json()); // Cho phép đọc dữ liệu JSON gửi từ Frontend
-
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // ==========================================
 // 4. IMPORT VÀ ĐĂNG KÝ CÁC ĐƯỜNG DẪN API
 // ==========================================
@@ -21,12 +21,13 @@ app.use(express.json()); // Cho phép đọc dữ liệu JSON gửi từ Fronten
 const authRoutes = require('./routes/authRoutes');
 const shopRoutes = require('./routes/shopRoutes');
 const gameRoutes = require('./routes/gameRoutes'); // <-- Đã thêm API Game
-
+const adminRoutes = require('./routes/adminRoutes');
 // Đăng ký
 app.use('/api/auth', authRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/games', gameRoutes); // <-- Đã đăng ký API Game
 app.use('/api/game', gameRoutes);
+app.use('/api/admin', adminRoutes);
 // Thêm một route cơ bản để kiểm tra Server có sống không
 app.get('/', (req, res) => {
     res.send('Máy chủ Backend MathQuest đang hoạt động bình thường!');

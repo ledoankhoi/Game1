@@ -1,5 +1,5 @@
 /**
- * SPEED.JS - Core Logic (Integrated with Server Reward & PlayCount)
+ * SPEED.JS - Core Logic (Integrated with RewardManager)
  */
 
 const SpeedGame = {
@@ -28,9 +28,10 @@ const SpeedGame = {
         const logContainer = document.getElementById('live-log-container');
         if(logContainer) logContainer.innerHTML = '';
 
-        // Gắn sự kiện nút
+        // Gắn sự kiện nút (Tránh gắn đè nhiều lần)
         for (let i = 0; i < 6; i++) {
             const btn = document.getElementById(`ans-btn-${i}`);
+            if(!btn) continue;
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
@@ -68,11 +69,14 @@ const SpeedGame = {
         this.correctAnswer = result;
         this.currentEquationStr = `${a} ${operator} ${b}`;
 
-        document.getElementById('math-equation').innerHTML = `
-            <span>${a}</span>
-            <span class="text-ice-accent mx-2">${operator}</span>
-            <span>${b}</span>
-        `;
+        const eqEl = document.getElementById('math-equation');
+        if(eqEl) {
+            eqEl.innerHTML = `
+                <span>${a}</span>
+                <span class="text-ice-accent mx-2">${operator}</span>
+                <span>${b}</span>
+            `;
+        }
 
         this.generateAnswers(result);
         
@@ -94,7 +98,7 @@ const SpeedGame = {
         const ansArray = Array.from(answers).sort(() => Math.random() - 0.5);
         for (let i = 0; i < 6; i++) {
             const btn = document.getElementById(`ans-btn-${i}`);
-            btn.querySelector('span').innerText = ansArray[i];
+            if(btn) btn.querySelector('span').innerText = ansArray[i];
         }
     },
 
@@ -107,7 +111,7 @@ const SpeedGame = {
             
             if (this.timeLeft <= 0) {
                 this.recordHistory(null, "TIMEOUT");
-                this.gameOver("Thermal Depletion");
+                this.gameOver("Hết thời gian (Time Out)");
             } else {
                 this.updateTimerUI();
             }
@@ -123,9 +127,9 @@ const SpeedGame = {
         text.innerText = `${Math.floor(this.timeLeft)}%`;
         
         if (this.timeLeft < 30) {
-            bar.className = "absolute inset-y-0 left-0 bg-gradient-to-r from-red-600 to-red-400 w-full shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-100 ease-linear";
+            bar.className = "h-full bg-gradient-to-r from-red-600 to-red-400 shadow-[0_0_15px_rgba(239,68,68,0.8)] transition-all duration-100 ease-linear";
         } else {
-            bar.className = "absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-ice-accent to-white w-full shadow-[0_0_15px_rgba(37,140,244,0.5)] transition-all duration-100 ease-linear";
+            bar.className = "h-full bg-primary shadow-[0_0_15px_rgba(37,140,244,0.8)] transition-all duration-100 ease-linear";
         }
     },
 
@@ -138,90 +142,33 @@ const SpeedGame = {
         };
         this.history.push(logEntry);
 
-        const container = document.getElementById('live-log-container');
-        if (container) {
-            if (this.history.length === 1) container.innerHTML = '';
-
-            const div = document.createElement('div');
-            let borderClass = status === 'CORRECT' ? 'border-primary' : 'border-red-500';
-            let bgClass = status === 'CORRECT' ? 'bg-primary/10' : 'bg-red-500/10';
-            let icon = status === 'CORRECT' ? 'check' : (status === 'TIMEOUT' ? 'timer_off' : 'close');
-            let textClass = status === 'CORRECT' ? 'text-white' : 'text-red-300';
-            
-            div.className = `flex items-center justify-between p-2 rounded border-l-2 ${borderClass} ${bgClass} text-xs animate-log-entry mb-2`;
-            div.innerHTML = `
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-primary/60 font-mono">${logEntry.equation}</span>
-                    <span class="font-bold ${textClass}">${playerChoice !== null ? playerChoice : '---'}</span>
-                </div>
-                <span class="material-icons-outlined text-sm opacity-50 ${textClass}">${icon}</span>
-            `;
-            container.prepend(div);
+        // Đã đồng bộ với hàm addToGameHistory của file speed.html mới
+        if(typeof window.addToGameHistory === 'function') {
+            window.addToGameHistory(this.currentEquationStr, playerChoice !== null ? playerChoice : '---', status === 'CORRECT');
         }
     },
 
-    checkAnswer: async function(val) {
+    checkAnswer: function(val) {
         if (!this.isPlaying) return;
 
         if (val === this.correctAnswer) {
             this.recordHistory(val, 'CORRECT'); 
             this.score += 50;
             this.updateScoreUI();
-
-            // --- GỬI THƯỞNG CHO MỖI CÂU ĐÚNG ---
-            await this.sendReward(5, 10); // 5 coins, 10 exp mỗi câu
+            
+            // XÓA BỎ MÃ GỬI THƯỞNG LẮT NHẮT CŨ TẠI ĐÂY
+            // Chúng ta sẽ tổng kết 1 lần khi game over để tránh bị spam server
 
             this.generateLevel();
         } else {
             this.recordHistory(val, 'WRONG'); 
-            this.gameOver(`Calculation Error: Chose ${val}, Expected ${this.correctAnswer}`);
-        }
-    },
-
-    // --- HÀM GỬI THƯỞNG & TĂNG SỐ LẦN CHƠI (MỚI THÊM) ---
-    sendReward: async function(coins, exp) {
-        const username = localStorage.getItem('username');
-        if (!username) return;
-
-        try {
-            await fetch('http://localhost:3000/api/user/reward', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: username,
-                    coins: coins,
-                    exp: exp,
-                    game: 'speed' // <--- QUAN TRỌNG: Server đếm lượt chơi game Speed Math
-                })
-            });
-        } catch (err) {
-            console.error("Lỗi gửi thưởng:", err);
-        }
-    },
-
-    // --- HÀM LƯU ĐIỂM CAO (MỚI THÊM) ---
-    saveHighScore: async function() {
-        const username = localStorage.getItem('username');
-        if (!username) return;
-
-        try {
-            await fetch('http://localhost:3000/api/user/highscore', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: username,
-                    game: 'speed',
-                    score: this.score
-                })
-            });
-            console.log("Highscore speed saved!");
-        } catch (err) {
-            console.error(err);
+            this.gameOver(`Sai kết quả (Chose ${val}, Expected ${this.correctAnswer})`);
         }
     },
 
     updateScoreUI: function() {
-        document.getElementById('current-score').innerText = this.score.toLocaleString();
+        const scoreEl = document.getElementById('current-score');
+        if(scoreEl) scoreEl.innerText = this.score.toLocaleString();
     },
 
     gameOver: async function(reason) {
@@ -229,17 +176,61 @@ const SpeedGame = {
         clearInterval(this.timerInterval);
         console.log("Game Over:", reason);
 
-        // --- LƯU KỶ LỤC LÊN SERVER ---
-        await this.saveHighScore();
+        // 1. Điền thông tin cơ bản
+        document.getElementById('fail-reason').innerText = reason;
+        document.getElementById('final-score-go').innerText = this.score.toLocaleString();
 
-        // Lưu bộ nhớ cục bộ cho màn hình GameOver
-        localStorage.setItem('speed_last_score', this.score);
-        localStorage.setItem('speed_fail_reason', reason);
-        localStorage.setItem('speed_history', JSON.stringify(this.history));
+        // 2. GỌI REWARD MANAGER ĐỂ LƯU ĐIỂM (NGẦM)
+        if (typeof RewardManager !== 'undefined') {
+            const reward = await RewardManager.submitScore('speed', this.score);
+            if (reward) {
+                document.getElementById('earned-coins').innerText = `+${reward.coins}`;
+                document.getElementById('earned-exp').innerText = `+${reward.exp}`;
+                document.getElementById('current-level').innerText = reward.level;
+                document.getElementById('exp-text').innerText = `${reward.currentExp} / ${reward.nextExp}`;
+                
+                if (reward.leveledUp) document.getElementById('level-up-badge').classList.remove('hidden');
 
+                setTimeout(() => {
+                    const percent = Math.min(100, (reward.currentExp / reward.nextExp) * 100);
+                    document.getElementById('exp-bar').style.width = `${percent}%`;
+                }, 500);
+            }
+        }
+
+        // 3. VẼ NHẬT KÝ CHIẾN ĐẤU (LOGS)
+        const logContainer = document.getElementById('go-log-container');
+        if (logContainer) {
+            logContainer.innerHTML = '';
+            this.history.forEach((item, index) => {
+                const isSuccess = item.status === 'CORRECT';
+                const color = isSuccess ? 'text-primary border-primary bg-primary/10' : 'text-red-400 border-red-500 bg-red-500/10';
+                const icon = isSuccess ? 'check_circle' : (item.status === 'TIMEOUT' ? 'timer_off' : 'cancel');
+                
+                logContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 rounded-xl border-l-4 ${color} mb-2">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] text-gray-400 uppercase tracking-widest">SEQ_${index + 1}</span>
+                            <span class="font-mono text-sm font-bold text-white">${item.equation} = ${item.choice !== null ? item.choice : 'N/A'}</span>
+                        </div>
+                        <span class="material-symbols-outlined text-lg">${icon}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. HIỂN THỊ MÀN HÌNH OVERLAY BĂNG GIÁ LÊN
+        const overlay = document.getElementById('speed-gameover-overlay');
+        const panel = document.getElementById('speed-gameover-panel');
+        
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex'); // Bật flex để căn giữa
+        
+        // Kích hoạt hiệu ứng Fade in & Trượt lên
         setTimeout(() => {
-            window.location.href = 'speed_gameover.html';
-        }, 500);
+            overlay.classList.remove('opacity-0');
+            panel.classList.remove('translate-y-10');
+        }, 50);
     }
 };
 
