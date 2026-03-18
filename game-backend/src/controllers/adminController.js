@@ -87,6 +87,16 @@ const updateItem = async (req, res) => {
 // ==========================================
 // 3. QUẢN LÝ GAME (GAMES)
 // ==========================================
+
+// THÊM HÀM MỚI NÀY ĐỂ LẤY TOÀN BỘ GAME CHO ADMIN
+const getAllGames = async (req, res) => {
+    try {
+        // Lấy TẤT CẢ game (bỏ qua điều kiện isActive), sắp xếp mới nhất lên đầu
+        const games = await Game.find().sort({ createdAt: -1 });
+        res.json({ success: true, games });
+    } catch (error) { res.status(500).json({ success: false, message: "Lỗi Server" }); }
+};
+
 const createGame = async (req, res) => {
     try {
         const newGame = await Game.create(req.body);
@@ -110,9 +120,11 @@ const updateGame = async (req, res) => {
     } catch (error) { res.status(500).json({ success: false, message: "Lỗi Server" }); }
 };
 
-// Gói ghém tất cả gửi cho Routes
+
+
+// Gói ghém tất cả gửi cho Routes (Đừng quên export getAllGames)
 module.exports = {
     getAllUsers, deleteUser, createUser, updateUser,
     createItem, deleteItem, updateItem,
-    createGame, deleteGame, updateGame
+    getAllGames, createGame, deleteGame, updateGame, // <--- Bổ sung getAllGames
 };

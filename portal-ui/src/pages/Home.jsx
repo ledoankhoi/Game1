@@ -22,9 +22,11 @@ function Home({ searchQuery = '' }) {
         // Nếu gọi thành công, bỏ dữ liệu vào cái "giỏ" setGames
         if (result.success) {
           setGames(result.games);
-
-          // Tự động rút trích danh sách Thể loại (Category) từ CSDL
-          const uniqueCategories = ['All', ...new Set(result.games.map(g => g.category).filter(Boolean))];
+          // Rã tất cả mảng thể loại ra và lọc trùng lặp bằng flatMap
+          const uniqueCategories = ['All', ...new Set(result.games.flatMap(g => {
+              // Xử lý an toàn cho cả game cũ (chuỗi) và mới (mảng)
+              return Array.isArray(g.category) ? g.category : [g.category];
+          }).filter(Boolean))];
           setCategories(uniqueCategories);
         }
       } catch (error) {
@@ -37,10 +39,21 @@ function Home({ searchQuery = '' }) {
     fetchGames(); // Kích hoạt hàm
   }, []); // Mảng rỗng [] nghĩa là chỉ gọi API 1 lần duy nhất khi vào trang
 
-  // --- THUẬT TOÁN LỌC GAME (Theo Tên và Thể loại) ---
+  // --- THUẬT TOÁN LỌC KÉP ---
   const filteredGames = games.filter(game => {
-    const matchSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCategory = activeCategory === 'All' || game.category === activeCategory;
+    const keyword = searchQuery.toLowerCase().trim();
+    // Đảm bảo category luôn là mảng để dễ check
+    const gameCats = Array.isArray(game.category) ? game.category : [game.category].filter(Boolean);
+    const catText = gameCats.join(' ').toLowerCase(); // Nối thành chuỗi để tìm kiếm từ khóa
+    
+    // 1. Kiểm tra từ khóa tìm kiếm
+    const matchSearch = keyword === '' || 
+                        (game.title && game.title.toLowerCase().includes(keyword)) ||
+                        catText.includes(keyword);
+                        
+    // 2. Kiểm tra bộ lọc bên Trái (Check xem mảng thể loại của game có chứa thể loại đang chọn không)
+    const matchCategory = activeCategory === 'All' || gameCats.includes(activeCategory);
+    
     return matchSearch && matchCategory;
   });
 
@@ -127,10 +140,13 @@ function Home({ searchQuery = '' }) {
                   className="game-card bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer" 
                   onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
                 >
-                  <div className="h-44 relative bg-gray-800">
-                    <img alt={game.title} className="size-full object-cover opacity-80 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
-                    <div className="absolute top-3 right-3 flex gap-1">
-                      <span className="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">{game.category}</span>
+                  <div className="h-44 relative bg-gray-800 overflow-hidden">
+                    <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
+                    {/* HIỂN THỊ NHIỀU THỂ LOẠI */}
+                    <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end max-w-[80%]">
+                      {(Array.isArray(game.category) ? game.category : [game.category]).map((cat, idx) => (
+                          cat && <span key={idx} className="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">{cat}</span>
+                      ))}
                     </div>
                   </div>
                   <div className="p-5">

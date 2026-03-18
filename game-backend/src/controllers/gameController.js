@@ -1,13 +1,22 @@
 const User = require('../models/User');
 const GameHistory = require('../models/GameHistory');
-
-
 const Game = require('../models/Game'); // Đảm bảo đã import model Game
 
 // Lấy danh sách toàn bộ Game hiển thị ra Sảnh
 exports.getAllGames = async (req, res) => {
     try {
-        const games = await Game.find();
+       const isAdmin = req.user && req.user.role === 'admin';
+
+        let query = {};
+        
+        if (!isAdmin) {
+            // Nếu KHÔNG PHẢI admin: Chỉ lấy game không bị ẩn
+            query = { isActive: { $ne: false } };
+        } 
+        // Nếu LÀ admin: query để trống {} để lấy tất cả 100% game
+
+        const games = await Game.find(query).sort({ createdAt: -1 });
+        
         res.json({ success: true, games });
     } catch (error) {
         console.error("Lỗi lấy danh sách game:", error);
@@ -73,7 +82,7 @@ exports.getUserHistory = async (req, res) => {
     }
 };
 
-// 1. Lấy Top Kinh Nghiệm (Cày level)
+// 3. Lấy Top Kinh Nghiệm (Cày level)
 exports.getTopExp = async (req, res) => {
     try {
         const topUsers = await User.find()
@@ -87,23 +96,28 @@ exports.getTopExp = async (req, res) => {
     }
 };
 
-// 2. Lấy Top Tổng Điểm (Cày điểm)
+// 4. Lấy Top Tổng Điểm (Cày điểm) - ĐÃ SỬA LỖI ĐỂ KHÔNG BỊ TRỐNG
 exports.getTopScore = async (req, res) => {
     try {
-        const topUsers = await User.find()
-            .sort({ totalScore: -1 }) // Chỉ xét tổng điểm
+        const topUsers = await User.find({}) 
+            .sort({ totalScore: -1 }) 
             .limit(50)
             .select('username avatarUrl equipped level totalScore');
-        res.json({ success: true, leaderboard: topUsers });
+
+        // Bù đắp số 0 cho những tài khoản cũ chưa có trường totalScore
+        const formattedUsers = topUsers.map(user => ({
+            ...user._doc, 
+            totalScore: user.totalScore || 0 
+        }));
+
+        res.json({ success: true, leaderboard: formattedUsers });
     } catch (error) {
         console.error("Lỗi lấy Top Điểm:", error);
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
 
-// --- THÊM ĐOẠN NÀY VÀO CUỐI FILE gameController.js ---
-
-// 3. Xử lý nhận thưởng sau khi chơi xong (Lưu điểm, Vàng, EXP)
+// 5. Xử lý nhận thưởng sau khi chơi xong (Lưu điểm, Vàng, EXP)
 exports.saveGameResult = async (req, res) => {
     try {
         const { gameId, score, coinsEarned, expEarned } = req.body;
@@ -178,5 +192,60 @@ exports.saveGameResult = async (req, res) => {
     } catch (error) {
         console.error("Lỗi khi lưu kết quả Game:", error);
         res.status(500).json({ success: false, message: 'Lỗi server khi lưu điểm' });
+    }
+};
+
+// --- HÀM MỚI: TÍNH TỔNG ĐIỂM THEO THỂ LOẠI ---
+// --- HÀM MỚI: TÍNH TỔNG ĐIỂM THEO THỂ LOẠI (HỖ TRỢ CẢ 'All') ---
+exports.getCategoryLeaderboard = async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        // [SỬA MỚI]: Nếu người dùng truyền lên chữ 'All', ta tìm TẤT CẢ game. Nếu không, tìm đúng thể loại.
+        const query = category === 'All' ? {} : { category: category };
+        
+        // 1. Tìm các Game theo query
+        const gamesInCategory = await Game.find(query);
+        const gameIds = gamesInCategory.map(g => g.slug); // Lấy danh sách ID (slug)
+
+        if (gameIds.length === 0) {
+            return res.json({ success: true, leaderboard: [] });
+        }
+
+        // 2. Lấy toàn bộ người chơi có lưu kỷ lục (highScores)
+        const users = await User.find({ 'highScores': { $exists: true } })
+            .select('username avatarUrl equipped level highScores');
+
+        // 3. Tính tổng điểm kỷ lục
+        let topUsers = users.map(u => {
+            let catScore = 0;
+            
+            // Duyệt qua từng game trong list và cộng dồn ĐIỂM KỶ LỤC
+            gameIds.forEach(id => {
+                if (u.highScores instanceof Map) {
+                    catScore += u.highScores.get(id) || 0;
+                } else if (u.highScores && typeof u.highScores === 'object') {
+                    catScore += u.highScores[id] || 0;
+                }
+            });
+
+            return {
+                username: u.username,
+                avatarUrl: u.avatarUrl,
+                equipped: u.equipped,
+                level: u.level,
+                score: catScore 
+            };
+        });
+
+        // 4. Lọc những người có điểm > 0 và sắp xếp từ cao xuống thấp
+        topUsers = topUsers.filter(u => u.score > 0);
+        topUsers.sort((a, b) => b.score - a.score);
+
+        // Trả về Top 50 
+        res.json({ success: true, leaderboard: topUsers.slice(0, 50) });
+    } catch (error) {
+        console.error("Lỗi lấy BXH Thể loại:", error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };

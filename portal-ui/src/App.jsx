@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
-import UserProfile from './pages/UserProfile';
 import Leaderboard from './pages/Leaderboard'; 
 import { GoogleLogin } from '@react-oauth/google';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
-  // --- 1. THÊM STATE ĐỂ LƯU CHỮ TÌM KIẾM ---
   const [searchQuery, setSearchQuery] = useState('');
-
   const [showAuth, setShowAuth] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
   
@@ -22,6 +19,7 @@ function App() {
 
   const [user, setUser] = useState(null); 
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   // Load user từ localStorage khi F5
   useEffect(() => {
@@ -30,6 +28,11 @@ function App() {
       setUser(JSON.parse(savedUser));
     }
   }, []);
+
+  // Xóa trắng thanh tìm kiếm khi chuyển trang
+  useEffect(() => {
+    setSearchQuery('');
+  }, [location.pathname]);
 
   const handleRegister = async () => {
     setAuthMessage("Đang xử lý...");
@@ -122,20 +125,21 @@ function App() {
           </h2>
         </Link>
 
-        {/* --- 2. THANH TÌM KIẾM ĐÃ NỐI DÂY ĐIỆN VÀ ĐIỀU CHỈNH RESPONSIVE --- */}
-        {/* Loại bỏ 'hidden md:block' để luôn hiển thị, dùng flex-1 để chiếm không gian trống */}
+        {/* --- THANH TÌM KIẾM --- */}
         <div className="flex-1 w-full md:w-auto max-w-2xl px-2 lg:px-12 order-3 md:order-none mt-3 md:mt-0">
           <div className="relative group w-full">
             <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
               <span className="material-symbols-outlined text-gray-400 group-focus-within:text-primary transition-colors text-2xl">search</span>
             </span>
+            
             <input 
-              type="search" 
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-10 py-2.5 md:py-3 bg-[#f0f5f1] dark:bg-[#0f1a14] border-2 border-transparent focus:bg-white dark:focus:bg-[#1a2e20] focus:border-primary/50 rounded-2xl text-base focus:ring-4 focus:ring-primary/10 transition-all shadow-inner placeholder-gray-400 text-gray-800 dark:text-white outline-none" 
-              placeholder="Search for games..." 
+              placeholder={location.pathname.includes('/shop') ? "Tìm kiếm vật phẩm..." : "Tìm kiếm tựa game..."} 
             />
+            
             {searchQuery && (
               <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
                 <span className="material-symbols-outlined text-lg">close</span>
@@ -146,12 +150,9 @@ function App() {
         
         {/* Nút bấm bên phải */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0 order-2 md:order-none">
-
-
           
           <div className="flex items-center gap-1 md:mr-2">
-
-{user && user.role === 'admin' && (
+            {user && user.role === 'admin' && (
               <Link to="/admin" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors font-bold group">
                 <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">admin_panel_settings</span>
                 <span className="hidden lg:block">Admin</span>
@@ -190,8 +191,7 @@ function App() {
                 <Link to="/profile" className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-70 transition-opacity" title="Vào trang Hồ Sơ">
                   <span className="font-bold text-gray-800 dark:text-white hidden lg:block text-sm">Chào, {user.username}</span>
                   <img 
-                    src={localStorage.getItem('user_avatar_custom') || user.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.equippedSkin !== 'default' ? user.equippedSkin : user.username}`} 
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-primary shadow-sm bg-white object-cover" 
+                    src={user.avatarUrl || localStorage.getItem('user_avatar_custom') || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"}                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-primary shadow-sm bg-white object-cover" 
                     alt="Avatar" 
                   />
                 </Link>
@@ -203,17 +203,16 @@ function App() {
         </div>
       </header>
 
-      {/* KHU VỰC THAY ĐỔI TRANG */}
+      {/* KHU VỰC THAY ĐỔI TRANG (ĐÃ FIX LỖI ROUTE BỊ LẶP) */}
       <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
         <Routes>
-          {/* --- 3. TRUYỀN BIẾN XUỐNG HOME ĐỂ LỌC --- */}
           <Route path="/" element={<Home searchQuery={searchQuery} />} />
+          <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
           
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          {/* Note: Bạn đang import 2 component profile, nên có 2 route. Tôi giữ nguyên code của bạn */}
+          {/* CHỈ GIỮ LẠI ĐÚNG 1 TRANG PROFILE CHUẨN */}
           <Route path="/profile" element={<Profile />} />
+          
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<AdminDashboard />} /> 
           <Route path="*" element={<h1 className="text-center text-2xl mt-10">404 - Không tìm thấy trang</h1>} />
         </Routes>
@@ -240,12 +239,10 @@ function App() {
           
           <p className="text-red-500 text-center text-sm mt-3 h-5 font-medium">{authMessage}</p>
           
-          {/* Nút Login / Register mặc định */}
           <button onClick={isLoginMode ? handleLogin : handleRegister} className="w-full bg-primary text-white font-bold py-3 rounded-xl mt-4 hover:bg-green-600 transition shadow-lg shadow-green-500/30 uppercase">
             {isLoginMode ? "Login" : "Register"}
           </button>
 
-          {/* --- NÚT GOOGLE --- */}
           <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
               <span className="text-sm text-gray-400 font-bold uppercase">Hoặc</span>
@@ -262,13 +259,11 @@ function App() {
                 shape="pill"
               />
           </div>
-          {/* ----------------------------------- */}
 
           <p className="text-center text-sm mt-6 text-gray-500">
             <span>{isLoginMode ? "Don't have an account?" : "Already have an account?"}</span> 
             <button onClick={() => { setIsLoginMode(!isLoginMode); setAuthMessage(""); }} className="text-primary font-bold hover:underline ml-1">Click here</button>
           </p>
-
         </div>
       </section>
     </div>

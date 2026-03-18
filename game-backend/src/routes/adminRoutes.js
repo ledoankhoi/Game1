@@ -23,4 +23,9 @@ router.post('/games', adminController.createGame);
 router.put('/games/:id', adminController.updateGame);
 router.delete('/games/:id', adminController.deleteGame);
 
+// Ví dụ trong file adminRoutes.js
+router.get('/games', adminMiddleware, adminController.getAllGames); // Lấy toàn bộ game
+router.post('/games', adminMiddleware, adminController.createGame);
+// ...
+
 module.exports = router;

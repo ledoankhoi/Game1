@@ -20,4 +20,6 @@ router.get('/leaderboard/score', gameController.getTopScore);
 // Đường link chứa tham số động (:gameId) phải nằm dưới cùng
 router.get('/leaderboard/game/:gameId', gameController.getGameLeaderboard);
 
+router.get('/leaderboard/category/:category', gameController.getCategoryLeaderboard);
+
 module.exports = router;

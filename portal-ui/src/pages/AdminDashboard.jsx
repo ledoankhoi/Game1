@@ -13,7 +13,6 @@ function AdminDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null); 
   
-  // STATE ĐỂ BIẾT LÀ ĐANG "THÊM MỚI" HAY "SỬA"
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -35,7 +34,7 @@ function AdminDashboard() {
       const token = localStorage.getItem('token');
       let url = '';
       if (activeTab === 'users') url = 'http://localhost:3000/api/admin/users';
-      else if (activeTab === 'games') url = 'http://localhost:3000/api/game/list';
+      else if (activeTab === 'games') url = 'http://localhost:3000/api/admin/games';
       else if (activeTab === 'items') url = 'http://localhost:3000/api/shop/items'; 
       
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -69,12 +68,11 @@ function AdminDashboard() {
     }
   };
 
-  // --- HÀM KÍCH HOẠT CHẾ ĐỘ SỬA ---
   const handleEdit = (item) => {
-    setEditingId(item._id); // Lưu lại ID đang sửa
-    setFormData(item);      // Đổ toàn bộ dữ liệu cũ vào Form
+    setEditingId(item._id); 
+    setFormData(item);      
     setImagePreview(item.imageUrl || item.assetUrl || item.avatarUrl || item.thumbnailUrl || null);
-    setShowModal(true);     // Mở bảng lên
+    setShowModal(true);     
   };
 
   const handleInputChange = (e) => {
@@ -107,7 +105,6 @@ function AdminDashboard() {
       const token = localStorage.getItem('token');
       const endpoint = activeTab === 'items' ? 'items' : (activeTab === 'users' ? 'users' : 'games');
       
-      // KIỂM TRA: Nếu có editingId thì CẬP NHẬT (PUT), nếu không thì THÊM MỚI (POST)
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId 
         ? `http://localhost:3000/api/admin/${endpoint}/${editingId}` 
@@ -137,13 +134,31 @@ function AdminDashboard() {
     }
   };
 
-  // HÀM KÍCH HOẠT CHẾ ĐỘ THÊM MỚI
   const openModal = () => {
-    setEditingId(null); // Xóa trắng ID
-    setFormData({}); 
+    setEditingId(null); 
+    if (activeTab === 'items') {
+        setFormData({ category: 'skin', rarity: 'silver', price: 100, isActive: true });
+    } else if (activeTab === 'games') {
+        // Mặc định category là MẢNG
+        setFormData({ category: ['Math'], isActive: true }); 
+    } else {
+        setFormData({}); 
+    }
     setImagePreview(null); 
     setShowModal(true);
   };
+
+  const renderRarityBadge = (rarity) => {
+      const badges = {
+          'silver': <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded-md text-[10px] font-bold">Thường</span>,
+          'green': <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-[10px] font-bold">Khá</span>,
+          'blue': <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[10px] font-bold">Hiếm</span>,
+          'purple': <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold">Sử Thi</span>,
+          'gold': <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-md text-[10px] font-bold">Thần Thoại</span>,
+          'rainbow': <span className="px-2 py-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white rounded-md text-[10px] font-black animate-pulse">Bạch Kim</span>
+      };
+      return badges[rarity] || badges['silver'];
+  }
 
   return (
     <div className="w-full bg-white dark:bg-[#1a2e20] rounded-3xl shadow-xl border border-[#e0e8e2] dark:border-[#2a3f31] overflow-hidden min-h-[600px] flex flex-col relative">
@@ -190,13 +205,15 @@ function AdminDashboard() {
               </thead>
               <tbody>
                 {data.length > 0 ? data.map((item) => (
-                  <tr key={item._id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <tr key={item._id} className={`border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}>
                     <td className="p-4 flex items-center gap-3">
                       {activeTab === 'users' && <img src={item.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.username}`} className="w-10 h-10 rounded-full border border-gray-300 object-cover" alt="avatar" />}
                       {activeTab === 'games' && <img src={item.thumbnailUrl || 'https://via.placeholder.com/150'} className="w-16 h-10 rounded-md object-cover border border-gray-300" alt="thumb" />}
                       {activeTab === 'items' && <img src={item.imageUrl || item.assetUrl || 'https://via.placeholder.com/150'} className="w-10 h-10 rounded-md object-cover bg-gray-100" alt="item" />}
                       <div>
-                        <p className="font-bold text-gray-800 dark:text-white">{activeTab === 'users' ? item.username : (activeTab === 'items' ? item.name : item.title)}</p>
+                        <p className="font-bold text-gray-800 dark:text-white">
+                            {activeTab === 'users' ? item.username : (activeTab === 'items' ? item.name : item.title)}
+                        </p>
                         <p className="text-xs text-gray-500 font-mono">
                           {activeTab === 'items' ? `ID: ${item.itemId}` : (activeTab === 'games' ? `Slug: ${item.slug}` : item._id)}
                         </p>
@@ -212,20 +229,40 @@ function AdminDashboard() {
                            </div>
                         </div>
                       )}
+                      
                       {activeTab === 'games' && (
                         <div className="flex flex-col gap-1">
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold w-fit uppercase">{item.category}</span>
-                          <span className="text-xs text-blue-500">{item.gameUrl}</span>
+                          {/* ĐÃ FIX: Hỗ trợ hiển thị mảng category bằng map() */}
+                          <div className="flex flex-wrap items-center gap-1">
+                              {(Array.isArray(item.category) ? item.category : [item.category]).map((c, i) => (
+                                  c && <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold w-fit uppercase">{c}</span>
+                              ))}
+
+                              {item.isActive === false && (
+                                  <span className="px-2 py-0.5 bg-red-500 text-white rounded-md text-[10px] font-black uppercase shadow-sm">Đã Ẩn</span>
+                              )}
+                          </div>
+                          <span className="text-xs text-blue-500 truncate max-w-[200px]">{item.gameUrl}</span>
                         </div>
                       )}
-                      {activeTab === 'items' && <div className="flex items-center gap-1 font-bold text-yellow-500"><span className="material-symbols-outlined text-sm">monetization_on</span> {item.price}</div>}
+                      
+                      {activeTab === 'items' && (
+                          <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">{item.category}</span>
+                                  {renderRarityBadge(item.rarity)}
+                              </div>
+                              <div className="flex items-center gap-1 font-bold text-yellow-500">
+                                  <span className="material-symbols-outlined text-sm">monetization_on</span> {item.price}
+                              </div>
+                          </div>
+                      )}
                     </td>
                     <td className="p-4 text-right whitespace-nowrap">
-                      {/* ĐÃ BỔ SUNG NÚT SỬA VÀO ĐÂY */}
-                      <button onClick={() => handleEdit(item)} className="text-blue-500 hover:text-blue-700 p-2 transition">
+                      <button onClick={() => handleEdit(item)} className="text-blue-500 hover:text-blue-700 p-2 transition" title="Sửa">
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button onClick={() => handleDelete(item._id)} className="text-red-500 hover:text-red-700 p-2 transition">
+                      <button onClick={() => handleDelete(item._id)} className="text-red-500 hover:text-red-700 p-2 transition" title="Xóa">
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </td>
@@ -278,29 +315,41 @@ function AdminDashboard() {
                     <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Tên hiển thị</label>
                     <input required value={formData.name || ''} type="text" name="name" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Mô tả vật phẩm</label>
-                    <input value={formData.description || ''} type="text" name="description" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
-                  </div>
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Phân Loại</label>
-                      <select required value={formData.category || ''} name="category" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white">
-                        <option value="">Chọn...</option>
-                        <option value="skin">Skin / Áo</option>
-                        <option value="face">Face / Khuôn mặt</option>
-                        <option value="hair">Hair / Tóc</option>
-                        <option value="shirt">Shirt / Áo</option>
+                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Phân Loại (Category)</label>
+                      <select required value={formData.category || 'skin'} name="category" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white">
+                        <option value="skin">Skin (Nền)</option>
+                        <option value="face">Face (Khuôn mặt)</option>
+                        <option value="hair">Hair (Tóc)</option>
+                        <option value="shirt">Shirt (Áo)</option>
+                        <option value="pants">Pants (Quần)</option>
+                        <option value="shoes">Shoes (Giày)</option>
+                        <option value="accessory">Accessory (Phụ kiện)</option>
+                        <option value="wings">Wings (Cánh)</option>
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Giá (Xu)</label>
-                      <input required value={formData.price || ''} type="number" name="price" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
+                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Độ Hiếm (Rarity)</label>
+                      <select required value={formData.rarity || 'silver'} name="rarity" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white">
+                        <option value="silver">⚪ Thường</option>
+                        <option value="green">🟢 Khá</option>
+                        <option value="blue">🔵 Hiếm</option>
+                        <option value="purple">🟣 Sử Thi</option>
+                        <option value="gold">🟡 Thần Thoại</option>
+                        <option value="rainbow">✨ Bạch Kim</option>
+                      </select>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Giá (Xu)</label>
+                    <input required value={formData.price || ''} type="number" name="price" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Đường dẫn Asset Game</label>
-                    <input value={formData.assetUrl || ''} type="text" name="assetUrl" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white text-sm" />
+                    <input value={formData.assetUrl || ''} type="text" name="assetUrl" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white text-sm" placeholder="Để trống nếu lấy ảnh Shop" />
                   </div>
                 </>
               )}
@@ -335,32 +384,68 @@ function AdminDashboard() {
                 </>
               )}
 
+              {/* ĐÃ FIX: Loại bỏ thẻ Div nhập Slug lặp lại và định dạng lại giao diện grid */}
               {activeTab === 'games' && (
                 <>
                   <div>
                     <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Tên Game</label>
                     <input required value={formData.title || ''} type="text" name="title" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Slug (ID Game)</label>
                       <input required value={formData.slug || ''} type="text" name="slug" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
                     </div>
+                    
                     <div>
-                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Thể loại</label>
-                      <select required value={formData.category || ''} name="category" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white">
-                        <option value="">Chọn...</option>
-                        <option value="Math">Math</option>
-                        <option value="Logic">Logic</option>
-                        <option value="Speed">Speed</option>
-                        <option value="Memory">Memory</option>
-                        <option value="Elite">Elite</option>
-                      </select>
+                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Thể loại (Chọn nhiều)</label>
+                      <div className="flex flex-wrap gap-2 p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800">
+                        {['Math', 'Logic', 'Speed', 'Memory', 'Elite', 'Action', 'Puzzle'].map(cat => {
+                          const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
+                          const isSelected = currentCats.includes(cat);
+                          
+                          return (
+                            <button
+                              type="button"
+                              key={cat}
+                              onClick={() => {
+                                let newCats;
+                                if (isSelected) newCats = currentCats.filter(c => c !== cat); 
+                                else newCats = [...currentCats, cat]; 
+                                setFormData({ ...formData, category: newCats });
+                              }}
+                              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                                isSelected 
+                                  ? 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/30' 
+                                  : 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-200'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Đường dẫn chạy Game (gameUrl)</label>
-                    <input required value={formData.gameUrl || ''} type="text" name="gameUrl" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white text-sm" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Đường dẫn chạy Game</label>
+                      <input required value={formData.gameUrl || ''} type="text" name="gameUrl" onChange={handleInputChange} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Trạng thái (Ẩn/Hiện)</label>
+                      <select 
+                        value={formData.isActive === false ? 'false' : 'true'} 
+                        name="isActive" 
+                        onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })} 
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white font-bold"
+                      >
+                        <option value="true">🟢 Đang hiển thị</option>
+                        <option value="false">🔴 Ẩn (Không hiện ở trang chủ)</option>
+                      </select>
+                    </div>
                   </div>
                 </>
               )}

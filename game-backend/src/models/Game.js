@@ -6,8 +6,12 @@ const gameSchema = new mongoose.Schema({
     slug: { type: String, required: true, unique: true }, // Tên đường dẫn (VD: monster)
     thumbnailUrl: { type: String, required: true }, // Link ảnh đại diện
     gameUrl: { type: String, required: true },      // Đường dẫn file chạy game
-    category: { type: String, required: true },     // Thể loại (Math, Logic...)
-    views: { type: Number, default: 0 }             // Lượt chơi (Mặc định là 0)
+    category: { type: [String], required: true },     // Thể loại (Math, Logic...)
+    views: { type: Number, default: 0, } ,
+    isActive: { 
+        type: Boolean, 
+        default: true // Mặc định khi tạo game mới là sẽ được Hiển thị
+    }            // Lượt chơi (Mặc định là 0)
 }, { timestamps: true }); // Tự động lưu thời gian tạo/cập nhật
 
 // Xuất Model ra để các file khác (như gameSeeder) có thể dùng được
