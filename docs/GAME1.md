@@ -184,6 +184,68 @@ npm run dev  # Vite → http://localhost:5173
 
 ---
 
+## 🗄️ **5. CƠ SỞ DỮ LIỆU (MongoDB)**
+
+### **Tổng quan**
+- **Database name**: `MathQuestDB` (kết nối localhost:27017 hoặc MONGO_URI).
+- **ORM**: Mongoose (6+ schemas trong `game-backend/src/models/`).
+- **Collections**: 6 chính (User, Game, GameHistory, Item, Quest, Transaction).
+
+**Tóm tắt schemas**:
+| Model | Mục đích | Fields chính |
+|-------|----------|--------------|
+| **User** | Người dùng & inventory | `googleId/email/username`, `coins/exp/level/totalScore`, `highScores:Map`, `inventory:[], equipped:{skin,face,hair,...}` |
+| **Game** | Danh sách mini-games | `title/slug(unique)/thumbnailUrl/gameUrl`, `category:[], views, isActive` |
+| **GameHistory** | Lưu lịch sử chơi (leaderboard) | `userId/gameId/score`, `expEarned/coinsEarned`; Index `gameId+score` |
+| **Item** | Hàng shop | `itemId(unique)/name/price/category(rarity)`, `imageUrl/assetUrl` |
+| **Quest** | Nhiệm vụ daily | `userId/questCode/progress/target`, `isCompleted` |
+| **Transaction** | Log giao dịch coins | `userId/amount(+/-)/reason/itemId` |
+
+### **Chi tiết Schemas (code snippets)**
+
+**1. User** (`models/User.js`):
+```js
+equipped: { skin: 'skin_default', face: 'face_smile', hair:'', ... }
+highScores: { monster: 1500, chess: 500, ... }  // Map<dynamic>
+inventory: ['skin_default', 'gundam_attack']    // Array itemIds
+```
+
+**2. Game** (`models/Game.js`):
+```js
+{ slug: 'monster', title: 'Monster Attack', gameUrl: '/monster.html', category: ['action'] }
+```
+
+**3. GameHistory**:
+```js
+{ userId: ObjectId, gameId: 'chess', score: 1200, coinsEarned: 50 }
+```
+
+**4. Item** (seed từ `seedItems.js`):
+```js
+{ itemId: 'gundam_attack', name: 'Gundam Attack', price: 100, category: 'skin', rarity: 'gold' }
+```
+
+**5. Quest**:
+```js
+{ questCode: 'play_3_games', progress: 2, target: 3 }
+```
+
+**6. Transaction**:
+```js
+{ userId: ObjectId, amount: -100, reason: 'buy_item', itemId: 'gundam_attack' }
+```
+
+### **Seed dữ liệu mẫu**
+```bash
+cd game-backend
+node src/seeders/gameSeeder.js     # ~10 games
+node src/seeders/seedItems.js      # ~20+ items (skins Gundam)
+```
+
+**Kết nối**: `src/config/db.js` → `mongoose.connect('mongodb://localhost:27017/MathQuestDB')`.
+
+---
+
 ## 🔄 **5. WORKFLOW NGƯỜI DÙNG**
 ```
 1. Truy cập http://localhost:5173 → Google Login (App.jsx)

@@ -1,1 +1,9 @@
-# TODO: Hoàn thành document dự án Game 1\n\n## Các bước từ kế hoạch đã phê duyệt:\n\n- [x] Bước 0: Khảo sát cấu trúc dự án bằng list_files và read các file chính (README, package.json, docs hiện có).\n- [x] Bước 1: Đề xuất và xác nhận kế hoạch document với user.\n- [ ] Bước 2: Viết toàn bộ nội dung mới vào file `docs/GAME1.md` theo kế hoạch.\n- [ ] Bước 3: Hoàn thành task bằng attempt_completion.\n\n**Tiến độ**: Đang thực hiện bước 2.
+# TODO - Cập nhật CSDL vào GAME1.md
+
+- [ ] Step 1: Tạo TODO.md với tracking (done)
+- [x] Step 2: Edit docs/GAME1.md - Thêm section 🗄️ 5. CƠ SỞ DỮ LIỆU (done)
+  - Thêm bảng tóm tắt models
+  - Chi tiết schemas User, Game, etc.
+  - Ví dụ dữ liệu
+- [x] Step 3: Verify & hoàn thành task (done)
+
