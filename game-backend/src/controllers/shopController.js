@@ -4,7 +4,6 @@ const Item = require('../models/Item');
 // 1. LẤY DANH SÁCH ĐỒ
 const getShopItems = async (req, res) => {
     try {
-        // XÓA BỎ ĐIỀU KIỆN { isActive: true }
         const items = await Item.find(); 
         res.json({ success: true, items });
     } catch (error) {
@@ -40,8 +39,7 @@ const buyItem = async (req, res) => {
     }
 };
 
-// 3. MẶC ĐỒ (ĐÃ FIX LỖI ĐỔI AVATAR)
-// 3. MẶC ĐỒ (CHỈ CHO PHÉP 1 AVATAR DUY NHẤT)
+// 3. MẶC ĐỒ (ĐÃ NÂNG CẤP: BẢO TOÀN KHUNG VÀ HUY HIỆU)
 const equipItem = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -56,15 +54,26 @@ const equipItem = async (req, res) => {
             return res.status(400).json({ success: false, message: "Bạn chưa mua vật phẩm này!" });
         }
 
-        // --- CHIÊU THỨC MỚI ---
-        // Xóa sạch toàn bộ đồ đang mặc trước đó
-        user.equipped = {}; 
-        
-        // Mặc đồ mới vào
-        user.equipped[item.category] = itemId;
+        // Đảm bảo object equipped tồn tại
+        if (!user.equipped) user.equipped = {};
 
-        // Cập nhật Avatar
-        user.avatarUrl = item.imageUrl || item.assetUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.itemId}`;
+        // --- CHIÊU THỨC MỚI ---
+        if (item.category === 'frame') {
+            // Nếu đồ mặc là KHUNG: Chỉ thay đổi khung, không chạm vào Avatar
+            user.equipped.frame = itemId;
+        } else {
+            // Nếu đồ mặc là AVATAR: Xóa sạch đồ cũ, NHƯNG LƯU LẠI Khung và Huy Hiệu
+            const currentFrame = user.equipped.frame;
+            const currentBadge = user.equipped.badge;
+            
+            user.equipped = {}; 
+            if (currentFrame) user.equipped.frame = currentFrame;
+            if (currentBadge) user.equipped.badge = currentBadge;
+            
+            // Mặc Avatar mới vào
+            user.equipped[item.category] = itemId;
+            user.avatarUrl = item.imageUrl || item.assetUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.itemId}`;
+        }
 
         user.markModified('equipped');
         await user.save();
@@ -80,5 +89,5 @@ const equipItem = async (req, res) => {
         res.status(500).json({ success: false, message: "Lỗi Server" });
     }
 };
-// Xuất khẩu các hàm (Hỗ trợ cả tên getAllItems để phòng hờ route của bạn gọi tên cũ)
+
 module.exports = { getShopItems, getAllItems: getShopItems, buyItem, equipItem };

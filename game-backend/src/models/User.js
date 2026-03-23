@@ -1,37 +1,52 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema({
-    // --- BẢO MẬT & ĐĂNG NHẬP ---
-    googleId: { type: String, unique: true, sparse: true }, 
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    username: { type: String, required: true },
-    password: { type: String }, 
+    password: { type: String },
+    googleId: { type: String },
     avatarUrl: { type: String },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' }, 
-
-    // --- TÀI SẢN & KINH NGHIỆM ---
+    
     coins: { type: Number, default: 0 },
     exp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
-    totalScore: { type: Number, default: 0 }, // [ĐÃ SỬA] Đưa ra ngoài, ngang hàng với exp
-
-    // --- THỐNG KÊ GAME ---
-    favoriteGames: { type: [String], default: [] }, 
-    highScores: { type: Map, of: Number, default: {} }, 
-
-    // --- HỆ THỐNG TÚI ĐỒ & NHÂN VẬT (AVATAR) ---
-    inventory: { type: [String], default: ['skin_default', 'face_smile'] }, 
+    totalScore: { type: Number, default: 0 },
+    
+    inventory: { type: [String], default: ['skin_default', 'face_smile'] },
     equipped: {
-        skin: { type: String, default: 'skin_default' }, 
-        face: { type: String, default: 'face_smile' },   
-        hair: { type: String, default: '' },             
-        shirt: { type: String, default: '' },            
-        pants: { type: String, default: '' },            
-        shoes: { type: String, default: '' },            
-        accessory: { type: String, default: '' },        
-        wings: { type: String, default: '' }
-        // [ĐÃ SỬA] Xóa bỏ exp và totalScore bị lọt vào đây
+        skin: { type: String, default: 'skin_default' },
+        face: { type: String, default: 'face_smile' },
+        frame: { type: String, default: 'none' }, 
+        badge: { type: String, default: 'none' }
+    },
+    
+    highScores: { type: Map, of: Number, default: {} },
+    favoriteGames: { type: [String], default: [] },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+
+    // --- THÊM PHẦN LƯU NHIỆM VỤ & THÀNH TỰU Ở ĐÂY ---
+    loginStreak: { type: Number, default: 1 }, // Chuỗi đăng nhập
+    lastLoginDate: { type: Date, default: Date.now }, // Ngày online cuối cùng
+    quests: {
+        dailyLoginClaimed: { type: Boolean, default: false },
+        gamesPlayedToday: { type: Number, default: 0 },
+        gamesPlayedClaimed: { type: Boolean, default: false },
+        scoreHunterClaimed: { type: Boolean, default: false }
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', UserSchema);
+// Mã hóa password
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+// Kiểm tra password
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+module.exports = mongoose.model('User', userSchema);

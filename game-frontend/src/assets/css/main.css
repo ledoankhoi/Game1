@@ -3,29 +3,61 @@
 /* 1. IMPORT FONTS (Dùng cho cả Game và Lobby) */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap');
+
+/* --- CSS VARIABLES (THEME SYSTEM) --- */
+:root {
+    --primary-color: #25f46a;       /* Xanh lá Neon */
+    --secondary-color: #00ffff;     /* Xanh dương Neon */
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --blur-amount: 12px;
+    --font-game: 'Orbitron', sans-serif;
+}
 
 /* 2. CẤU HÌNH BODY */
 /* Lưu ý: Không đặt background-image ở đây để tránh đè lên giao diện Lobby mới */
 body {
     margin: 0;
     padding: 0;
-    /* Font mặc định cho các phần chưa có Tailwind */
-    font-family: 'Roboto', sans-serif; 
-    
-    /* --- CSS VARIABLES (THEME SYSTEM) --- */
-    :root {
-        --primary-color: #25f46a;       /* Xanh lá Neon */
-        --secondary-color: #00ffff;     /* Xanh dương Neon */
-        --glass-bg: rgba(15, 23, 42, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.1);
-        --blur-amount: 12px;
-        --font-game: 'Orbitron', sans-serif;
-    }
+    /* Cập nhật font theo file HTML (Lexend), dự phòng Roboto */
+    font-family: 'Lexend', 'Roboto', sans-serif; 
 }
 
-/* 3. LỚP TIỆN ÍCH QUAN TRỌNG */
+/* 3. LỚP TIỆN ÍCH QUAN TRỌNG (Đã gộp từ HTML sang) */
 .hidden {
     display: none !important;
+}
+
+.material-symbols-outlined { 
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
+}
+
+.card-hover:hover { 
+    transform: translateY(-4px); 
+    transition: transform 0.2s ease-in-out; 
+    cursor: pointer; 
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.active-category {
+    background-color: var(--primary-color) !important; /* Đã đồng bộ sử dụng biến primary-color */
+    color: white !important;
+}
+
+.active-category .material-symbols-outlined {
+    color: white !important;
 }
 
 /* Class dùng chung cho hiệu ứng kính (Xóa ở các file con) */
@@ -75,7 +107,7 @@ body {
 
 .game-area input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 10px rgba(37, 244, 106, 0.3); /* Có thể dùng biến màu RGB nếu tách riêng */
+    box-shadow: 0 0 10px rgba(37, 244, 106, 0.3);
 }
 
 /* Nút bấm trong game */
@@ -144,6 +176,7 @@ body.theme-ice .game-area {
 ::-webkit-scrollbar-thumb:hover {
     background: #25f46a;
 }
+
 /* --- NHÂN VẬT GUNDAM --- */
 .shin-character {
     width: 100px;  /* Tăng lên 100px để Gundam nhìn cho ngầu */

@@ -21,12 +21,21 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation(); 
 
-  // Load user từ localStorage khi F5
-  useEffect(() => {
+  // Hàm load User và đồng bộ hóa tự động
+  const loadUser = () => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
+    } else {
+      setUser(null);
     }
+  };
+
+  useEffect(() => {
+    loadUser(); // Load lần đầu
+    // Lắng nghe sự kiện để tự động đổi Avatar khi ở Shop/Profile
+    window.addEventListener('storage', loadUser);
+    return () => window.removeEventListener('storage', loadUser);
   }, []);
 
   // Xóa trắng thanh tìm kiếm khi chuyển trang
@@ -106,8 +115,26 @@ function App() {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    localStorage.removeItem('user_avatar_custom'); // Xóa luôn ảnh custom nếu đăng xuất
-    navigate('/'); // Đẩy về trang chủ
+    localStorage.removeItem('user_avatar_custom'); 
+    navigate('/'); 
+  };
+
+  // --- HELPER CSS CHO HEADER AVATAR ---
+  const getFrameStyleApp = (frameId) => {
+    if (frameId === 'frame_gold') return "border-2 border-yellow-400 shadow-[0_0_10px_#facc15]";
+    if (frameId === 'frame_neon') return "border-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]";
+    if (frameId === 'frame_fire') return "border-2 border-red-500 shadow-[0_0_10px_#ef4444]";
+    return "border-2 border-primary shadow-sm"; // Mặc định
+  };
+
+  const getBadgeIconApp = (badgeId) => {
+    switch(badgeId) {
+      case 'rookie': return { icon: 'verified', color: 'text-orange-500' };
+      case 'firstBlood': return { icon: 'sports_esports', color: 'text-blue-500' };
+      case 'richMan': return { icon: 'monetization_on', color: 'text-yellow-500' };
+      case 'streak7': return { icon: 'local_fire_department', color: 'text-red-500' };
+      default: return { icon: 'stars', color: 'text-yellow-500' }; // Đề phòng lỗi
+    }
   };
 
   return (
@@ -186,14 +213,26 @@ function App() {
                 <span className="text-xs md:text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
               </div>
 
-              {/* NÚT AVATAR */}
+              {/* NÚT AVATAR MỚI CÓ KHUNG & HUY HIỆU */}
               <div className="relative flex items-center gap-2 md:gap-3 group">
-                <Link to="/profile" className="flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-70 transition-opacity" title="Vào trang Hồ Sơ">
+                <Link to="/profile" className="relative flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity" title="Vào trang Hồ Sơ">
                   <span className="font-bold text-gray-800 dark:text-white hidden lg:block text-sm">Chào, {user.username}</span>
+                  
+                  {/* Avatar Image + Khung Frame (Nếu có) */}
                   <img 
-                    src={user.avatarUrl || localStorage.getItem('user_avatar_custom') || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"}                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-primary shadow-sm bg-white object-cover" 
+                    src={user.avatarUrl || localStorage.getItem('user_avatar_custom') || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"}
+                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full object-cover bg-white transition-all ${getFrameStyleApp(user.equipped?.frame)}`} 
                     alt="Avatar" 
                   />
+
+                  {/* Phụ Kiện Huy Hiệu (Nếu có) */}
+                  {user.equipped?.badge && user.equipped.badge !== 'none' && (
+                    <div className="absolute -top-1 -right-1 z-20 w-4 h-4 md:w-5 md:h-5 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-md transform rotate-12">
+                      <span className={`material-symbols-outlined text-[10px] md:text-[12px] ${getBadgeIconApp(user.equipped.badge).color}`}>
+                        {getBadgeIconApp(user.equipped.badge).icon}
+                      </span>
+                    </div>
+                  )}
                 </Link>
                 <button onClick={handleLogout} className="text-[10px] md:text-xs text-red-500 font-bold hover:underline px-1 md:px-2">Đăng xuất</button>
               </div>
@@ -203,23 +242,20 @@ function App() {
         </div>
       </header>
 
-      {/* KHU VỰC THAY ĐỔI TRANG (ĐÃ FIX LỖI ROUTE BỊ LẶP) */}
+      {/* KHU VỰC THAY ĐỔI TRANG */}
       <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
         <Routes>
           <Route path="/" element={<Home searchQuery={searchQuery} />} />
           <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
-          
-          {/* CHỈ GIỮ LẠI ĐÚNG 1 TRANG PROFILE CHUẨN */}
           <Route path="/profile" element={<Profile />} />
-          
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<AdminDashboard />} /> 
           <Route path="*" element={<h1 className="text-center text-2xl mt-10">404 - Không tìm thấy trang</h1>} />
         </Routes>
       </main>
 
-      {/* BẢNG ĐĂNG NHẬP (CÓ NÚT GOOGLE) */}
-      <section id="auth-screen" className={`modal-overlay ${showAuth ? '' : 'hidden'}`}>
+      {/* BẢNG ĐĂNG NHẬP */}
+      <section id="auth-screen" className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm ${showAuth ? '' : 'hidden'}`}>
         <div className="bg-white dark:bg-[#1a2e20] p-8 rounded-2xl w-full max-w-sm shadow-2xl relative">
           <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
             <span className="material-symbols-outlined">close</span>

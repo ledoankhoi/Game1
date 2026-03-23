@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
 
-const QuestSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    questCode: { type: String, required: true }, // VD: 'play_3_games'
-    progress: { type: Number, default: 0 },      // Tiến độ (VD: 1/3)
-    target: { type: Number, required: true },    // Mục tiêu (VD: 3)
-    isCompleted: { type: Boolean, default: false },
-    rewardClaimed: { type: Boolean, default: false }
-}, { timestamps: true });
+const questSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true }, // Mã nhiệm vụ (vd: 'dailyLogin')
+    title: { type: String, required: true }, // Tên hiển thị
+    type: { type: String, enum: ['daily', 'weekly', 'monthly', 'milestone'], required: true }, // Loại
+    requirement: { type: Number, required: true }, // Yêu cầu (vd: 3 ván)
+    rewardCoins: { type: Number, default: 0 }, // Thưởng Xu
+    rewardExp: { type: Number, default: 0 }, // Thưởng Kinh nghiệm
+    icon: { type: String, default: 'assignment' }, // Icon Google Material
+    color: { type: String, default: 'blue' } // Màu sắc
+});
 
-module.exports = mongoose.model('Quest', QuestSchema);
+module.exports = mongoose.model('Quest', questSchema);

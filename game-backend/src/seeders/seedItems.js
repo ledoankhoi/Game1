@@ -46,8 +46,15 @@ const sampleItems = [
         category: 'wings',
         imageUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=wings_angel',
         assetUrl: '/assets/avatar/wings_angel.png'
-    }
+    },
+
+    // Thêm vào dưới cùng danh sách items
+    { id: 'frame_gold', name: 'Khung Vàng Hoàng Gia', price: 5000, type: 'frame', imageUrl: 'crop_square' },
+    { id: 'frame_neon', name: 'Khung Neon Cyber', price: 10000, type: 'frame', imageUrl: 'crop_square' },
+    { id: 'frame_fire', name: 'Khung Hỏa Ngục', price: 20000, type: 'frame', imageUrl: 'crop_square' },
 ];
+
+
 
 const seedItems = async () => {
     try {

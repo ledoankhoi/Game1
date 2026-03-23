@@ -1,73 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// Thêm searchQuery vào props để nhận dữ liệu từ App.jsx
 function Home({ searchQuery = '' }) {
-  // 1. Tạo cái "giỏ" (state) để chứa dữ liệu game và trạng thái đang tải
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // --- THÊM STATE CHO THỂ LOẠI (Bỏ state searchQuery vì đã nhận từ Props) ---
   const [categories, setCategories] = useState(['All']);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [favoriteGames, setFavoriteGames] = useState([]);
 
-  // 2. Dùng useEffect để gọi API xuống Backend khi trang vừa mở
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        // Gọi API tới cổng 3000
         const response = await fetch('http://localhost:3000/api/game/list');
         const result = await response.json();
 
-        // Nếu gọi thành công, bỏ dữ liệu vào cái "giỏ" setGames
-        if (result.success) {
+        // BỌC THÉP 1: Đảm bảo games là một mảng
+        if (result.success && Array.isArray(result.games)) {
           setGames(result.games);
-          // Rã tất cả mảng thể loại ra và lọc trùng lặp bằng flatMap
           const uniqueCategories = ['All', ...new Set(result.games.flatMap(g => {
-              // Xử lý an toàn cho cả game cũ (chuỗi) và mới (mảng)
-              return Array.isArray(g.category) ? g.category : [g.category];
+              return Array.isArray(g?.category) ? g.category : [g?.category];
           }).filter(Boolean))];
           setCategories(uniqueCategories);
         }
       } catch (error) {
         console.error("Lỗi khi kết nối với Backend:", error);
       } finally {
-        setLoading(false); // Tắt hiệu ứng tải
+        setLoading(false);
       }
     };
 
-    fetchGames(); // Kích hoạt hàm
-  }, []); // Mảng rỗng [] nghĩa là chỉ gọi API 1 lần duy nhất khi vào trang
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const res = await fetch('http://localhost:3000/api/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          // BỌC THÉP 2: Đảm bảo favoriteGames luôn là mảng
+          if (data.success && data.user) {
+            setFavoriteGames(Array.isArray(data.user.favoriteGames) ? data.user.favoriteGames : []);
+          }
+        } catch (error) {
+          console.error("Lỗi khi tải profile:", error);
+        }
+      }
+    };
 
-  // --- THUẬT TOÁN LỌC KÉP ---
-  const filteredGames = games.filter(game => {
-    const keyword = searchQuery.toLowerCase().trim();
-    // Đảm bảo category luôn là mảng để dễ check
-    const gameCats = Array.isArray(game.category) ? game.category : [game.category].filter(Boolean);
-    const catText = gameCats.join(' ').toLowerCase(); // Nối thành chuỗi để tìm kiếm từ khóa
+    fetchGames();
+    fetchProfile();
+  }, []);
+
+  const handleToggleFavorite = async (gameSlug, e) => {
+    e.stopPropagation(); 
     
-    // 1. Kiểm tra từ khóa tìm kiếm
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("Vui lòng đăng nhập để lưu game yêu thích nhé!");
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/toggle-favorite', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ gameSlug })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        // BỌC THÉP 3: Cập nhật an toàn
+        setFavoriteGames(Array.isArray(data.favoriteGames) ? data.favoriteGames : []); 
+      }
+    } catch (err) {
+      console.error("Lỗi khi thêm/xóa yêu thích:", err);
+    }
+  };
+
+  const filteredGames = games.filter(game => {
+    // BỌC THÉP 4: Chống lỗi khi searchQuery bị truyền sai kiểu dữ liệu
+    const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
+    const keyword = safeSearchQuery.toLowerCase().trim();
+    
+    const safeCategory = game?.category;
+    const gameCats = Array.isArray(safeCategory) ? safeCategory : [safeCategory].filter(Boolean);
+    const catText = gameCats.join(' ').toLowerCase(); 
+    
     const matchSearch = keyword === '' || 
-                        (game.title && game.title.toLowerCase().includes(keyword)) ||
+                        (game?.title && game.title.toLowerCase().includes(keyword)) ||
                         catText.includes(keyword);
                         
-    // 2. Kiểm tra bộ lọc bên Trái (Check xem mảng thể loại của game có chứa thể loại đang chọn không)
     const matchCategory = activeCategory === 'All' || gameCats.includes(activeCategory);
     
     return matchSearch && matchCategory;
   });
 
+  // BỌC THÉP 5: Chống lỗi includes()
+  const safeFavoriteGames = Array.isArray(favoriteGames) ? favoriteGames : [];
+
   return (
     <div className="flex flex-col lg:flex-row w-full gap-8">
       
-      {/* CỘT TRÁI: Danh mục Game (Đã tự động hóa) */}
+      {/* CỘT TRÁI */}
       <aside className="w-full lg:w-64 flex flex-col gap-8 shrink-0">
         <div className="flex flex-col gap-6">
           <section>
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Danh mục</h3>
             <div className="flex flex-col gap-2">
-              
-              {/* Render danh sách thể loại động từ Database */}
               {categories.map(cat => (
                 <button 
                   key={cat}
@@ -89,16 +131,15 @@ function Home({ searchQuery = '' }) {
                   </span>
                 </button>
               ))}
-
             </div>
           </section>
         </div>
       </aside>
 
-      {/* CỘT PHẢI: Danh sách Game */}
+      {/* CỘT PHẢI */}
       <div className="flex-1 flex flex-col gap-10">
         
-        {/* Game nổi bật (Giữ nguyên) */}
+        {/* Banner */}
         <section className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl group">
           <img alt="Game of the Day" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000"/>
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-12">
@@ -115,7 +156,7 @@ function Home({ searchQuery = '' }) {
           </div>
         </section>
 
-        {/* Lưới danh sách Game TỰ ĐỘNG */}
+        {/* Danh sách */}
         <section>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -130,32 +171,59 @@ function Home({ searchQuery = '' }) {
           
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="game-grid">
             
-            {/* 3. Vòng lặp render dữ liệu */}
             {loading ? (
               <p className="text-gray-500 dark:text-gray-300">Đang tải dữ liệu từ máy chủ...</p>
             ) : filteredGames.length > 0 ? (
-              filteredGames.map((game) => (
-                <div 
-                  key={game._id} 
-                  className="game-card bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm card-hover border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer" 
-                  onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
-                >
-                  <div className="h-44 relative bg-gray-800 overflow-hidden">
-                    <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
-                    {/* HIỂN THỊ NHIỀU THỂ LOẠI */}
-                    <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end max-w-[80%]">
-                      {(Array.isArray(game.category) ? game.category : [game.category]).map((cat, idx) => (
-                          cat && <span key={idx} className="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">{cat}</span>
-                      ))}
+              filteredGames.map((game) => {
+                const isFav = safeFavoriteGames.includes(game.slug);
+
+                return (
+                  <div 
+                    key={game._id} 
+                    className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" 
+                    onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
+                  >
+                    <div className="h-44 relative bg-gray-800 overflow-hidden">
+                      <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
+                      <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end max-w-[80%] z-10">
+                        {(Array.isArray(game?.category) ? game.category : [game?.category]).map((cat, idx) => (
+                            cat && <span key={idx} className="bg-black/60 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase">{cat}</span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="p-5">
+                      <h4 className="font-bold text-lg mb-1 text-black dark:text-white">{game?.title}</h4>
+                      <p className="text-sm text-[#608a6e] mb-5 line-clamp-2">👁️ Lượt chơi: {game?.views?.toLocaleString() || 0}</p>
+                      
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
+                          className="flex-grow h-11 bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold rounded-xl transition-all flex items-center justify-center"
+                        >
+                          Play Now
+                        </button>
+
+                        <button 
+                          onClick={(e) => handleToggleFavorite(game.slug, e)} 
+                          className={`w-11 h-11 shrink-0 rounded-full border-2 transition-all shadow-sm flex items-center justify-center
+                            ${isFav
+                              ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600'
+                              : 'bg-white dark:bg-[#2a3f31] border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
+                            }`}
+                        >
+                          <span 
+                            className="material-symbols-outlined text-[20px]" 
+                            style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}
+                          >
+                            favorite
+                          </span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-5">
-                    <h4 className="font-bold text-lg mb-1 text-black dark:text-white">{game.title}</h4>
-                    <p className="text-sm text-[#608a6e] mb-5 line-clamp-2">👁️ Lượt chơi: {game.views?.toLocaleString() || 0}</p>
-                    <button className="w-full bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold py-2.5 rounded-xl transition-all">Play Now</button>
-                  </div>
-                </div>
-              ))
+                )
+              })
             ) : (
               <div className="col-span-full py-10 text-center">
                 <span className="material-symbols-outlined text-5xl text-gray-300 mb-3">search_off</span>

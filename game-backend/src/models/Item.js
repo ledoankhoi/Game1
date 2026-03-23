@@ -1,24 +1,25 @@
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
-    itemId: { type: String, required: true, unique: true }, // Ví dụ: 'hat_cap_01'
-    name: { type: String, required: true },                 // Mũ Lưỡi Trai
+    itemId: { type: String, required: true, unique: true }, 
+    name: { type: String, required: true },                 
     description: { type: String },
-    price: { type: Number, required: true },                // Giá xu
+    price: { type: Number, required: true },                
     category: { 
         type: String, 
-        enum: ['skin', 'face', 'hair', 'shirt', 'pants', 'shoes', 'accessory', 'wings'], 
+        // THÊM 'frame' VÀO DANH SÁCH DƯỚI ĐÂY:
+        enum: ['skin', 'face', 'hair', 'shirt', 'pants', 'shoes', 'accessory', 'wings', 'frame'], 
         required: true 
     },
 
     rarity: {
         type: String,
-        enum: ['silver', 'green', 'blue', 'purple', 'gold', 'rainbow'], // Giới hạn các bậc
-        default: 'silver' // Mặc định nếu thêm item mà quên set độ hiếm thì là hạng Thường
+        enum: ['silver', 'green', 'blue', 'purple', 'gold', 'rainbow'], 
+        default: 'silver' 
     },
 
-    imageUrl: { type: String, required: true }, // Ảnh hiển thị trong Shop
-    assetUrl: { type: String, }  // Ảnh xé nền (PNG trong suốt) để đắp lên nhân vật
+    imageUrl: { type: String, required: true }, 
+    assetUrl: { type: String, }  
 }, { timestamps: true });
 
 module.exports = mongoose.model('Item', ItemSchema);

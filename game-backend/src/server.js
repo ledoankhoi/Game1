@@ -29,6 +29,13 @@ app.use('/api/games', gameRoutes); // <-- Đã đăng ký API Game
 app.use('/api/game', gameRoutes);
 app.use('/api/admin', adminRoutes);
 // Thêm một route cơ bản để kiểm tra Server có sống không
+
+const questRoutes = require('./routes/questRoutes');
+app.use('/api/quest', questRoutes);
+
+const achievementRoutes = require('./routes/achievementRoutes');
+app.use('/api/achievement', achievementRoutes);
+
 app.get('/', (req, res) => {
     res.send('Máy chủ Backend MathQuest đang hoạt động bình thường!');
 });

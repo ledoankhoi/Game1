@@ -2,6 +2,7 @@ const User = require('../models/User');
 const GameHistory = require('../models/GameHistory');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Feedback = require('../models/Feedback');
 const { OAuth2Client } = require('google-auth-library');
 
 // Cấu hình Google Client
@@ -53,7 +54,7 @@ const login = async (req, res) => {
                 email: user.email,
                 coins: user.coins || 0,
                 level: user.level || 1,
-                inventory: user.inventory || [], // <--- THÊM DÒNG NÀY ĐỂ TRẢ VỀ TÚI ĐỒ
+                inventory: user.inventory || [], 
                 equipped: user.equipped,
                 avatarUrl: user.avatarUrl
             }
@@ -146,7 +147,6 @@ const updateScore = async (req, res) => {
         // 4. Lưu kỷ lục cao nhất (Bọc thép 2 lớp)
         if (!user.highScores) user.highScores = {}; 
         
-        // Kiểm tra kỷ lục cũ một cách an toàn
         let currentHighScore = 0;
         if (typeof user.highScores.get === 'function') {
             currentHighScore = user.highScores.get(gameId) || 0;
@@ -154,7 +154,6 @@ const updateScore = async (req, res) => {
             currentHighScore = user.highScores[gameId] || 0;
         }
 
-        // Nếu điểm mới cao hơn thì phá kỷ lục
         if (score > currentHighScore) {
             if (typeof user.highScores.set === 'function') {
                 user.highScores.set(gameId, score);
@@ -164,8 +163,6 @@ const updateScore = async (req, res) => {
             }
         }
 
-
-        // Ghi lại lịch sử chơi game
         await GameHistory.create({
             userId: userId,
             username: user.username,
@@ -227,15 +224,32 @@ const buyItem = async (req, res) => {
     }
 };
 
-// --- 7. LẤY THÔNG TIN PROFILE ---
+// --- 7. LẤY THÔNG TIN PROFILE (ĐÃ THÊM AUTO RESET NHIỆM VỤ NGÀY) ---
 const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findById(userId).select('-password'); // Lấy hết trừ mật khẩu
+        const user = await User.findById(userId).select('-password'); 
         
-        // Đếm xem người này đã chơi bao nhiêu ván game
-        const gamesPlayed = await GameHistory.countDocuments({ userId: userId });
+        // Logic Reset Nhiệm Vụ Ngày
+        const now = new Date();
+        const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : new Date(0);
+        
+        if (now.toDateString() !== lastLogin.toDateString()) {
+            user.quests.dailyLoginClaimed = false;
+            user.quests.gamesPlayedToday = 0;
+            user.quests.gamesPlayedClaimed = false;
+            
+            // Tính chuỗi đăng nhập (Streak)
+            const diffTime = Math.abs(now - lastLogin);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            if (diffDays <= 2) user.loginStreak += 1;
+            else user.loginStreak = 1;
 
+            user.lastLoginDate = now;
+            await user.save();
+        }
+
+        const gamesPlayed = await GameHistory.countDocuments({ userId: userId });
         res.json({ success: true, user, gamesPlayed });
     } catch (error) {
         console.error("Lỗi lấy Profile:", error);
@@ -260,13 +274,11 @@ const updateAvatar = async (req, res) => {
         console.error("Lỗi cập nhật Avatar:", error);
         res.status(500).json({ success: false, message: "Lỗi Server" });
     }
-
 };
 
 // --- 9. LẤY THÔNG TIN USER (Dành cho đồng bộ Shop) ---
 const getUserInfo = async (req, res) => {
     try {
-        // req.user.id có được là nhờ authMiddleware đã giải mã token
         const user = await User.findById(req.user.id).select('-password');
         if (!user) {
             return res.status(404).json({ success: false, message: "Không tìm thấy User" });
@@ -279,7 +291,126 @@ const getUserInfo = async (req, res) => {
     }
 };
 
-// --- XUẤT TẤT CẢ CÁC HÀM ---
+// --- 10. BẬT/TẮT YÊU THÍCH GAME ---
+const toggleFavorite = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { gameSlug } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+        }
+
+        if (!user.favoriteGames) user.favoriteGames = [];
+
+        const index = user.favoriteGames.indexOf(gameSlug);
+        if (index > -1) {
+            user.favoriteGames.splice(index, 1);
+        } else {
+            user.favoriteGames.push(gameSlug);
+        }
+
+        await user.save();
+
+        res.json({ success: true, favoriteGames: user.favoriteGames });
+    } catch (error) {
+        console.error('Lỗi toggle favorite:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// --- 11. GỬI GÓP Ý / BÁO LỖI ---
+const submitFeedback = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { content } = req.body;
+
+        if (!content || content.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Vui lòng nhập nội dung!' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+        }
+
+        // Lưu vào CSDL
+        await Feedback.create({
+            userId: user._id,
+            username: user.username,
+            content: content
+        });
+
+        res.json({ success: true, message: 'Cảm ơn bạn đã góp ý! Lời nhắn đã được gửi đến nhà phát triển.' });
+    } catch (error) {
+        console.error('Lỗi gửi góp ý:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// --- 12. NHẬN THƯỞNG NHIỆM VỤ ---
+const claimQuest = async (req, res) => {
+    try {
+        const { questId } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy user" });
+
+        let rewardCoins = 0;
+        let rewardExp = 0;
+
+        if (questId === 'dailyLogin' && !user.quests.dailyLoginClaimed) {
+            rewardCoins = 50;
+            user.quests.dailyLoginClaimed = true;
+        } else if (questId === 'play3Games' && user.quests.gamesPlayedToday >= 3 && !user.quests.gamesPlayedClaimed) {
+            rewardCoins = 100;
+            rewardExp = 50;
+            user.quests.gamesPlayedClaimed = true;
+        } else if (questId === 'scoreHunter' && user.totalScore >= 10000 && !user.quests.scoreHunterClaimed) {
+            rewardCoins = 500;
+            user.quests.scoreHunterClaimed = true;
+        } else {
+            return res.status(400).json({ success: false, message: "Chưa đủ điều kiện hoặc đã nhận rồi!" });
+        }
+
+        user.coins += rewardCoins;
+        user.exp += rewardExp;
+        
+        // Xử lý lên cấp nếu đủ exp
+        let expNeeded = user.level * 1000;
+        while (user.exp >= expNeeded) {
+            user.level += 1;
+            user.exp -= expNeeded;
+            expNeeded = user.level * 1000;
+        }
+
+        await user.save();
+        res.json({ success: true, message: "Nhận thưởng thành công!", user });
+    } catch (error) {
+        console.error("Lỗi nhận thưởng:", error);
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+};
+
+// --- 13. GẮN HUY HIỆU ---
+const equipBadge = async (req, res) => {
+    try {
+        const { badgeId } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: "Lỗi User" });
+
+        if (!user.equipped) user.equipped = {};
+        user.equipped.badge = badgeId; // badgeId có thể là 'none' để tháo ra
+        await user.save();
+
+        res.json({ success: true, message: "Đã cập nhật phụ kiện!", user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+};
+// Nhớ thêm equipBadge vào module.exports { ... } nhé!
+
+// --- XUẤT TẤT CẢ CÁC HÀM (ĐÃ BAO GỒM ĐẦY ĐỦ LOGIn/REGISTER) ---
 module.exports = { 
     register, 
     login, 
@@ -289,5 +420,10 @@ module.exports = {
     googleLogin,
     getProfile, 
     updateAvatar,
-    getUserInfo
+    getUserInfo,
+    toggleFavorite,
+    submitFeedback,
+    claimQuest,
+    equipBadge,
+    
 };

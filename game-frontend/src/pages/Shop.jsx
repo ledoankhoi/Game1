@@ -133,57 +133,40 @@ function Shop({ searchQuery = '' }) {
     { id: 'rainbow', label: '✨ Bạch Kim' }
   ];
 
+  // --- ĐÃ THÊM KHUNG (FRAME) VÀO DANH SÁCH LỌC ---
   const categoryFilters = [
     { id: 'all', label: 'Tất cả đồ', icon: 'apps' },
     { id: 'skin', label: 'Trang phục', icon: 'accessibility_new' },
+    { id: 'frame', label: 'Khung Avatar', icon: 'crop_square' }, // Thêm mới
     { id: 'face', label: 'Khuôn mặt', icon: 'face' },
     { id: 'hair', label: 'Tóc & Mũ', icon: 'face_retouching_natural' },
     { id: 'shirt', label: 'Áo', icon: 'checkroom' },
     { id: 'pants', label: 'Quần', icon: 'dry_cleaning' },
     { id: 'shoes', label: 'Giày', icon: 'roller_skating' },
     { id: 'accessory', label: 'Phụ kiện', icon: 'diamond' },
-    { id: 'wings', label: 'Cánh', icon: 'flight' }
+    { id: 'wings', label: 'Cánh', icon: 'flight' },
   ];
 
-  const getCategoryInfo = (cat) => {
-    switch (cat?.toLowerCase()) {
-      case 'skin': return { title: 'Trang phục (Skin)' };
-      case 'face': return { title: 'Khuôn mặt (Face)' };
-      case 'hair': return { title: 'Tóc & Mũ (Hair)' };
-      case 'shirt': return { title: 'Áo (Shirt)' };
-      case 'pants': return { title: 'Quần (Pants)' };
-      case 'shoes': return { title: 'Giày (Shoes)' };
-      case 'accessory': return { title: 'Phụ kiện (Accessory)' };
-      case 'wings': return { title: 'Cánh (Wings)' };
-      default: return { title: 'Vật phẩm khác' };
-    }
-  };
-
-  // --- THUẬT TOÁN XÓA DẤU TIẾNG VIỆT (TÌM KIẾM CỰC MẠNH) ---
   const removeAccents = (str) => {
     if (!str) return '';
     return str.normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "") // Xóa dấu thanh
-              .replace(/đ/g, "d").replace(/Đ/g, "D") // Đổi chữ đ
+              .replace(/[\u0300-\u036f]/g, "") 
+              .replace(/đ/g, "d").replace(/Đ/g, "D") 
               .toLowerCase()
               .trim();
   };
 
   const filteredItems = items.filter(item => {
      const matchRarity = selectedRarity === 'all' || getActualRarity(item) === selectedRarity;
-      
-      // 2. Lọc theo phân loại
-      const matchCategory = selectedCategory === 'all' || (item.category || 'other').toLowerCase() === selectedCategory;
-      
-      // 3. CHỈ TÌM KIẾM TRONG TÊN VẬT PHẨM (Đã sửa lại theo yêu cầu)
-      if (!searchQuery) return matchRarity && matchCategory; 
+     const matchCategory = selectedCategory === 'all' || (item.category || 'other').toLowerCase() === selectedCategory;
+     
+     if (!searchQuery) return matchRarity && matchCategory; 
 
-      const keyword = removeAccents(searchQuery);
-      const safeName = removeAccents(item.name); // Chỉ lấy đúng Tên ra để so sánh
-      
-      const matchSearch = safeName.includes(keyword);
+     const keyword = removeAccents(searchQuery);
+     const safeName = removeAccents(item.name); 
+     const matchSearch = safeName.includes(keyword);
 
-      return matchRarity && matchCategory && matchSearch;
+     return matchRarity && matchCategory && matchSearch;
   });
 
   if (loading) return <div className="text-center py-20 text-xl font-bold">Đang tải cửa hàng...</div>;
