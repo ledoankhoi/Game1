@@ -1,0 +1,101 @@
+.perspective-grid {
+    perspective: 1000px;
+    background: radial-gradient(circle at 50% 50%, #161a21 0%, #0b0e14 100%);
+}
+
+/* Mặt đường trải dài về phía chân trời */
+.circuit-track {
+    transform: rotateX(75deg) translateY(-200px);
+    transform-style: preserve-3d;
+    height: 250% !important; 
+    top: -50%;
+}
+
+.data-stream {
+    background: linear-gradient(to bottom, transparent, #8ff5ff 50%, transparent);
+    width: 2px;
+    height: 100px;
+    position: absolute;
+}
+
+.glass-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.tech-clip {
+    clip-path: polygon(0 0, 90% 0, 100% 20%, 100% 100%, 10% 100%, 0 80%);
+}
+
+@keyframes fall { 
+    from { transform: translateY(-100vh); } 
+    to { transform: translateY(100vh); } 
+}
+
+@keyframes fall-slow { 
+    from { transform: translateY(-100vh); } 
+    to { transform: translateY(100vh); } 
+}
+
+/* Hiệu ứng chuyển làn xe mượt mà */
+#player-car {
+    transition: left 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Style cho Gate được làm nổi bật */
+.gate-active {
+    background-color: rgba(143, 245, 255, 0.2) !important;
+    border-color: #8ff5ff !important;
+    box-shadow: 0 -10px 30px rgba(143, 245, 255, 0.2);
+}
+
+.gate-active span {
+    color: #8ff5ff !important;
+    opacity: 1 !important;
+}
+
+/* Style khi đâm trúng đáp án đúng */
+.gate-correct {
+    background-color: rgba(0, 255, 100, 0.3) !important;
+    border-color: #00ff64 !important;
+}
+
+/* Hiệu ứng tường vỡ tung và bay qua đầu xe khi tông ĐÚNG */
+.shatter {
+    opacity: 0 !important;
+    transform: translateY(50px) scale(0.5) translateZ(20px) !important;
+    background-color: rgba(0, 255, 100, 0.6) !important;
+    border-color: #00ff64 !important;
+    pointer-events: none;
+    transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Các mảnh vỡ vụn bay ra */
+.glass-particle {
+    position: fixed;
+    background-color: rgba(0, 255, 100, 0.8);
+    box-shadow: 0 0 15px #00ff64, inset 0 0 5px #ffffff;
+    border: 1px solid #baffd8;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.6s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.6s ease-in;
+}
+
+/* Hiệu ứng xe bị hỏng hóc, xẹt lửa đỏ khi tông SAI */
+.gate-wrong {
+    background-color: rgba(255, 0, 50, 0.4) !important;
+    border-color: #ff0032 !important;
+    box-shadow: 0 0 40px rgba(255,0,50,0.5) !important;
+}
+
+.car-crash {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    filter: hue-rotate(-30deg) saturate(3) brightness(0.7) drop-shadow(0 0 20px #ff0032);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(-50%) translate3d(0, 0, 0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-50%) translate3d(-10px, 0, 0); }
+    20%, 40%, 60%, 80% { transform: translateX(-50%) translate3d(10px, 0, 0); }
+}

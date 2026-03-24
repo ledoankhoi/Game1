@@ -2,24 +2,28 @@ const Achievement = require('../models/Achievement');
 
 exports.getAchievements = async (req, res) => {
     try {
-        let achievements = await Achievement.find();
+        // 1. Đọc dữ liệu từ MongoDB (sắp xếp theo requirement để cái dễ lên trước)
+        let rawAchievements = await Achievement.find().sort({ requirement: 1 }).lean();
         
-        // AUTO-SEED: Tự động bơm dữ liệu nếu CSDL trống
-        if (achievements.length === 0) {
-            const defaultAchievements = [
-                { id: 'rookie', title: 'Tân Binh', description: 'Tạo tài khoản thành công', targetType: 'level', requirement: 1, icon: 'verified', color: 'orange' },
-                { id: 'firstBlood', title: 'Khởi Động', description: 'Hoàn thành ván game đầu tiên', targetType: 'gamesPlayed', requirement: 1, icon: 'sports_esports', color: 'blue' },
-                { id: 'richMan', title: 'Đại Gia', description: 'Sở hữu 10,000 Xu', targetType: 'coins', requirement: 10000, icon: 'monetization_on', color: 'yellow' },
-                { id: 'streak7', title: 'Chuỗi Thắng', description: 'Đăng nhập 7 ngày liên tiếp', targetType: 'streak', requirement: 7, icon: 'local_fire_department', color: 'red' }
-            ];
-            await Achievement.insertMany(defaultAchievements);
-            achievements = await Achievement.find();
-            console.log("Đã tự động tạo các Thành tựu cơ bản vào Database!");
+        // Nếu DB trống, báo mảng rỗng về cho Frontend
+        if (!rawAchievements || rawAchievements.length === 0) {
+            console.log("⚠️ CSDL Thành tựu đang trống. Vui lòng thêm dữ liệu vào MongoDB.");
+            return res.json({ success: true, achievements: [] });
         }
 
-        res.json({ success: true, achievements });
+        // 2. Chuẩn hóa ID để giao diện Web luôn nhận diện được
+        let formattedAchievements = rawAchievements.map(ach => {
+            return {
+                ...ach,
+                id: ach.id || (ach._id ? ach._id.toString() : '')
+            };
+        });
+
+        // 3. Trả kết quả về
+        res.json({ success: true, achievements: formattedAchievements });
+
     } catch (error) {
-        console.error("Lỗi lấy danh sách thành tựu:", error);
+        console.error("❌ Lỗi lấy danh sách thành tựu:", error);
         res.status(500).json({ success: false, message: "Lỗi Server" });
     }
 };

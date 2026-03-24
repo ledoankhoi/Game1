@@ -82,8 +82,10 @@ function AdminDashboard() {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Vui lòng chọn ảnh có dung lượng dưới 2MB!");
+    
+    // Tăng giới hạn tải ảnh lên 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Vui lòng chọn ảnh có dung lượng dưới 10MB!");
       return;
     }
 
@@ -110,13 +112,27 @@ function AdminDashboard() {
         ? `http://localhost:3000/api/admin/${endpoint}/${editingId}` 
         : `http://localhost:3000/api/admin/${endpoint}`;
       
+      // Tạo bản sao dữ liệu để gửi đi
+      const submitData = { ...formData };
+
+      // Xử lý việc "Tải ảnh lên sau": Nếu chưa có ảnh, tự động chèn ảnh mặc định để qua mặt validation của Backend
+      if (activeTab === 'games' && !submitData.thumbnailUrl) {
+          submitData.thumbnailUrl = 'https://placehold.co/150x150/1a2e20/8ff5ff?text=Game+Thumbnail';
+      }
+      if (activeTab === 'items' && !submitData.imageUrl) {
+          submitData.imageUrl = 'https://placehold.co/150x150/1a2e20/8ff5ff?text=Item+Image';
+      }
+      if (activeTab === 'users' && !submitData.avatarUrl) {
+          submitData.avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${submitData.username || 'user'}`;
+      }
+
       const response = await fetch(url, {
         method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
       
       const result = await response.json();
@@ -139,7 +155,6 @@ function AdminDashboard() {
     if (activeTab === 'items') {
         setFormData({ category: 'skin', rarity: 'silver', price: 100, isActive: true });
     } else if (activeTab === 'games') {
-        // Mặc định category là MẢNG
         setFormData({ category: ['Math'], isActive: true }); 
     } else {
         setFormData({}); 
@@ -208,8 +223,8 @@ function AdminDashboard() {
                   <tr key={item._id} className={`border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}>
                     <td className="p-4 flex items-center gap-3">
                       {activeTab === 'users' && <img src={item.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.username}`} className="w-10 h-10 rounded-full border border-gray-300 object-cover" alt="avatar" />}
-                      {activeTab === 'games' && <img src={item.thumbnailUrl || 'https://via.placeholder.com/150'} className="w-16 h-10 rounded-md object-cover border border-gray-300" alt="thumb" />}
-                      {activeTab === 'items' && <img src={item.imageUrl || item.assetUrl || 'https://via.placeholder.com/150'} className="w-10 h-10 rounded-md object-cover bg-gray-100" alt="item" />}
+                      {activeTab === 'games' && <img src={item.thumbnailUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Thumb'} className="w-16 h-10 rounded-md object-cover border border-gray-300" alt="thumb" />}
+                      {activeTab === 'items' && <img src={item.imageUrl || item.assetUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Image'} className="w-10 h-10 rounded-md object-cover bg-gray-100" alt="item" />}
                       <div>
                         <p className="font-bold text-gray-800 dark:text-white">
                             {activeTab === 'users' ? item.username : (activeTab === 'items' ? item.name : item.title)}
@@ -232,7 +247,6 @@ function AdminDashboard() {
                       
                       {activeTab === 'games' && (
                         <div className="flex flex-col gap-1">
-                          {/* ĐÃ FIX: Hỗ trợ hiển thị mảng category bằng map() */}
                           <div className="flex flex-wrap items-center gap-1">
                               {(Array.isArray(item.category) ? item.category : [item.category]).map((c, i) => (
                                   c && <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold w-fit uppercase">{c}</span>
@@ -287,14 +301,15 @@ function AdminDashboard() {
 
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 custom-scrollbar">
               
+              {/* PHẦN TẢI ẢNH */}
               <div className="flex flex-col items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-4 mb-2">
                 <span className="text-xs font-bold text-gray-500 uppercase block w-full text-left mb-1">
-                  Hình ảnh đính kèm (Dưới 2MB) <span className="text-gray-400 normal-case font-normal">(Tùy chọn)</span>
+                  Hình ảnh đính kèm (Dưới 10MB) <span className="text-gray-400 normal-case font-normal">(Tùy chọn - Có thể tải lên sau)</span>
                 </span>
                 <label className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#102216] border border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                   <span className="material-symbols-outlined text-primary">cloud_upload</span>
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-300 flex-1 truncate">
-                    {imagePreview ? 'Đã có ảnh' : 'Click để tải ảnh lên...'}
+                    {imagePreview ? 'Đã có ảnh (Nhấn để thay đổi)' : 'Click để tải ảnh lên...'}
                   </span>
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </label>
@@ -384,7 +399,6 @@ function AdminDashboard() {
                 </>
               )}
 
-              {/* ĐÃ FIX: Loại bỏ thẻ Div nhập Slug lặp lại và định dạng lại giao diện grid */}
               {activeTab === 'games' && (
                 <>
                   <div>

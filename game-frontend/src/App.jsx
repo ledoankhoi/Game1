@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Leaderboard from './pages/Leaderboard'; 
 import { GoogleLogin } from '@react-oauth/google';
-import Profile from './pages/Profile';
+import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {

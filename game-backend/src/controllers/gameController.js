@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const GameHistory = require('../models/GameHistory');
 const Game = require('../models/Game'); // Đảm bảo đã import model Game
+const { updateGameProgress } = require('../services/progressService'); // <--- THÊM DÒNG NÀY
 
 // Lấy danh sách toàn bộ Game hiển thị ra Sảnh
 exports.getAllGames = async (req, res) => {
@@ -121,11 +122,8 @@ exports.getTopScore = async (req, res) => {
 exports.saveGameResult = async (req, res) => {
     try {
         const { gameId, score, coinsEarned, expEarned } = req.body;
-        
-        // Lấy ID user từ token (do middleware auth cung cấp)
         const userId = req.user.id; 
 
-        // 1. Tìm User
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy User" });
 
@@ -135,10 +133,8 @@ exports.saveGameResult = async (req, res) => {
         user.level = user.level || 1;
         user.totalScore = (user.totalScore || 0) + score;
 
-        // 3. Kiểm tra và Lưu Điểm Cao (High Score) cho Game hiện tại
+        // 3. Kiểm tra và Lưu Điểm Cao
         if (!user.highScores) user.highScores = {};
-        
-        // Xử lý an toàn cho cả Object thường và Mongoose Map
         let currentHighScore = 0;
         if (user.highScores instanceof Map) {
             currentHighScore = user.highScores.get(gameId) || 0;
@@ -148,13 +144,12 @@ exports.saveGameResult = async (req, res) => {
             if (score > currentHighScore) user.highScores[gameId] = score;
         }
 
-        // 4. Thuật toán thăng cấp (Level Up)
+        // 4. Thuật toán thăng cấp
         let leveledUp = false;
         const baseLevelExp = 1000;
         const expMultiplier = 1.5;
         let expNeeded = Math.floor(baseLevelExp * Math.pow(expMultiplier, user.level - 1));
 
-        // Dùng vòng lặp while đề phòng trường hợp nhận 1 lúc quá nhiều EXP lên 2, 3 cấp
         while (user.exp >= expNeeded) {
             user.exp -= expNeeded;
             user.level += 1;
@@ -162,10 +157,15 @@ exports.saveGameResult = async (req, res) => {
             expNeeded = Math.floor(baseLevelExp * Math.pow(expMultiplier, user.level - 1));
         }
 
-        // Lưu User cập nhật vào CSDL
+        // ==========================================
+        // THÊM MỚI: GỌI HÀM CẬP NHẬT NHIỆM VỤ Ở ĐÂY
+        // ==========================================
+        const unlockedItems = updateGameProgress(user, score);
+
+        // Lưu User cập nhật vào CSDL (Bao gồm cả điểm, level và tiến độ nhiệm vụ vừa tính)
         await user.save();
 
-        // 5. Ghi nhận vào Bảng Lịch Sử (Để làm BXH Lịch sử)
+        // 5. Ghi nhận vào Bảng Lịch Sự
         await GameHistory.create({
             userId: user._id,
             username: user.username,
@@ -175,10 +175,11 @@ exports.saveGameResult = async (req, res) => {
             expEarned: expEarned
         });
 
-        // 6. Trả kết quả về cho Frontend (rewardManager.js)
+        // 6. Trả kết quả về cho Frontend
         res.json({ 
             success: true, 
             leveledUp: leveledUp,
+            unlockedItems: unlockedItems, // <--- TRẢ VỀ THÔNG BÁO CHO FRONTEND
             user: {
                 id: user._id,
                 username: user.username,

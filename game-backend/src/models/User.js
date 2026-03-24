@@ -33,7 +33,24 @@ const userSchema = new mongoose.Schema({
         gamesPlayedToday: { type: Number, default: 0 },
         gamesPlayedClaimed: { type: Boolean, default: false },
         scoreHunterClaimed: { type: Boolean, default: false }
-    }
+    },
+    stats: {
+        totalGamesPlayed: { type: Number, default: 0 },
+        loginStreak: { type: Number, default: 0 }
+    },
+    questProgress: {
+        type: Map,
+        of: Number,
+        default: {} // Ví dụ: { "play3Games": 1, "scoreHunter": 5000 }
+    },
+    completedQuests: [{ type: String }], // Lưu ID các nhiệm vụ đã xong hôm nay
+    unlockedAchievements: [{ type: String }],
+
+    claimedQuests: {
+        type: Map,
+        of: Date,
+        default: {} // Ví dụ: { "play3Games": "2023-10-25T12:00:00Z" }
+    },
 }, { timestamps: true });
 
 // Mã hóa password

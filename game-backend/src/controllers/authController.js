@@ -409,7 +409,42 @@ const equipBadge = async (req, res) => {
     }
 };
 // Nhớ thêm equipBadge vào module.exports { ... } nhé!
+// --- THÊM CHỨC NĂNG ĐỔI TÊN ---
+const updateUsername = async (req, res) => {
+    try {
+        const { newUsername } = req.body;
+        const userId = req.user.id;
 
+        // Kiểm tra điều kiện tên
+        if (!newUsername || newUsername.trim().length < 3 || newUsername.trim().length > 20) {
+            return res.status(400).json({ success: false, message: 'Tên hiển thị phải từ 3 đến 20 ký tự.' });
+        }
+
+        // Kiểm tra xem tên này đã có ai dùng chưa (tùy chọn, nếu bạn muốn tên là duy nhất)
+        const User = require('../models/User'); // Đảm bảo đã import User model
+        const existingUser = await User.findOne({ username: newUsername.trim() });
+        if (existingUser && existingUser._id.toString() !== userId) {
+            return res.status(400).json({ success: false, message: 'Tên này đã có người sử dụng, vui lòng chọn tên khác!' });
+        }
+
+        // Cập nhật tên mới vào CSDL
+        const user = await User.findByIdAndUpdate(
+            userId, 
+            { username: newUsername.trim() }, 
+            { new: true }
+        );
+
+        res.json({ 
+            success: true, 
+            message: 'Đổi tên thành công!', 
+            username: user.username 
+        });
+
+    } catch (error) {
+        console.error("Lỗi updateUsername:", error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi đổi tên' });
+    }
+};
 // --- XUẤT TẤT CẢ CÁC HÀM (ĐÃ BAO GỒM ĐẦY ĐỦ LOGIn/REGISTER) ---
 module.exports = { 
     register, 
@@ -425,5 +460,5 @@ module.exports = {
     submitFeedback,
     claimQuest,
     equipBadge,
-    
+    updateUsername
 };
