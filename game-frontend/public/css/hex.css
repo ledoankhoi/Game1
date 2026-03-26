@@ -1,0 +1,49 @@
+:root {
+    --board-size: 7; /* Kích thước chuẩn cho web game MCTS */
+}
+
+.hexagon-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--board-size), 1fr);
+    gap: 4px;
+    transform: rotateX(45deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+    margin: 0 auto;
+}
+
+.hex-cell {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    aspect-ratio: 1/1.15;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hex-glow-red {
+    box-shadow: 0 0 15px rgba(255, 89, 227, 0.4);
+}
+
+.hex-glow-blue {
+    box-shadow: 0 0 15px rgba(143, 245, 255, 0.4);
+}
+
+.glass-panel {
+    background: rgba(22, 26, 33, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-mask {
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* Custom Scrollbar for logs */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #45484f;
+    border-radius: 10px;
+}

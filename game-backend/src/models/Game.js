@@ -11,7 +11,7 @@ const gameSchema = new mongoose.Schema({
     isActive: { 
         type: Boolean, 
         default: true // Mặc định khi tạo game mới là sẽ được Hiển thị
-    }            // Lượt chơi (Mặc định là 0)
+    },
 }, { timestamps: true }); // Tự động lưu thời gian tạo/cập nhật
 
 // Xuất Model ra để các file khác (như gameSeeder) có thể dùng được

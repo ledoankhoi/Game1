@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-function Home({ searchQuery = '' }) {
+function Home({ searchQuery = '', user, setShowAuth }) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState(['All']);
   const [activeCategory, setActiveCategory] = useState('All');
   const [favoriteGames, setFavoriteGames] = useState([]);
+
+  // Thêm hàm xử lý khi nhấn chơi game
+  const handlePlayGame = (url, e) => {
+    if (e) e.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
+    
+    // Nếu chưa có user (chưa đăng nhập), hiển thị form đăng nhập
+    if (!user) {
+      if (setShowAuth) setShowAuth(true);
+    } else {
+      // Nếu đã đăng nhập, chuyển hướng đến game
+      window.location.href = url;
+    }
+  };
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -80,6 +93,23 @@ function Home({ searchQuery = '' }) {
     }
   };
 
+  // Trong Home.jsx
+const [recommendations, setRecommendations] = useState([]);
+
+useEffect(() => {
+  const fetchRecommendations = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const res = await fetch('http://localhost:3000/api/game/recommendations', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setRecommendations(data.games);
+    }
+  };
+  fetchRecommendations();
+}, []);
+
   const filteredGames = games.filter(game => {
     // BỌC THÉP 4: Chống lỗi khi searchQuery bị truyền sai kiểu dữ liệu
     const safeSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
@@ -149,7 +179,8 @@ function Home({ searchQuery = '' }) {
             <h1 className="text-4xl lg:text-6xl font-black text-white leading-tight max-w-2xl mb-4">Galaxy Striker:<br/>Math Defense</h1>
             <p className="text-white/80 text-lg max-w-xl mb-8 leading-relaxed">Protect the galaxy from number monsters! Type the correct answer to shoot them down.</p>
             <div className="flex items-center gap-4">
-              <button onClick={() => window.location.href='/monster.html'} className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
+              {/* Sửa nút Play Now ở Banner */}
+              <button onClick={(e) => handlePlayGame('/monster.html', e)} className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
                 <span className="material-symbols-outlined">play_circle</span> Play Now
               </button>
             </div>
@@ -181,7 +212,8 @@ function Home({ searchQuery = '' }) {
                   <div 
                     key={game._id} 
                     className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" 
-                    onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
+                    // Sửa onClick cho Thẻ Game
+                    onClick={(e) => handlePlayGame(game.gameUrl || `/${game.slug}.html`, e)}
                   >
                     <div className="h-44 relative bg-gray-800 overflow-hidden">
                       <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
@@ -197,8 +229,9 @@ function Home({ searchQuery = '' }) {
                       <p className="text-sm text-[#608a6e] mb-5 line-clamp-2">👁️ Lượt chơi: {game?.views?.toLocaleString() || 0}</p>
                       
                       <div className="flex items-center gap-2">
+                        {/* Sửa onClick cho nút Play Now */}
                         <button
-                          onClick={() => window.location.href = game.gameUrl || `/${game.slug}.html`}
+                          onClick={(e) => handlePlayGame(game.gameUrl || `/${game.slug}.html`, e)}
                           className="flex-grow h-11 bg-[#f0f5f1] dark:bg-[#233829] hover:bg-primary hover:text-white text-[#111813] dark:text-white font-bold rounded-xl transition-all flex items-center justify-center"
                         >
                           Play Now

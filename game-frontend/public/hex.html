@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MathQuest - HEX: KINETIC LOGIC</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#22262f",
+              "background": "#0b0e14",
+              "secondary-dim": "#ff59e3",
+              "outline": "#73757d",
+              "primary-fixed": "#00eefc",
+              "on-surface-variant": "#a9abb3",
+              "surface": "#0b0e14",
+              "primary-container": "#00eefc",
+              "surface-container-lowest": "#000000",
+              "surface-container-high": "#1c2028",
+              "secondary": "#ff59e3",
+              "on-surface": "#ecedf6",
+              "surface-container": "#161a21",
+              "primary": "#8ff5ff",
+              "outline-variant": "#45484f"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Lexend"]
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="css/hex.css">
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary overflow-hidden">
+    <header class="bg-slate-950/70 backdrop-blur-xl fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-6 h-16 shadow-none">
+        <div class="flex items-center gap-4">
+            <span class="text-xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)] font-['Space_Grotesk'] uppercase tracking-tighter">HEX: KINETIC LOGIC</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full">
+                <span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                <span id="ai-status" class="text-xs font-label uppercase tracking-widest text-secondary font-bold">AWAITING MOVE</span>
+            </div>
+            <button onclick="window.location.href='/'" class="text-slate-400 hover:text-cyan-300 transition-colors"><span class="material-symbols-outlined">home</span></button>
+            <button id="btn-restart" class="bg-primary text-slate-900 font-['Space_Grotesk'] font-bold px-4 py-1.5 rounded-xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-tighter text-sm">REBOOT CORE</button>
+        </div>
+    </header>
+
+    <main class="pt-16 h-screen flex flex-col md:flex-row">
+        <section class="flex-1 relative flex items-center justify-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-surface-container-low to-background overflow-hidden p-8">
+            <div class="absolute inset-0 pointer-events-none opacity-20">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border-[0.5px] border-primary-dim/30 rounded-full animate-pulse"></div>
+            </div>
+            
+            <div id="hex-grid" class="relative z-10 hexagon-grid w-full max-w-[500px]"></div>
+
+            <div class="absolute bottom-8 left-8 right-8 flex justify-between items-end pointer-events-none">
+                <div class="glass-panel p-4 rounded-xl flex items-center gap-4 border-l-4 border-secondary pointer-events-auto">
+                    <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                        <span class="material-symbols-outlined text-3xl">account_circle</span>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-label text-secondary font-bold tracking-widest uppercase">Red (Left to Right)</div>
+                        <div class="text-xl font-headline font-bold text-on-surface">PLAYER_01</div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-2 pointer-events-auto">
+                    <div class="px-3 py-1 bg-surface-container-highest rounded-full border border-outline-variant/30">
+                        <span id="turn-counter" class="text-[10px] font-label text-outline uppercase tracking-widest">Turn: 1</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl flex items-center gap-4 border-r-4 border-primary pointer-events-auto text-right">
+                    <div>
+                        <div class="text-[10px] font-label text-primary font-bold tracking-widest uppercase">Blue (Top to Bottom)</div>
+                        <div class="text-xl font-headline font-bold text-on-surface">MCTS_AI_CORE</div>
+                    </div>
+                    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">memory</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="w-full md:w-80 lg:w-96 glass-panel border-l border-white/5 flex flex-col p-6 space-y-8 overflow-y-auto">
+            <section>
+                <header class="flex justify-between items-center mb-4">
+                    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-outline">Win Probability</h3>
+                </header>
+                <div class="relative h-24 w-full bg-surface-container-low rounded-xl overflow-hidden flex items-end">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                        <div class="text-2xl font-headline font-black text-on-surface opacity-80"><span id="prob-red">50</span>% <span class="text-xs font-normal text-outline">v</span> <span id="prob-blue">50</span>%</div>
+                    </div>
+                    <div id="bar-red" class="flex-1 bg-secondary/20 h-[50%] border-t border-secondary/50 transition-all duration-500"></div>
+                    <div id="bar-blue" class="flex-1 bg-primary/40 h-[50%] border-t border-primary/50 shadow-[0_-5px_15px_rgba(143,245,255,0.2)] transition-all duration-500"></div>
+                </div>
+            </section>
+
+            <section class="flex-1 flex flex-col min-h-0">
+                <header class="flex justify-between items-center mb-4">
+                    <h3 class="font-headline text-xs font-bold uppercase tracking-widest text-outline">Tactical Log</h3>
+                </header>
+                <div id="tactical-log" class="flex-1 bg-surface-container-lowest/50 rounded-xl p-3 border border-outline-variant/10 overflow-y-auto sidebar-mask space-y-4">
+                    </div>
+            </section>
+        </aside>
+    </main>
+
+    <script src="js/scoreManager.js"></script>
+    <script src="js/games/hex.js"></script>
+    <script src="js/rewardManager.js"></script>
+    <script src="js/game-header.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import Leaderboard from './pages/Leaderboard';
 import { GoogleLogin } from '@react-oauth/google';
 import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import Chatbot from './components/Chatbot';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -245,8 +246,7 @@ function App() {
       {/* KHU VỰC THAY ĐỔI TRANG */}
       <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
         <Routes>
-          <Route path="/" element={<Home searchQuery={searchQuery} />} />
-          <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
+<Route path="/" element={<Home searchQuery={searchQuery} user={user} setShowAuth={setShowAuth} />} />          <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<AdminDashboard />} /> 
@@ -296,12 +296,12 @@ function App() {
               />
           </div>
 
-          <p className="text-center text-sm mt-6 text-gray-500">
-            <span>{isLoginMode ? "Don't have an account?" : "Already have an account?"}</span> 
-            <button onClick={() => { setIsLoginMode(!isLoginMode); setAuthMessage(""); }} className="text-primary font-bold hover:underline ml-1">Click here</button>
-          </p>
+          
         </div>
       </section>
+
+<Chatbot />
+      
     </div>
   );
 }

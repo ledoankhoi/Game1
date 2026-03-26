@@ -7,19 +7,15 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.get('/list', gameController.getAllGames); 
 router.get('/history', authMiddleware, gameController.getUserHistory); 
 
-// ========================================================
-// 🌟 API MỚI THÊM: NHẬN THƯỞNG SAU KHI CHƠI GAME XONG
-// ========================================================
+// API Lưu kết quả
 router.post('/save-result', authMiddleware, gameController.saveGameResult);
 
-// 2. Các API Xếp hạng (BẮT BUỘC PHẢI ĐẶT THEO THỨ TỰ NÀY)
-// Các đường link cụ thể phải nằm trên
+// 2. Các API Xếp hạng
 router.get('/leaderboard/exp', gameController.getTopExp);
 router.get('/leaderboard/score', gameController.getTopScore);
-
-// Đường link chứa tham số động (:gameId) phải nằm dưới cùng
 router.get('/leaderboard/game/:gameId', gameController.getGameLeaderboard);
-
 router.get('/leaderboard/category/:category', gameController.getCategoryLeaderboard);
-
+router.get('/recommendations', authMiddleware, gameController.getAIRecommendations);
+router.get('/info/:slug', gameController.getGameInfo);
+router.get('/instructions/:slug', gameController.getGameInstructions);
 module.exports = router;

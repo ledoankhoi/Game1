@@ -70,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
             backdrop-filter: blur(15px); font-family: 'Lexend', sans-serif;
             box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         ">
-            
             <div style="display: flex; align-items: center; gap: 16px; cursor: pointer;" onclick="window.location.href='http://localhost:5173'">
                 <div style="background: ${gamePrimary}; padding: 8px; border-radius: 12px; color: #000; display: flex; box-shadow: 0 0 15px ${gamePrimary}66;">
                     <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;">stadia_controller</span>
@@ -84,17 +83,18 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div style="display: flex; align-items: center; gap: 24px;">
+                <button id="help-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid ${gamePrimary}88; color: ${gamePrimary}; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='${gamePrimary}33'" onmouseout="this.style.transform='scale(1)'; this.style.background='rgba(255, 255, 255, 0.05)'" title="Hướng dẫn chơi">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">help</span>
+                </button>
+
                 <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid #facc1588; padding: 6px 16px; border-radius: 99px; display: flex; align-items: center; gap: 8px;">
                     <span class="material-symbols-outlined" style="color: #facc15; font-size: 20px; font-variation-settings: 'FILL' 1;">monetization_on</span>
                     <span style="color: white; font-weight: 900; font-size: 15px;">${(user.coins || 0).toLocaleString()}</span>
                 </div>
 
                 <div style="position: relative; cursor: pointer; transition: 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="window.location.href='http://localhost:5173/profile'">
-                    <img src="${user.avatarUrl}" 
-                         style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${gamePrimary}; object-fit: cover; background: #000; box-shadow: 0 0 10px ${gamePrimary}44;">
-                    <div style="position: absolute; bottom: -2px; right: -2px; background: ${gamePrimary}; color: #000; 
-                                font-size: 10px; font-weight: 900; width: 20px; height: 20px; 
-                                display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid ${gameBg};">
+                    <img src="${user.avatarUrl}" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${gamePrimary}; object-fit: cover; background: #000; box-shadow: 0 0 10px ${gamePrimary}44;">
+                    <div style="position: absolute; bottom: -2px; right: -2px; background: ${gamePrimary}; color: #000; font-size: 10px; font-weight: 900; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid ${gameBg};">
                         ${user.level || 1}
                     </div>
                 </div>
@@ -104,9 +104,76 @@ document.addEventListener("DOMContentLoaded", () => {
                 </button>
             </div>
         </header>
+
+        <div id="how-to-play-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px); font-family: 'Lexend', sans-serif;">
+            <div style="background: ${gameBg}; border: 2px solid ${gamePrimary}; border-radius: 16px; width: 90%; max-width: 650px; max-height: 85vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+                
+                <div style="padding: 20px; border-bottom: 1px solid ${gamePrimary}44; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; color: ${gamePrimary}; font-weight: 900; text-transform: uppercase;">🎮 HƯỚNG DẪN CHƠI</h2>
+                    <button id="close-modal-btn" style="background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onmouseover="this.style.color='#ff4d4d'" onmouseout="this.style.color='white'">
+                        <span class="material-symbols-outlined" style="font-size: 30px;">close</span>
+                    </button>
+                </div>
+                
+                <div id="how-to-play-content" style="padding: 24px; overflow-y: auto; color: #e0e0e0; font-size: 15px; line-height: 1.6;">
+                    <div style="text-align: center; color: #aaa;">Đang tải dữ liệu...</div>
+                </div>
+
+            </div>
+        </div>
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
+
+    // ==========================================
+    // 5. XỬ LÝ LOGIC CLICK NÚT HƯỚNG DẪN
+    // ==========================================
+    document.getElementById('help-btn').addEventListener('click', async () => {
+        const modal = document.getElementById('how-to-play-modal');
+        const contentDiv = document.getElementById('how-to-play-content');
+        modal.style.display = 'flex'; // Hiển thị bảng
+
+        // Trích xuất "slug" từ tên file HTML hiện tại (ví dụ: monster.html -> monster)
+        const pathName = window.location.pathname;
+        let slug = pathName.substring(pathName.lastIndexOf('/') + 1).replace('.html', '');
+        if(!slug) slug = 'index'; // Phòng trường hợp path rỗng
+
+        try {
+            // Gọi API lên Backend
+            const response = await fetch(`http://localhost:3000/api/games/info/${slug}`);
+            const data = await response.json();
+
+            if (data.success && data.game && data.game.howToPlay && data.game.howToPlay.length > 0) {
+                let html = '';
+                // Vẽ từng bước hướng dẫn và ảnh
+                data.game.howToPlay.forEach(step => {
+                    html += `
+                        <div style="margin-bottom: 24px; background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border-left: 4px solid ${gamePrimary};">
+                            <h3 style="color: ${gamePrimary}; margin: 0 0 10px 0; font-size: 18px;">Bước ${step.step}</h3>
+                            <p style="margin: 0 0 16px 0;">${step.description}</p>
+                            ${step.imageUrl ? `<img src="${step.imageUrl}" style="max-width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.5);" alt="Hình ảnh minh họa bước ${step.step}" />` : ''}
+                        </div>
+                    `;
+                });
+                contentDiv.innerHTML = html;
+            } else {
+                contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">Chưa có dữ liệu hướng dẫn cho trò chơi này.</div>`;
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            contentDiv.innerHTML = `<div style="text-align: center; color: #ff4d4d;">Có lỗi xảy ra khi tải hướng dẫn. Vui lòng kiểm tra kết nối!</div>`;
+        }
+    });
+
+    // Tắt modal khi bấm nút X hoặc bấm ra ngoài bảng
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+        document.getElementById('how-to-play-modal').style.display = 'none';
+    });
+    document.getElementById('how-to-play-modal').addEventListener('click', (e) => {
+        if(e.target === document.getElementById('how-to-play-modal')) {
+            document.getElementById('how-to-play-modal').style.display = 'none';
+        }
+    });
 });
 
 function handleGlobalLogout() {
