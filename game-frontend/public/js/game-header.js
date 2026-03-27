@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // 5. XỬ LÝ LOGIC CLICK NÚT HƯỚNG DẪN
     // ==========================================
-    document.getElementById('help-btn').addEventListener('click', async () => {
+   document.getElementById('help-btn').addEventListener('click', async () => {
         const modal = document.getElementById('how-to-play-modal');
         const contentDiv = document.getElementById('how-to-play-content');
         modal.style.display = 'flex'; // Hiển thị bảng
@@ -138,15 +138,19 @@ document.addEventListener("DOMContentLoaded", () => {
         let slug = pathName.substring(pathName.lastIndexOf('/') + 1).replace('.html', '');
         if(!slug) slug = 'index'; // Phòng trường hợp path rỗng
 
+        // Hiển thị trạng thái đang tải
+        contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">Đang tải dữ liệu...</div>`;
+
         try {
-            // Gọi API lên Backend
-            const response = await fetch(`http://localhost:3000/api/games/info/${slug}`);
+            // SỬA ĐỔI 1: Gọi đúng API /instructions thay vì /info
+            const response = await fetch(`http://localhost:3000/api/games/instructions/${slug}`);
             const data = await response.json();
 
-            if (data.success && data.game && data.game.howToPlay && data.game.howToPlay.length > 0) {
+            // SỬA ĐỔI 2: Đọc dữ liệu từ data.howToPlay (do Backend trả về mảng trực tiếp)
+            if (data.success && data.howToPlay && data.howToPlay.length > 0) {
                 let html = '';
                 // Vẽ từng bước hướng dẫn và ảnh
-                data.game.howToPlay.forEach(step => {
+                data.howToPlay.forEach(step => {
                     html += `
                         <div style="margin-bottom: 24px; background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border-left: 4px solid ${gamePrimary};">
                             <h3 style="color: ${gamePrimary}; margin: 0 0 10px 0; font-size: 18px;">Bước ${step.step}</h3>
@@ -157,7 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 contentDiv.innerHTML = html;
             } else {
-                contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">Chưa có dữ liệu hướng dẫn cho trò chơi này.</div>`;
+                // Hiển thị thông báo nếu không có hướng dẫn
+                contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">${data.message || 'Chưa có dữ liệu hướng dẫn cho trò chơi này.'}</div>`;
             }
         } catch (error) {
             console.error("Lỗi:", error);

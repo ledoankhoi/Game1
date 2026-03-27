@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>3D Rubik | MathQuest</title>
+    
+    <link rel="stylesheet" href="css/rubik.css">
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#006a71",
+                        "on-primary": "#ffffff",
+                        "surface": "#ffffff",
+                        "on-surface": "#10131a",
+                        "surface-variant": "#f1f3f4",
+                        "on-surface-variant": "#45484f"
+                    },
+                    fontFamily: { 
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Lexend", "sans-serif"] 
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-[#f8f9fa] text-on-surface font-body min-h-screen flex flex-col overflow-x-hidden select-none">
+
+    <div class="flex flex-1 w-full max-w-[1440px] mx-auto p-6 gap-6 flex-col lg:flex-row mt-4">
+        
+        <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0 h-[calc(100vh-120px)]">
+            <div class="bg-white rounded-xl p-5 border border-zinc-200 shadow-sm flex flex-col gap-4 shrink-0">
+                <div>
+                    <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-2 block">Kích thước Cube</label>
+                    <select id="cube-size-select" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-sm font-bold text-primary shadow-sm outline-none focus:border-primary transition-all cursor-pointer">
+                        <option value="2">2x2 Pocket</option>
+                        <option value="3" selected>3x3 Pro</option>
+                        <option value="4">4x4 Master</option>
+                        <option value="5">5x5 Professor</option>
+                        <option value="6">6x6 Elite</option>
+                        <option value="7">7x7 Grandmaster</option>
+                    </select>
+                </div>
+
+                <button id="btn-scramble" class="group flex items-center justify-center gap-3 w-full py-3 rounded-xl bg-primary text-white hover:bg-[#00585e] font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 uppercase tracking-widest text-sm">
+                    <span class="material-symbols-outlined font-bold">shuffle</span>
+                    <span>Trộn Rubik</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl p-5 border border-zinc-200 shadow-sm flex-1 flex flex-col h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-zinc-100">
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-primary">Lịch sử xoay</h3>
+                    <button id="btn-clear-log" class="text-zinc-400 hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                </div>
+                <div id="move-log" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-1.5 content-start pr-2">
+                    <div class="w-full text-center text-sm text-zinc-400 mt-4 italic">Chưa có thao tác nào...</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-white rounded-xl border border-zinc-200 shadow-sm relative overflow-hidden">
+            
+            <div id="cube-container" class="w-full h-full cursor-grab active:cursor-grabbing absolute inset-0 z-10"></div>
+
+            <div class="absolute top-6 right-6 z-20 w-[290px] space-y-4 pointer-events-none hidden lg:block opacity-90">
+                <div class="bg-white/90 backdrop-blur-xl p-5 rounded-2xl border-l-4 border-primary shadow-xl">
+                    <h3 class="font-headline font-bold text-primary mb-3 text-xs tracking-widest uppercase">Điều khiển Trực quan</h3>
+                    <ul class="space-y-3 text-xs text-zinc-600 font-medium">
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-sm text-primary mt-0.5">360</span>
+                            <span><strong class="text-zinc-900">Kéo ở vùng trống</strong> để xoay góc nhìn Camera.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-sm text-primary mt-0.5">swipe</span>
+                            <span><strong class="text-zinc-900">Vuốt lên khối Rubik</strong> để xoay trực tiếp các lớp.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-sm text-primary mt-0.5">ads_click</span>
+                            <span><strong class="text-zinc-900">Click vào mặt khối</strong> để chọn làm mặt Front (F).</span>
+                        </li>
+                        <li class="border-t border-zinc-200 pt-2"></li>
+                        <li class="flex items-center justify-between">
+                            <span>Xoay bằng Phím</span>
+                            <span class="font-mono bg-zinc-100 border border-zinc-200 px-2 py-0.5 rounded text-primary font-bold">F,B,U,D,L,R</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/game-header.js"></script>
+    <script type="module" src="js/games/rubik.js"></script>
+</body>
+</html>

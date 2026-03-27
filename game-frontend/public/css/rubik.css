@@ -1,0 +1,39 @@
+/* file: public/css/rubik.css */
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e4e4e7; /* zinc-200 */
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d4d4d8; /* zinc-300 */
+}
+
+/* Log item styling */
+.log-item {
+    background-color: #f4f4f5; /* zinc-100 */
+    border: 1px solid #e4e4e7;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #3f3f46; /* zinc-700 */
+    animation: fadeIn 0.3s ease-out;
+}
+.log-item.prime {
+    color: #ef4444; 
+    border-color: #fca5a5;
+}
+.log-item.double {
+    color: #f97316; 
+    border-color: #fdba74;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
