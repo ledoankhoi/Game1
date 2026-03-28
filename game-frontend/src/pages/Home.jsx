@@ -13,15 +13,24 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   // SỬA TẠI ĐÂY: Đổi tên từ pageBgColor thành pageBgImage để khớp với logic bên dưới
   const [pageBgImage, setPageBgImage] = useState('none');
 
-  const handlePlayGame = (url, e) => {
+  const handlePlayGame = async (gameSlug, url, e) => {
     if (e) e.stopPropagation();
     if (!user) {
       if (setShowAuth) setShowAuth(true);
     } else {
+      // 1. Gọi API tăng lượt chơi ngầm trong background
+      try {
+        await fetch(`http://localhost:3000/api/game/${gameSlug}/play`, {
+          method: 'POST'
+        });
+      } catch (err) {
+        console.error("Lỗi cập nhật lượt chơi:", err);
+      }
+      
+      // 2. Sau đó chuyển hướng người dùng đến game
       window.location.href = url;
     }
   };
-
   useEffect(() => {
     const fetchGames = async () => {
       try {
@@ -177,8 +186,8 @@ function Home({ searchQuery = '', user, setShowAuth }) {
               <h1 className="text-4xl lg:text-6xl font-black text-white leading-tight max-w-2xl mb-4">Galaxy Striker:<br/>Math Defense</h1>
               <p className="text-white/80 text-lg max-w-xl mb-8 leading-relaxed">Protect the galaxy from number monsters! Type the correct answer to shoot them down.</p>
               <div className="flex items-center gap-4">
-                <button onClick={(e) => handlePlayGame('/monster.html', e)} className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
-                  <span className="material-symbols-outlined">play_circle</span> Play Now
+                <button onClick={(e) => handlePlayGame('monster', '/monster.html', e)} className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
+  <span className="material-symbols-outlined">play_circle</span> Play Now
                 </button>
               </div>
             </div>
@@ -203,9 +212,21 @@ function Home({ searchQuery = '', user, setShowAuth }) {
               ) : filteredGames.map((game) => {
                 const isFav = safeFavoriteGames.includes(game.slug);
                 return (
-                  <div key={game._id} className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" onClick={(e) => handlePlayGame(game.gameUrl || `/${game.slug}.html`, e)}>
+                  <div key={game._id} 
+  className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" 
+  /* Truyền thêm game.slug làm tham số đầu */
+  onClick={(e) => handlePlayGame(game.slug, game.gameUrl || `/${game.slug}.html`, e)}>
                     <div className="h-44 relative bg-gray-800 overflow-hidden">
                       <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
+                      <button 
+                        onClick={(e) => handleToggleFavorite(game.slug, e)}
+                        className="absolute top-3 right-3 z-10 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-90"
+                        title={isFav ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                      >
+                        <span className={`material-symbols-outlined text-xl ${isFav ? 'text-red-500 fill-current' : 'text-white'}`}>
+                          {isFav ? 'favorite' : 'favorite_border'}
+                        </span>
+                      </button>
                     </div>
                     <div className="p-5">
                       <h4 className="font-bold text-lg mb-1 text-black dark:text-white">{game.title}</h4>

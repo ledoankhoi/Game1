@@ -337,3 +337,24 @@ exports.getGameInstructions = async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
+
+exports.incrementPlayCount = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    // Tìm game theo slug và tăng trường "views" lên 1
+    const game = await Game.findOneAndUpdate(
+      { slug: slug },
+      { $inc: { views: 1 } }, 
+      { new: true }
+    );
+
+    if (!game) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy game' });
+    }
+
+    res.json({ success: true, views: game.views });
+  } catch (error) {
+    console.error("Lỗi khi tăng lượt chơi:", error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};

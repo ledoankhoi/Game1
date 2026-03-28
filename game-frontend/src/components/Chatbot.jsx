@@ -18,27 +18,48 @@ function Chatbot() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // CẬP NHẬT: Hàm phát âm thanh với file tuhoan7444.mp3
+  const playBotSound = (isEasterEgg = false) => {
+    const soundUrl = isEasterEgg ? '/sounds/tuhoang7444.mp3' : '/sounds/clicek_test.mp3'; 
+    const audio = new Audio(soundUrl);
+    audio.volume = 0.8; // Chỉnh âm lượng to lên một chút cho dễ nghe
+    audio.play().catch(error => console.log("Trình duyệt chặn phát âm thanh:", error));
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     
     const userMsg = input.trim();
+    const lowerCaseMsg = userMsg.toLowerCase();
+
     // Thêm tin nhắn của user vào giao diện
     setMessages(prev => [...prev, { text: userMsg, isBot: false }]);
     setInput("");
     setIsLoading(true);
 
+    // KIỂM TRA TỪ KHÓA BÍ MẬT Ở ĐÂY (Để quyết định dùng âm thanh nào)
+    const isEasterEgg = lowerCaseMsg.includes("tú là ai") || lowerCaseMsg.includes("tu la ai");
+
     try {
-      // Gọi API sang Backend của bạn
+      // Lấy token từ Local Storage
+      const token = localStorage.getItem('token'); 
+
+      // Gọi API sang Backend
       const res = await fetch('http://localhost:3000/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          // Đính kèm token vào Header nếu user đã đăng nhập
+          ...(token && { 'Authorization': `Bearer ${token}` }) 
+        },
         body: JSON.stringify({ message: userMsg })
       });
       
       const data = await res.json();
       
       if (data.success) {
-        // Thêm câu trả lời của AI vào giao diện
+        // AI có câu trả lời -> Phát âm thanh và hiện tin nhắn
+        playBotSound(isEasterEgg);
         setMessages(prev => [...prev, { text: data.reply, isBot: true }]);
       } else {
         setMessages(prev => [...prev, { text: "Xin lỗi, đường truyền đang bị lỗi. Bạn thử lại sau nhé!", isBot: true }]);
@@ -76,7 +97,6 @@ function Chatbot() {
                     ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-tl-none' 
                     : 'bg-primary text-white rounded-tr-none'
                 }`}>
-                  {/* Hiển thị markdown cơ bản (xuống dòng) */}
                   {msg.text.split('\n').map((line, idx) => (
                     <span key={idx}>{line}<br/></span>
                   ))}

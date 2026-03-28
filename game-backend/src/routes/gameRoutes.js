@@ -18,4 +18,5 @@ router.get('/leaderboard/category/:category', gameController.getCategoryLeaderbo
 router.get('/recommendations', authMiddleware, gameController.getAIRecommendations);
 router.get('/info/:slug', gameController.getGameInfo);
 router.get('/instructions/:slug', gameController.getGameInstructions);
+router.post('/:slug/play', gameController.incrementPlayCount);
 module.exports = router;
