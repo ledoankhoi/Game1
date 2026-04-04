@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SettingsMenu from '../components/SettingsMenu';
-import axios from 'axios';
-// Nhúng thư viện Facebook Login vào
-import FacebookLoginRaw from 'react-facebook-login/dist/facebook-login-render-props';
-const FacebookLogin = FacebookLoginRaw.default || FacebookLoginRaw;
 
 function Home({ searchQuery = '', user, setShowAuth }) {
   const [games, setGames] = useState([]);
@@ -14,31 +10,6 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   const [favoriteGames, setFavoriteGames] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [pageBgImage, setPageBgImage] = useState('none');
-
-  // --- HÀM XỬ LÝ PHẢN HỒI TỪ FACEBOOK ---
-  const handleFacebookResponse = async (response) => {
-      // Nếu người dùng tắt popup hoặc có lỗi
-      if (!response.accessToken) {
-          console.log("Người dùng đã hủy đăng nhập hoặc có lỗi.");
-          return;
-      }
-
-      try {
-        // Gửi token nhận được xuống Backend của bạn
-        const res = await axios.post('http://localhost:3000/api/auth/facebook-login', {
-          accessToken: response.accessToken
-        });
-
-        if (res.data.success) {
-          localStorage.setItem('token', res.data.token);
-          alert('Đăng nhập Facebook thành công!');
-          window.location.reload(); 
-        }
-      } catch (error) {
-        console.error("Lỗi đăng nhập FB:", error);
-        alert("Đăng nhập Facebook thất bại, vui lòng thử lại!");
-      }
-  };
 
   const handlePlayGame = async (gameSlug, url, e) => {
     if (e) e.stopPropagation();
@@ -113,7 +84,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
     e.stopPropagation(); 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert("Vui lòng đăng nhập để lưu game yêu thích nhé!");
+      if (setShowAuth) setShowAuth(true); // Hiển thị form đăng nhập nếu chưa đăng nhập
       return;
     }
     try {
@@ -167,30 +138,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
         <aside className="w-full lg:w-64 flex flex-col gap-8 shrink-0">
           <div className="flex flex-col gap-6">
 
-            {/* CHỈ HIỂN THỊ KHUNG NÀY NẾU CHƯA ĐĂNG NHẬP */}
-            {!user && (
-              <section className="bg-white dark:bg-[#1a2e20] p-4 rounded-2xl shadow-sm border border-[#e0e8e2] dark:border-[#2a3f31]">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-3">Tham gia ngay</h3>
-                
-                {/* --- NÚT ĐĂNG NHẬP FACEBOOK --- */}
-                <FacebookLogin
-                    appId="2123992368365701"
-                    autoLoad={false}
-                    fields="name,email,picture"
-                    callback={handleFacebookResponse}
-                    render={renderProps => (
-                        <button 
-                            type="button"
-                            onClick={renderProps.onClick}
-                            className="w-full flex items-center justify-center gap-3 bg-[#1877F2] text-white font-bold py-3 px-4 rounded-xl hover:bg-[#166fe5] transition-all shadow-md active:scale-95"
-                        >
-                            <span className="font-bold text-xl">f</span>
-                            Đăng nhập Facebook
-                        </button>
-                    )}
-                />
-              </section>
-            )}
+            {/* Đã xóa hoàn toàn khu vực Đăng nhập Facebook ở đây */}
 
             <section>
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Danh mục</h3>

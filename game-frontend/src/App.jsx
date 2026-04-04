@@ -3,21 +3,20 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Leaderboard from './pages/Leaderboard'; 
-import { GoogleLogin } from '@react-oauth/google';
 import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Chatbot from './components/Chatbot';
+
+// 1. Nhập các component Auth mới của bạn
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuth, setShowAuth] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
   
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [authMessage, setAuthMessage] = useState('');
-
+  // Đã xóa bỏ các state email, password, authMessage... vì logic này giờ nằm trong Login/Register.jsx
   const [user, setUser] = useState(null); 
   const navigate = useNavigate();
   const location = useLocation(); 
@@ -33,84 +32,15 @@ function App() {
   };
 
   useEffect(() => {
-    loadUser(); // Load lần đầu
-    // Lắng nghe sự kiện để tự động đổi Avatar khi ở Shop/Profile
+    loadUser(); 
+    // Lắng nghe sự kiện storage để cập nhật user khi có thay đổi từ các modal auth
     window.addEventListener('storage', loadUser);
     return () => window.removeEventListener('storage', loadUser);
   }, []);
 
-  // Xóa trắng thanh tìm kiếm khi chuyển trang
   useEffect(() => {
     setSearchQuery('');
   }, [location.pathname]);
-
-  const handleRegister = async () => {
-    setAuthMessage("Đang xử lý...");
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setAuthMessage("Đăng ký thành công! Hãy đăng nhập.");
-        setIsLoginMode(true);
-      } else {
-        setAuthMessage(data.message || "Đăng ký thất bại!");
-      }
-    } catch (error) {
-      setAuthMessage("Lỗi kết nối tới máy chủ!");
-    }
-  };
-
-  const handleLogin = async () => {
-    setAuthMessage("Đang xử lý...");
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        setShowAuth(false);
-        setAuthMessage("");
-        setEmail("");
-        setPassword("");
-      } else {
-        setAuthMessage(data.message || "Sai email hoặc mật khẩu!");
-      }
-    } catch (error) {
-      setAuthMessage("Lỗi kết nối tới máy chủ!");
-    }
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setAuthMessage("Đang xác thực với Google...");
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/google-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: credentialResponse.credential })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        setShowAuth(false);
-        setAuthMessage("");
-      } else {
-        setAuthMessage("Xác thực Google thất bại!");
-      }
-    } catch (error) {
-      setAuthMessage("Lỗi kết nối tới máy chủ!");
-    }
-  };
 
   const handleLogout = () => {
     setUser(null);
@@ -118,6 +48,7 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user_avatar_custom'); 
     navigate('/'); 
+    window.location.reload(); // Tải lại để xóa sạch trạng thái cũ
   };
 
   // --- HELPER CSS CHO HEADER AVATAR ---
@@ -125,7 +56,7 @@ function App() {
     if (frameId === 'frame_gold') return "border-2 border-yellow-400 shadow-[0_0_10px_#facc15]";
     if (frameId === 'frame_neon') return "border-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]";
     if (frameId === 'frame_fire') return "border-2 border-red-500 shadow-[0_0_10px_#ef4444]";
-    return "border-2 border-primary shadow-sm"; // Mặc định
+    return "border-2 border-primary shadow-sm"; 
   };
 
   const getBadgeIconApp = (badgeId) => {
@@ -134,7 +65,7 @@ function App() {
       case 'firstBlood': return { icon: 'sports_esports', color: 'text-blue-500' };
       case 'richMan': return { icon: 'monetization_on', color: 'text-yellow-500' };
       case 'streak7': return { icon: 'local_fire_department', color: 'text-red-500' };
-      default: return { icon: 'stars', color: 'text-yellow-500' }; // Đề phòng lỗi
+      default: return { icon: 'stars', color: 'text-yellow-500' };
     }
   };
 
@@ -176,7 +107,7 @@ function App() {
           </div>
         </div>
         
-        {/* Nút bấm bên phải */}
+        {/* Nút bấm bên phải Header */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0 order-2 md:order-none">
           
           <div className="flex items-center gap-1 md:mr-2">
@@ -200,10 +131,21 @@ function App() {
 
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden md:block"></div>
 
+          {/* 2. CHỖ THAY ĐỔI: Sử dụng state để mở Modal thay vì gọi hàm trực tiếp ở đây */}
           {!user ? (
             <div className="flex items-center gap-2 md:gap-3">
-              <button onClick={() => { setShowAuth(true); setIsLoginMode(true); setAuthMessage(""); }} className="text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-primary transition-colors px-2">Log In</button>
-              <button onClick={() => { setShowAuth(true); setIsLoginMode(false); setAuthMessage(""); }} className="bg-primary hover:bg-green-500 text-white text-sm font-bold px-3 py-2 md:px-5 md:py-2.5 rounded-xl shadow-lg shadow-green-500/30 transition-all transform active:scale-95 hover:-translate-y-0.5 whitespace-nowrap">Sign Up</button>
+              <button 
+                onClick={() => { setShowAuth(true); setIsLoginMode(true); }} 
+                className="text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors px-2"
+              >
+                Log In
+              </button>
+              <button 
+                onClick={() => { setShowAuth(true); setIsLoginMode(false); }} 
+                className="bg-primary hover:bg-green-500 text-white text-sm font-bold px-3 py-2 md:px-5 md:py-2.5 rounded-xl shadow-lg shadow-green-500/30 transition-all transform active:scale-95 hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Sign Up
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2 md:gap-6">
@@ -214,19 +156,16 @@ function App() {
                 <span className="text-xs md:text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
               </div>
 
-              {/* NÚT AVATAR MỚI CÓ KHUNG & HUY HIỆU */}
               <div className="relative flex items-center gap-2 md:gap-3 group">
                 <Link to="/profile" className="relative flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity" title="Vào trang Hồ Sơ">
                   <span className="font-bold text-gray-800 dark:text-white hidden lg:block text-sm">Chào, {user.username}</span>
                   
-                  {/* Avatar Image + Khung Frame (Nếu có) */}
                   <img 
                     src={user.avatarUrl || localStorage.getItem('user_avatar_custom') || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"}
                     className={`w-8 h-8 md:w-10 md:h-10 rounded-full object-cover bg-white transition-all ${getFrameStyleApp(user.equipped?.frame)}`} 
                     alt="Avatar" 
                   />
 
-                  {/* Phụ Kiện Huy Hiệu (Nếu có) */}
                   {user.equipped?.badge && user.equipped.badge !== 'none' && (
                     <div className="absolute -top-1 -right-1 z-20 w-4 h-4 md:w-5 md:h-5 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-md transform rotate-12">
                       <span className={`material-symbols-outlined text-[10px] md:text-[12px] ${getBadgeIconApp(user.equipped.badge).color}`}>
@@ -237,16 +176,16 @@ function App() {
                 </Link>
                 <button onClick={handleLogout} className="text-[10px] md:text-xs text-red-500 font-bold hover:underline px-1 md:px-2">Đăng xuất</button>
               </div>
-
             </div>
           )}
         </div>
       </header>
 
-      {/* KHU VỰC THAY ĐỔI TRANG */}
+      {/* NỘI DUNG TRANG CHỦ / SHOP / RANK... */}
       <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
         <Routes>
-<Route path="/" element={<Home searchQuery={searchQuery} user={user} setShowAuth={setShowAuth} />} />          <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
+          <Route path="/" element={<Home searchQuery={searchQuery} user={user} setShowAuth={setShowAuth} />} />          
+          <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
           <Route path="/profile" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<AdminDashboard />} /> 
@@ -254,54 +193,24 @@ function App() {
         </Routes>
       </main>
 
-      {/* BẢNG ĐĂNG NHẬP */}
-      <section id="auth-screen" className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm ${showAuth ? '' : 'hidden'}`}>
-        <div className="bg-white dark:bg-[#1a2e20] p-8 rounded-2xl w-full max-w-sm shadow-2xl relative">
-          <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-          
-          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">
-            {isLoginMode ? "Login" : "Create Account"}
-          </h2>
-          
-          <div className="flex flex-col gap-3">
-            {!isLoginMode && (
-              <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 outline-none transition focus:ring-2 focus:ring-primary" />
-            )}
-            <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 outline-none focus:ring-2 focus:ring-primary" />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 outline-none focus:ring-2 focus:ring-primary" />
-          </div>
-          
-          <p className="text-red-500 text-center text-sm mt-3 h-5 font-medium">{authMessage}</p>
-          
-          <button onClick={isLoginMode ? handleLogin : handleRegister} className="w-full bg-primary text-white font-bold py-3 rounded-xl mt-4 hover:bg-green-600 transition shadow-lg shadow-green-500/30 uppercase">
-            {isLoginMode ? "Login" : "Register"}
-          </button>
+      {/* 3. KHU VỰC QUAN TRỌNG NHẤT: NHÚNG 2 COMPONENT RIÊNG CỦA BẠN VÀO ĐÂY */}
+      {showAuth && (
+        <section className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          {isLoginMode ? (
+            <Login 
+              onClose={() => setShowAuth(false)} 
+              onSwitchToRegister={() => setIsLoginMode(false)} 
+            />
+          ) : (
+            <Register 
+              onClose={() => setShowAuth(false)} 
+              onSwitchToLogin={() => setIsLoginMode(true)} 
+            />
+          )}
+        </section>
+      )}
 
-          <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-              <span className="text-sm text-gray-400 font-bold uppercase">Hoặc</span>
-              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-          </div>
-
-          <div className="flex justify-center w-full">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => {
-                  setAuthMessage('Cửa sổ Google bị đóng hoặc lỗi!');
-                }}
-                theme="filled_blue"
-                shape="pill"
-              />
-          </div>
-
-          
-        </div>
-      </section>
-
-<Chatbot />
-      
+      <Chatbot />
     </div>
   );
 }
