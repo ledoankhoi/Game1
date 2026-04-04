@@ -1,54 +1,66 @@
 const SoundManager = {
-    // Kho chứa các file âm thanh
     sounds: {
         correct: new Audio('sounds/correct.mp3'),
         wrong:   new Audio('sounds/wrong.mp3'),
-        bgm:     new Audio('sounds/bgm.mp3'),
-        click:   new Audio('sounds/click.mp3')
+        bgm:     new Audio('sounds/bgm_test.mp3'),
+        click:   new Audio('sounds/click_test.mp3')
     },
     
-    isMuted: false, // Trạng thái tắt tiếng
+    // Đọc trạng thái Mute trực tiếp từ Settings của React
+    isMuted: localStorage.getItem('global_sound') === 'false',
 
-    // 1. Hàm khởi tạo (Cấu hình nhạc nền)
     init: function() {
-        this.sounds.bgm.loop = true; // Lặp lại vô tận
-        this.sounds.bgm.volume = 0.3; // Nhạc nền nhỏ thôi (30%)
+        this.sounds.bgm.loop = true; 
+        this.sounds.bgm.volume = 0.3;
+
+        // LẮNG NGHE TÍN HIỆU TỪ REACT CÀI ĐẶT
+        window.addEventListener('settingsChange', (e) => {
+            if (e.detail.type === 'sound') {
+                this.isMuted = !e.detail.value; // Nếu value (soundEnabled) là true -> isMuted = false
+                
+                // Xử lý bật/tắt nhạc nền ngay lập tức
+                if (this.isMuted) {
+                    this.sounds.bgm.pause();
+                } else {
+                    // Nếu bật âm thanh thì cố gắng phát nhạc nền
+                    this.sounds.bgm.play().catch(err => console.log("Trình duyệt yêu cầu tương tác trước khi phát nhạc."));
+                }
+            }
+        });
     },
 
-    // 2. Phát hiệu ứng (ngắn)
     play: function(name) {
-        if (this.isMuted) return;
+        if (this.isMuted) return; // Nếu đang Mute thì không phát gì cả
 
-        // Nếu file đó tồn tại thì phát
         if (this.sounds[name]) {
-            this.sounds[name].currentTime = 0; // Tua về đầu (để bấm liên tục được)
+            this.sounds[name].currentTime = 0; 
             this.sounds[name].play().catch(e => console.log("Chưa tải được file: " + name));
         }
     },
 
-    // 3. Bật/Tắt nhạc nền
     toggleMusic: function() {
+        if (this.isMuted) return; // Không cho bật/tắt tay nếu đang Mute ở Settings tổng
+        
         if (this.sounds.bgm.paused) {
-            this.sounds.bgm.play().catch(e => console.log("Cần tương tác để phát nhạc"));
+            this.sounds.bgm.play().catch(e => {});
         } else {
             this.sounds.bgm.pause();
         }
     },
 
-    // 4. Bật/Tắt toàn bộ âm thanh (Mute)
     toggleMute: function() {
+        // Cập nhật state nội bộ (nếu game có nút bấm riêng)
         this.isMuted = !this.isMuted;
         
-        // Xử lý nhạc nền theo trạng thái Mute
         if (this.isMuted) {
             this.sounds.bgm.pause();
-            return "🔇"; // Trả về icon
+            return "🔇"; 
         } else {
             this.sounds.bgm.play().catch(e => {});
-            return "🔊"; // Trả về icon
+            return "🔊"; 
         }
     }
 };
 
-// Gọi khởi tạo ngay khi file được tải
+// Gọi khởi tạo ngay
 SoundManager.init();
