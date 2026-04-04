@@ -163,7 +163,18 @@ function Profile() {
       const data = await res.json();
       
       if (data.success) {
-        alert(data.message);
+        // ✅ GỌI POPUP NHẬN THƯỞNG MỚI THAY VÌ DÙNG ALERT
+        if (window.MathQuestBridge && window.MathQuestBridge.showItemRewardPopup) {
+            window.MathQuestBridge.showItemRewardPopup(
+                "Phần Thưởng", 
+                data.rewardCoins || 0, // Số lượng xu (hoặc điểm) nhận được
+                "workspace_premium", // Icon hiển thị
+                data.message
+            );
+        } else {
+            alert(data.message); // Dự phòng nếu file game-bridge.js chưa load
+        }
+
         setProfileData(prev => {
           const updatedUser = { ...prev, ...data.user };
           localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -175,9 +186,16 @@ function Profile() {
           .then(r => r.json())
           .then(d => { if (d.success) setQuestsList(d.quests || []); });
       } else {
-        alert(data.message);
+        // Hiển thị lỗi bằng popup (nếu có) hoặc alert
+        if (window.MathQuestBridge && window.MathQuestBridge.showRewardPopup) {
+            window.MathQuestBridge.showRewardPopup("Lỗi: " + data.message, profileData?.coins || 0);
+        } else {
+            alert(data.message);
+        }
       }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error(err); 
+    }
   };
 
   const handleEquipBadge = async (badgeId) => {

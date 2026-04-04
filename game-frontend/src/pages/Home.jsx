@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SettingsMenu from '../components/SettingsMenu';
+import axios from 'axios';
+// Nhúng thư viện Facebook Login vào
+import FacebookLoginRaw from 'react-facebook-login/dist/facebook-login-render-props';
+const FacebookLogin = FacebookLoginRaw.default || FacebookLoginRaw;
 
 function Home({ searchQuery = '', user, setShowAuth }) {
   const [games, setGames] = useState([]);
@@ -9,16 +13,38 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [favoriteGames, setFavoriteGames] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
-  
-  // SỬA TẠI ĐÂY: Đổi tên từ pageBgColor thành pageBgImage để khớp với logic bên dưới
   const [pageBgImage, setPageBgImage] = useState('none');
+
+  // --- HÀM XỬ LÝ PHẢN HỒI TỪ FACEBOOK ---
+  const handleFacebookResponse = async (response) => {
+      // Nếu người dùng tắt popup hoặc có lỗi
+      if (!response.accessToken) {
+          console.log("Người dùng đã hủy đăng nhập hoặc có lỗi.");
+          return;
+      }
+
+      try {
+        // Gửi token nhận được xuống Backend của bạn
+        const res = await axios.post('http://localhost:3000/api/auth/facebook-login', {
+          accessToken: response.accessToken
+        });
+
+        if (res.data.success) {
+          localStorage.setItem('token', res.data.token);
+          alert('Đăng nhập Facebook thành công!');
+          window.location.reload(); 
+        }
+      } catch (error) {
+        console.error("Lỗi đăng nhập FB:", error);
+        alert("Đăng nhập Facebook thất bại, vui lòng thử lại!");
+      }
+  };
 
   const handlePlayGame = async (gameSlug, url, e) => {
     if (e) e.stopPropagation();
     if (!user) {
       if (setShowAuth) setShowAuth(true);
     } else {
-      // 1. Gọi API tăng lượt chơi ngầm trong background
       try {
         await fetch(`http://localhost:3000/api/game/${gameSlug}/play`, {
           method: 'POST'
@@ -26,11 +52,10 @@ function Home({ searchQuery = '', user, setShowAuth }) {
       } catch (err) {
         console.error("Lỗi cập nhật lượt chơi:", err);
       }
-      
-      // 2. Sau đó chuyển hướng người dùng đến game
       window.location.href = url;
     }
   };
+
   useEffect(() => {
     const fetchGames = async () => {
       try {
@@ -127,7 +152,6 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   return (
     <div className="relative w-full min-h-screen">
       
-      {/* LỚP NỀN TRANG WEB */}
       <div 
         className="fixed inset-0 z-[-1] transition-all duration-1000 ease-in-out bg-cover bg-center bg-no-repeat" 
         style={{ 
@@ -136,14 +160,38 @@ function Home({ searchQuery = '', user, setShowAuth }) {
         }}
       ></div>
 
-      {/* COMPONENT CÀI ĐẶT */}
       <SettingsMenu pageBgImage={pageBgImage} setPageBgImage={setPageBgImage} />
 
       <div className="flex flex-col lg:flex-row w-full gap-8 relative z-10 p-4 lg:p-8">
         
-        {/* CỘT TRÁI */}
         <aside className="w-full lg:w-64 flex flex-col gap-8 shrink-0">
           <div className="flex flex-col gap-6">
+
+            {/* CHỈ HIỂN THỊ KHUNG NÀY NẾU CHƯA ĐĂNG NHẬP */}
+            {!user && (
+              <section className="bg-white dark:bg-[#1a2e20] p-4 rounded-2xl shadow-sm border border-[#e0e8e2] dark:border-[#2a3f31]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-3">Tham gia ngay</h3>
+                
+                {/* --- NÚT ĐĂNG NHẬP FACEBOOK --- */}
+                <FacebookLogin
+                    appId="2123992368365701"
+                    autoLoad={false}
+                    fields="name,email,picture"
+                    callback={handleFacebookResponse}
+                    render={renderProps => (
+                        <button 
+                            type="button"
+                            onClick={renderProps.onClick}
+                            className="w-full flex items-center justify-center gap-3 bg-[#1877F2] text-white font-bold py-3 px-4 rounded-xl hover:bg-[#166fe5] transition-all shadow-md active:scale-95"
+                        >
+                            <span className="font-bold text-xl">f</span>
+                            Đăng nhập Facebook
+                        </button>
+                    )}
+                />
+              </section>
+            )}
+
             <section>
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Danh mục</h3>
               <div className="flex flex-col gap-2">
@@ -173,10 +221,8 @@ function Home({ searchQuery = '', user, setShowAuth }) {
           </div>
         </aside>
 
-        {/* CỘT PHẢI */}
         <div className="flex-1 flex flex-col gap-10">
           
-          {/* Banner */}
           <section className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl group">
             <img alt="Game of the Day" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000"/>
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-12">
@@ -187,13 +233,12 @@ function Home({ searchQuery = '', user, setShowAuth }) {
               <p className="text-white/80 text-lg max-w-xl mb-8 leading-relaxed">Protect the galaxy from number monsters! Type the correct answer to shoot them down.</p>
               <div className="flex items-center gap-4">
                 <button onClick={(e) => handlePlayGame('monster', '/monster.html', e)} className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
-  <span className="material-symbols-outlined">play_circle</span> Play Now
+                  <span className="material-symbols-outlined">play_circle</span> Play Now
                 </button>
               </div>
             </div>
           </section>
 
-          {/* Danh sách Game */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -213,9 +258,8 @@ function Home({ searchQuery = '', user, setShowAuth }) {
                 const isFav = safeFavoriteGames.includes(game.slug);
                 return (
                   <div key={game._id} 
-  className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" 
-  /* Truyền thêm game.slug làm tham số đầu */
-  onClick={(e) => handlePlayGame(game.slug, game.gameUrl || `/${game.slug}.html`, e)}>
+                    className="game-card relative bg-white dark:bg-[#1a2e20] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-[#e0e8e2] dark:border-[#2a3f31] cursor-pointer group" 
+                    onClick={(e) => handlePlayGame(game.slug, game.gameUrl || `/${game.slug}.html`, e)}>
                     <div className="h-44 relative bg-gray-800 overflow-hidden">
                       <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
                       <button 

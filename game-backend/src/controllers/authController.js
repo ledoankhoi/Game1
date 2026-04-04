@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Feedback = require('../models/Feedback');
 const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 
 // Cấu hình Google Client
 const CLIENT_ID = "424857046874-ag5tmbrp5b7951u7185d7b78ttkflvhj.apps.googleusercontent.com";
@@ -445,6 +446,69 @@ const updateUsername = async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi máy chủ khi đổi tên' });
     }
 };
+
+// --- ĐĂNG NHẬP FACEBOOK ---
+const facebookLogin = async (req, res) => {
+    try {
+        const { accessToken } = req.body;
+        console.log("🔑 Token nhận được từ Frontend:", accessToken); // In ra để kiểm tra
+
+        if (!accessToken) {
+            return res.status(400).json({ success: false, message: "Thiếu Access Token từ Facebook" });
+        }
+
+        // Gọi API của Facebook BẢN v19.0
+        const { data } = await axios.get(`https://graph.facebook.com/v19.0/me?fields=id,name,email,picture.type(large)&access_token=${accessToken}`);
+        
+        const facebookId = data.id;
+        const name = data.name;
+        const email = data.email || `${facebookId}@facebook-user.com`; 
+        const picture = data.picture?.data?.url;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({
+                facebookId: facebookId,
+                email: email,
+                username: name,
+                avatarUrl: picture,
+                coins: 500,
+                level: 1,
+                inventory: ['skin_default', 'face_smile'],
+                equipped: { skin: 'skin_default', face: 'face_smile' }
+            });
+        } else if (!user.facebookId) {
+            user.facebookId = facebookId;
+            if (!user.avatarUrl) user.avatarUrl = picture;
+            await user.save();
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+
+        res.status(200).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                coins: user.coins,
+                level: user.level,
+                inventory: user.inventory,
+                avatarUrl: user.avatarUrl,
+                equipped: user.equipped,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        // In lỗi chi tiết ra Backend terminal
+        console.error("❌ Lỗi xác thực Facebook:", error.response?.data || error.message);
+        res.status(500).json({ success: false, message: "Lỗi xác thực Facebook từ Backend" });
+    }
+};
+
+
 // --- XUẤT TẤT CẢ CÁC HÀM (ĐÃ BAO GỒM ĐẦY ĐỦ LOGIn/REGISTER) ---
 module.exports = { 
     register, 
@@ -460,5 +524,6 @@ module.exports = {
     submitFeedback,
     claimQuest,
     equipBadge,
-    updateUsername
+    updateUsername,
+    facebookLogin
 };

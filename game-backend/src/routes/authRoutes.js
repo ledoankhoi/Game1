@@ -30,6 +30,6 @@ router.post('/equip-badge', authMiddleware, authController.equipBadge);
 // Route đổi tên hiển thị (Có bảo vệ bằng authMiddleware)
 router.post('/update-username', authMiddleware, authController.updateUsername);
 
-
+router.post('/facebook-login', authController.facebookLogin);
 
 module.exports = router;
