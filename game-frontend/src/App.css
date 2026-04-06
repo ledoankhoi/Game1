@@ -1,8 +1,18 @@
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden; /* Ngăn chặn thanh cuộn ngang không mong muốn */
+}
+
+/* Phá bỏ giới hạn chiều rộng của thẻ root chứa ứng dụng React */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  max-width: 100%; /* Đè lên các thuộc tính max-width mặc định của Vite nếu có */
+  margin: 0;
+  padding: 0;
+  text-align: left; /* Trả text về mặc định thay vì căn giữa toàn bộ như Vite */
 }
 
 .logo {

@@ -1,19 +1,21 @@
 /* game-frontend/src/assets/css/footer.css */
 
 .footer-container {
-  background-color: #1a1a2e; /* Nền xanh đen đậm */
-  color: #e0e0e0;
-  padding: 50px 20px 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff; /* Đổi thành màu trắng */
+  color: #555555; /* Màu xám đậm cho văn bản */
+  padding: 40px 20px 20px; /* Điều chỉnh padding */
+  font-family: 'Roboto', sans-serif; /* Sử dụng font đơn giản */
   margin-top: auto; 
-  border-top: 3px solid #0f3460; /* Đường viền trên cùng tạo điểm nhấn */
+  border-top: 1px solid #eeeeee; /* Đường viền trên mỏng và màu nhạt */
+  position: relative;
+  z-index: 10;
 }
 
 .footer-content {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  max-width: 1200px;
+  max-width: 1100px; /* Giảm max-width để trông gọn gàng hơn */
   margin: 0 auto;
   gap: 30px;
 }
@@ -24,18 +26,19 @@
 }
 
 .footer-section h4 {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  color: #e94560; /* Màu đỏ hồng cá tính cho tiêu đề */
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: bold;
+  font-family: 'Roboto', sans-serif; /* Font đơn giản cho tiêu đề */
+  font-size: 1.1rem; /* Kích thước tiêu đề nhỏ hơn một chút */
+  margin-bottom: 15px; /* Giảm margin dưới */
+  color: #333333; /* Màu xám đậm cho tiêu đề */
+  font-weight: 500; /* Độ đậm vừa phải */
+  text-transform: none; /* Loại bỏ chữ hoa toàn bộ */
+  letter-spacing: normal; /* Loại bỏ khoảng cách chữ rộng */
 }
 
 .footer-section p {
   line-height: 1.6;
-  color: #a0a0b0;
-  font-size: 0.95rem;
+  color: #666666; /* Màu xám nhạt hơn một chút cho nội dung */
+  font-size: 0.9rem; /* Kích thước chữ nhỏ hơn */
 }
 
 .footer-section ul {
@@ -45,29 +48,35 @@
 }
 
 .footer-section ul li {
-  margin-bottom: 12px;
+  margin-bottom: 10px; /* Giảm khoảng cách giữa các mục */
 }
 
 .footer-section a {
-  color: #a0a0b0;
+  color: #666666; /* Màu xám cho các liên kết */
   text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.3s ease, padding-left 0.3s ease;
+  font-size: 0.9rem; /* Cùng kích thước với văn bản */
+  transition: color 0.2s ease; /* Hiệu ứng chuyển màu nhanh */
   display: inline-block;
 }
 
-/* Hiệu ứng khi di chuột vào link */
+/* Hiệu ứng khi di chuột vào link (Hover) */
 .footer-section a:hover {
-  color: #fff;
-  padding-left: 8px; /* Thụt lề nhẹ tạo cảm giác tương tác */
-  text-shadow: 0 0 5px rgba(233, 69, 96, 0.5); /* Tỏa sáng nhẹ */
+  color: #000000; /* Màu đen khi di chuột vào, không có màu xanh */
+  padding-left: 0; /* Loại bỏ hiệu ứng dịch chuyển */
+  text-shadow: none; /* Loại bỏ hiệu ứng tỏa sáng */
+}
+
+/* Tùy chỉnh riêng cho danh sách liên hệ */
+.social-links a {
+  display: block; /* Hiển thị đơn giản */
+  padding: 0;
 }
 
 .footer-bottom {
   text-align: center;
-  padding-top: 20px;
-  margin-top: 40px;
-  border-top: 1px solid #2a2a4e;
-  color: #707085;
-  font-size: 0.85rem;
+  padding-top: 15px; /* Điều chỉnh padding */
+  margin-top: 30px; /* Điều chỉnh margin */
+  border-top: 1px solid #eeeeee; /* Đường viền trên cho phần đáy */
+  color: #999999; /* Màu xám nhạt cho phần bản quyền */
+  font-size: 0.8rem;
 }

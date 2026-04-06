@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TACTICAL COMMAND INTERFACE - HOME</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#a5eeff",
+                    "on-background": "#dfe2eb",
+                    "surface-container-low": "#181c22",
+                    "tertiary-fixed": "#dde2f2",
+                    "tertiary": "#d6dcec",
+                    "on-tertiary": "#2b313c",
+                    "secondary-fixed": "#ffdad8",
+                    "on-primary-container": "#005764",
+                    "primary-fixed-dim": "#00daf8",
+                    "on-surface": "#dfe2eb",
+                    "surface": "#10141a",
+                    "surface-variant": "#31353c",
+                    "on-surface-variant": "#bbc9cf",
+                    "tertiary-container": "#bbc0cf",
+                    "surface-tint": "#00daf8",
+                    "surface-container-highest": "#31353c",
+                    "secondary-container": "#ff525c",
+                    "on-tertiary-fixed": "#161c27",
+                    "on-primary": "#00363f",
+                    "on-error": "#690005",
+                    "primary-container": "#00d3f0",
+                    "on-secondary-container": "#5b000f",
+                    "on-primary-fixed": "#001f25",
+                    "outline": "#859399",
+                    "on-secondary": "#680012",
+                    "on-primary-fixed-variant": "#004e5a",
+                    "surface-container-high": "#262a31",
+                    "surface-container-lowest": "#0a0e14",
+                    "error-container": "#93000a",
+                    "secondary-fixed-dim": "#ffb3b2",
+                    "primary": "#8beaff",
+                    "on-secondary-fixed-variant": "#92001e",
+                    "background": "#10141a",
+                    "tertiary-fixed-dim": "#c1c6d6",
+                    "outline-variant": "#3c494e",
+                    "on-tertiary-fixed-variant": "#414753",
+                    "on-tertiary-container": "#484e5b",
+                    "on-secondary-fixed": "#410008",
+                    "on-error-container": "#ffdad6",
+                    "inverse-on-surface": "#2d3137",
+                    "inverse-surface": "#dfe2eb",
+                    "surface-dim": "#10141a",
+                    "surface-bright": "#353940",
+                    "surface-container": "#1c2026",
+                    "error": "#ffb4ab",
+                    "inverse-primary": "#006877",
+                    "secondary": "#ffb3b2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-trace-bottom {
+            box-shadow: 0 4px 10px -2px rgba(139, 234, 255, 0.2);
+        }
+        .scratched-glass {
+            background: linear-gradient(135deg, rgba(53, 57, 64, 0.2) 0%, rgba(16, 20, 26, 0.4) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 234, 255, 0.1);
+        }
+        .nurnie-bracket::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            border-top: 2px solid #8beaff;
+            border-left: 2px solid #8beaff;
+        }
+        .nurnie-bracket::after {
+            content: '';
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 8px; height: 8px;
+            border-bottom: 2px solid #8beaff;
+            border-right: 2px solid #8beaff;
+        }
+        .scanline-overlay {
+            background: linear-gradient(to bottom, transparent 50%, rgba(139, 234, 255, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body select-none overflow-hidden h-screen w-screen">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-2 bg-[#10141a]/80 backdrop-blur-md border-b border-[#8beaff]/40 glow-trace-bottom">
+<div class="flex items-center gap-6">
+<span class="text-2xl font-black tracking-tighter text-[#8beaff] drop-shadow-[0_0_8px_rgba(139,234,255,0.6)] font-headline">TACTICAL COMMAND INTERFACE</span>
+<nav class="hidden md:flex gap-4">
+<a class="font-['Space_Grotesk'] uppercase tracking-[0.1em] text-sm text-[#8beaff] border-b-2 border-[#8beaff] pb-1 hover:text-[#8beaff] hover:bg-[#8beaff]/10 transition-all duration-150" href="#">RE-ARM</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-[0.1em] text-sm text-[#8beaff]/50 hover:text-[#8beaff] hover:bg-[#8beaff]/10 transition-all duration-150" href="#">RE-FUEL</a>
+<a class="font-['Space_Grotesk'] uppercase tracking-[0.1em] text-sm text-[#8beaff]/50 hover:text-[#8beaff] hover:bg-[#8beaff]/10 transition-all duration-150" href="#">MAINTENANCE</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary px-4 py-1 font-headline font-bold text-xs tracking-widest uppercase hover:bg-primary-fixed transition-colors">SYSTEM READY</button>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-[#8beaff] cursor-pointer hover:bg-[#8beaff]/10 p-1">settings</span>
+<span class="material-symbols-outlined text-[#8beaff] cursor-pointer hover:bg-[#8beaff]/10 p-1">power_settings_new</span>
+</div>
+</div>
+</header>
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col pt-16 bg-[#10141a] w-20 border-r border-[#8beaff]/20 shadow-[inset_-10px_0_20px_rgba(0,209,255,0.05)]">
+<div class="flex flex-col items-center py-6 gap-8">
+<div class="text-[#8beaff] bg-[#8beaff]/20 border-r-4 border-[#8beaff] w-full py-4 flex flex-col items-center justify-center font-['Space_Grotesk'] font-bold text-xs cursor-pointer">
+<span class="material-symbols-outlined mb-1">precision_manufacturing</span>
+<span>COCKPIT</span>
+</div>
+<div class="text-[#8beaff]/40 py-4 flex flex-col items-center justify-center font-['Space_Grotesk'] font-bold text-xs cursor-pointer hover:bg-[#8beaff]/5 hover:text-[#8beaff] w-full">
+<span class="material-symbols-outlined mb-1">precision_manufacturing</span>
+<span>HANGAR</span>
+</div>
+<div class="text-[#8beaff]/40 py-4 flex flex-col items-center justify-center font-['Space_Grotesk'] font-bold text-xs cursor-pointer hover:bg-[#8beaff]/5 hover:text-[#8beaff] w-full">
+<span class="material-symbols-outlined mb-1">grid_view</span>
+<span>LIBRARY</span>
+</div>
+<div class="text-[#8beaff]/40 py-4 flex flex-col items-center justify-center font-['Space_Grotesk'] font-bold text-xs cursor-pointer hover:bg-[#8beaff]/5 hover:text-[#8beaff] w-full">
+<span class="material-symbols-outlined mb-1">rss_feed</span>
+<span>COMMS</span>
+</div>
+<div class="text-[#8beaff]/40 py-4 flex flex-col items-center justify-center font-['Space_Grotesk'] font-bold text-xs cursor-pointer hover:bg-[#8beaff]/5 hover:text-[#8beaff] w-full">
+<span class="material-symbols-outlined mb-1">settings_input_component</span>
+<span>SYSTEMS</span>
+</div>
+</div>
+<div class="mt-auto mb-6 flex flex-col items-center gap-2">
+<div class="w-10 h-10 bg-surface-container-high border border-primary/40 p-1">
+<img alt="Pilot" class="w-full h-full object-cover grayscale brightness-125" data-alt="close-up of a futuristic pilot avatar wearing a sleek high-tech helmet with glowing blue visors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_LiXHDhUFmJooHNumeCMboWCAZp5gF-tkv4HIkBH0VSFFlxsHfmoQHiHwGLyq6lqZT2RBYGDrqTTJs3XnHJeimLvn-HzK2BoCxuYLbZP6tsqVN_XxcPkz6AD6tthLqcybkZ6BQNxC-F0Hf70UQpJ6_dtiNXETMam-MVIUE7_y2XfZRVSk3XvFC5sxzD1LT7dDRACSt-NiVvFz1aVqIjPti-gQt9nHDTPsW6NOJcrAAGDjxAvN2UvgymxSL8jNni8AYoPBBrkMpjY"/>
+</div>
+<span class="font-headline text-[10px] text-primary/60 tracking-tighter">ID-01</span>
+</div>
+</aside>
+<!-- Main Content: 50/50 Split Screen -->
+<main class="pl-20 pt-14 h-screen flex overflow-hidden">
+<!-- LEFT HALF: Tactical List of Games (Swapped to Left) -->
+<section class="w-1/2 h-full flex flex-col bg-surface-container-low overflow-y-auto p-8 relative border-r border-[#8beaff]/20">
+<div class="absolute inset-0 scanline-overlay opacity-50"></div>
+<div class="flex justify-between items-baseline mb-8 relative z-10">
+<h2 class="font-headline text-xl font-bold text-white tracking-widest border-l-2 border-primary pl-4">MISSION ROSTER</h2>
+<span class="font-label text-xs text-primary/40 uppercase">SECTOR_07-B // ACTIVE_OPERATIONS</span>
+</div>
+<!-- Tactical Game Cards Grid -->
+<div class="grid grid-cols-1 gap-6 relative z-10">
+<!-- Game Card 1 -->
+<div class="scratched-glass p-4 group cursor-pointer hover:bg-primary/10 transition-all duration-300 relative flex gap-6 border-outline-variant/30">
+<div class="w-32 h-20 bg-black/40 border border-primary/20 shrink-0 relative overflow-hidden">
+<img alt="Math Race" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all" data-alt="abstract visualization of neon mathematical equations and grid lines racing toward a vanishing point on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL4ge9Kvvl_CFmj4_EekVhwq0Er5dRJy0oZbxPm151zCpglDwOFefP8geVL0MYxP7BsS_4MlOEfNrlTubltaFuVuCVm-w-Enl5akNUgqXXGrX-EqGmV8UQM37gH8qFJu_ZLyrcsPQUmA_9-sD8OaQ7esqAJazJR6jMeyZM3wIJxgD7o9ONx9mcPuuQZzha-kFumcdnGq_5xGjWmh0zJwV31R8CqtUR90zhbFjre7ez795Imawi0l2-GBCO_iOn5klR0dcYTIk5F8A"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline text-lg font-bold text-white tracking-tight uppercase">Math Race</h3>
+<span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 font-headline">CALC_INT-V4</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-3">
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Sync Rate</span>
+<span class="text-sm font-headline text-primary">82.4%</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Difficulty</span>
+<span class="text-sm font-headline text-primary">ELITE</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">High Score</span>
+<span class="text-sm font-headline text-primary">45,902</span>
+</div>
+</div>
+</div>
+<div class="absolute top-2 right-2 flex gap-1">
+<div class="w-1 h-1 bg-primary"></div>
+<div class="w-1 h-1 bg-primary/20"></div>
+</div>
+</div>
+<!-- Game Card 2 -->
+<div class="scratched-glass p-4 group cursor-pointer hover:bg-primary/10 transition-all duration-300 relative flex gap-6 border-outline-variant/30">
+<div class="w-32 h-20 bg-black/40 border border-primary/20 shrink-0 relative overflow-hidden">
+<img alt="Number String Rules" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all" data-alt="close-up of digital encryption code scrolling on a dark high-tech monitor with cybernetic patterns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBcjOAd4_MwKoEZq7TTJW7v02Mp2cNv6zP22_nT45acG8Ockhw807YkkEwM3faLQWyadzaXOm05vvowAd7H3gpsPPs8Ld3kg5U1eO2LUqkJz1vUFnZZ1irmg7-TAsXOWnMCZTapc4rFZhYD3q-9AwpV0TCTYQWkDiblSwty0ifMIWKPDIVL_AnDjb-DQJcAF20yDLhNpMAU-0oE_-shBoJs2UIiCLLinoN_lbduezEk5DhRE0zvhnP8UolmsLQ2HdvaPFD5Nh6sfI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline text-lg font-bold text-white tracking-tight uppercase">Number String Rules</h3>
+<span class="bg-secondary/20 text-secondary text-[10px] px-2 py-0.5 font-headline">ENCRYPT_B1</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-3">
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Sync Rate</span>
+<span class="text-sm font-headline text-primary">64.1%</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Difficulty</span>
+<span class="text-sm font-headline text-primary">TACTICAL</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">High Score</span>
+<span class="text-sm font-headline text-primary">12,110</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Game Card 3 -->
+<div class="scratched-glass p-4 group cursor-pointer hover:bg-primary/10 transition-all duration-300 relative flex gap-6 border-outline-variant/30">
+<div class="w-32 h-20 bg-black/40 border border-primary/20 shrink-0 relative overflow-hidden">
+<img alt="Quick Math Solver" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all" data-alt="complex circuitry pathways glowing with blue electricity inside a server room environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCm0XySaMVM2Vr35NJrkWIB1mSzdaiN7K8QDktYKcbFrGMZWB7VFm_oDqYw6Dc2lEmp9SP5JTinuTB0-56qWaVbzTbaWzHqWgwsn12k4m2BtdgExJ42qyGyYsiLgRHWvmTwgnskAcNOW7-ez9Y54xnw3x9OBJBg1ckfvpb2ukAg66FaRZ9hlEmdRzXWF4HE--BUHkYjlEPPZ4kVvI8xprsPPyXMjiy1fgQ7UY_to9Zgz05em5mbTByaZh8s95mkzbhoFJwS5-u_Kvk"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline text-lg font-bold text-white tracking-tight uppercase">Quick Math Solver</h3>
+<span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 font-headline">PROCESS_X9</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-3">
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Sync Rate</span>
+<span class="text-sm font-headline text-primary">94.8%</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Difficulty</span>
+<span class="text-sm font-headline text-primary">SCOUT</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">High Score</span>
+<span class="text-sm font-headline text-primary">99,320</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Game Card 4 -->
+<div class="scratched-glass p-4 group cursor-pointer hover:bg-primary/10 transition-all duration-300 relative flex gap-6 border-outline-variant/30">
+<div class="w-32 h-20 bg-black/40 border border-primary/20 shrink-0 relative overflow-hidden">
+<img alt="Pixel Painting 1" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all" data-alt="vibrant neon pixel art patterns forming a digital landscape with cascading light effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY5BKRMNqxFnwXMph_JWHOsyWyCr4qe3xh3HKUDNdOtyf_j5OzX38CteHWg3zeLjMwVLIbjzjhj1hX6pkhpt_sSFf4CRPznS_LJIBfEw4UbTvizXuocIsrcHtfacPH1z6vs6R-ClOA3HSyxpqwH9zCS8pjWJIDXa_4iFUIt3f0L1KYfu4039IhPtRe-R3WoPHYZOjsG8iqWJFkQu9LrP-HGGf1kx67bn1N4pXoifPGwPaAKYUYdjEl9D7f-ZL2cCAkudjDCOt44x8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline text-lg font-bold text-white tracking-tight uppercase">Pixel Painting 1</h3>
+<span class="bg-tertiary-container/20 text-tertiary text-[10px] px-2 py-0.5 font-headline">VISUAL_S01</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-3">
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Sync Rate</span>
+<span class="text-sm font-headline text-primary">31.2%</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">Difficulty</span>
+<span class="text-sm font-headline text-primary">RECON</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-label text-primary/40 uppercase">High Score</span>
+<span class="text-sm font-headline text-primary">5,400</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Overlay in Left Section -->
+<div class="mt-auto pt-8 border-t border-outline-variant/20 flex justify-between items-center relative z-10">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-primary/40">SYSTEM STATUS</span>
+<span class="font-headline text-xs text-primary font-bold">LINK_ESTABLISHED</span>
+</div>
+</div>
+<div class="flex gap-2">
+<div class="w-3 h-3 bg-primary/20 border border-primary/40"></div>
+<div class="w-3 h-3 bg-primary border border-primary"></div>
+<div class="w-3 h-3 bg-primary/20 border border-primary/40"></div>
+</div>
+</div>
+</section>
+<!-- RIGHT HALF: Hangar Bay (Swapped to Right) -->
+<section class="w-1/2 h-full relative bg-surface-container-lowest overflow-hidden">
+<div class="absolute inset-0 scanline-overlay"></div>
+<!-- Hangar Header -->
+<div class="absolute top-6 left-6 z-10">
+<div class="flex flex-col">
+<span class="font-headline text-3xl font-black text-[#8beaff] tracking-widest drop-shadow-[0_0_10px_rgba(139,234,255,0.4)]">HANGAR BAY 04</span>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-2 h-2 bg-primary animate-pulse"></div>
+<span class="font-label text-[10px] text-primary tracking-[0.2em] uppercase">STRIKE FREEDOM GUNDAM // UNIT-02</span>
+</div>
+</div>
+</div>
+<!-- 3D Mecha View -->
+<div class="w-full h-full p-4">
+<div class="w-full h-full relative nurnie-bracket border border-white/5 bg-black">
+<iframe allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen="" class="w-full h-full" execution-while-not-rendered="" execution-while-out-of-viewport="" frameborder="0" mozallowfullscreen="true" src="https://sketchfab.com/models/b480398fadb747d282081b2176794a4b/embed?autostart=1&amp;ui_theme=dark&amp;transparent=0" title="Strike Freedom Gundam" web-share="" webkitallowfullscreen="true" xr-spatial-tracking="">
+</iframe>
+</div>
+</div>
+<!-- Side Panel Stats (Floating) -->
+<div class="absolute right-6 top-1/2 -translate-y-1/2 w-48 space-y-4">
+<div class="scratched-glass p-3 border-l-4 border-primary">
+<div class="flex justify-between items-end">
+<span class="font-label text-[10px] text-primary/60">REACTOR OUTPUT</span>
+<span class="font-headline text-2xl font-bold text-primary">98%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high mt-2">
+<div class="h-full bg-primary" style="width: 98%;"></div>
+</div>
+</div>
+<div class="scratched-glass p-3 border-l-4 border-secondary">
+<div class="flex justify-between items-end">
+<span class="font-label text-[10px] text-secondary/60">HULL INTEGRITY</span>
+<span class="font-headline text-2xl font-bold text-secondary">100%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high mt-2">
+<div class="h-full bg-secondary" style="width: 100%;"></div>
+</div>
+</div>
+<div class="scratched-glass p-3 border-l-4 border-primary">
+<div class="grid grid-cols-2 gap-2 text-[9px] font-label text-primary/40">
+<div>LAT: 35.6895° N</div>
+<div>LNG: 139.6917° E</div>
+<div>ALT: 2,450 M</div>
+<div>VEL: 0.00 M/S</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Background Ambience Element -->
+<div class="fixed inset-0 pointer-events-none z-0 opacity-10 bg-[radial-gradient(circle_at_30%_50%,_#8beaff_0%,_transparent_50%)]"></div>
+</body></html>

@@ -7,6 +7,7 @@ import Shop from './pages/Shop';
 import Leaderboard from './pages/Leaderboard'; 
 import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import About from './pages/About'; // [THÊM MỚI] Import trang About
 
 // Import Components
 import Header from './components/Header';
@@ -22,6 +23,9 @@ function App() {
   const [user, setUser] = useState(null); 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // [THÊM MỚI] Kiểm tra xem người dùng có đang ở trang Giới thiệu không
+  const isAboutPage = location.pathname === '/about';
 
   // --- QUẢN LÝ USER ---
   const loadUser = () => {
@@ -52,6 +56,16 @@ function App() {
     window.location.reload(); 
   };
 
+  // [THÊM MỚI] Nếu là trang About, chỉ hiển thị duy nhất nội dung của trang đó (Trang độc lập hoàn toàn)
+  if (isAboutPage) {
+    return (
+      <Routes>
+        <Route path="/about" element={<About />} />
+      </Routes>
+    );
+  }
+
+  // GIAO DIỆN CHÍNH CHO TẤT CẢ CÁC TRANG CÒN LẠI
   return (
     <div id="app-lobby" className="relative flex flex-col w-full min-h-screen bg-[#f9f9f9] dark:bg-[#141516] transition-colors duration-300">
       
@@ -66,8 +80,8 @@ function App() {
       />
 
       {/* KHU VỰC THAY ĐỔI TRANG (MAIN CONTENT) */}
-      <main className="flex flex-1 flex-col max-w-[1600px] mx-auto w-full p-4 lg:p-8">
-        <Routes>
+<main className="flex flex-1 flex-col w-full p-4 sm:p-6 lg:p-8">
+          <Routes>
           <Route path="/" element={<Home searchQuery={searchQuery} user={user} setShowAuth={setShowAuth} />} />          
           <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
           <Route path="/profile" element={<Profile />} />
@@ -80,7 +94,7 @@ function App() {
       {/* CÁC THÀNH PHẦN NỔI */}
       <Chatbot />
 
-      {/* FOOTER (Style Poki) */}
+      {/* FOOTER */}
       <Footer />
 
       {/* BẢNG ĐĂNG NHẬP (MODALS) */}
