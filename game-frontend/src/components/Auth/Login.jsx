@@ -18,7 +18,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
     setError("");
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -46,7 +46,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError("");
     try {
-      const response = await fetch('http://localhost:3000/api/auth/google-login', {
+      const response = await fetch('http://localhost:5000/api/auth/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential })
@@ -71,7 +71,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
     if (!response.accessToken) return;
     setError("");
     try {
-      const res = await axios.post('http://localhost:3000/api/auth/facebook-login', {
+      const res = await axios.post('http://localhost:5000/api/auth/facebook-login', {
         accessToken: response.accessToken
       });
       if (res.data.success) {

@@ -45,7 +45,7 @@ function Profile() {
       return;
     }
 
-    fetch('http://localhost:3000/api/auth/profile', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch('http://localhost:5000/api/auth/profile', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.user) {
@@ -60,10 +60,10 @@ function Profile() {
       })
       .catch(err => console.error("Lỗi tải profile:", err));
 
-    fetch('http://localhost:3000/api/game/list').then(res => res.json()).then(data => { if (data.success) setGamesList(data.games || []); });
-    fetch('http://localhost:3000/api/game/history', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setHistory(data.history || []); });
-    fetch('http://localhost:3000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setQuestsList(data.quests || []); });
-    fetch('http://localhost:3000/api/achievement/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setAchievementsList(data.achievements || []); });
+    fetch('http://localhost:5000/api/game/list').then(res => res.json()).then(data => { if (data.success) setGamesList(data.games || []); });
+    fetch('http://localhost:5000/api/game/history', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setHistory(data.history || []); });
+    fetch('http://localhost:5000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setQuestsList(data.quests || []); });
+    fetch('http://localhost:5000/api/achievement/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setAchievementsList(data.achievements || []); });
 
   }, [navigate]);
 
@@ -76,7 +76,7 @@ function Profile() {
   const handleSaveAvatar = async () => {
     if (!selectedAvatar) return setIsModalOpen(false);
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:3000/api/auth/update-avatar', {
+    const res = await fetch('http://localhost:5000/api/auth/update-avatar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ avatarUrl: selectedAvatar })
@@ -100,7 +100,7 @@ function Profile() {
     
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:3000/api/auth/update-username', {
+      const res = await fetch('http://localhost:5000/api/auth/update-username', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ newUsername: newName })
@@ -142,7 +142,7 @@ function Profile() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:3000/api/auth/toggle-favorite', {
+      const res = await fetch('http://localhost:5000/api/auth/toggle-favorite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ gameSlug })
@@ -155,7 +155,7 @@ function Profile() {
   const handleClaimQuest = async (questId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:3000/api/quest/claim', {
+      const res = await fetch('http://localhost:5000/api/quest/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ questId })
@@ -182,7 +182,7 @@ function Profile() {
           return updatedUser;
         });
         
-        fetch('http://localhost:3000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch('http://localhost:5000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.json())
           .then(d => { if (d.success) setQuestsList(d.quests || []); });
       } else {
@@ -201,7 +201,7 @@ function Profile() {
   const handleEquipBadge = async (badgeId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:3000/api/auth/equip-badge', {
+      const res = await fetch('http://localhost:5000/api/auth/equip-badge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ badgeId })

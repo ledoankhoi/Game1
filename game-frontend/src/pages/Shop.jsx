@@ -20,7 +20,7 @@ function Shop({ searchQuery = '' }) {
     setUser(savedUser);
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/profile', { 
+      const res = await fetch('http://localhost:5000/api/auth/profile', { 
         method: 'GET', 
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
@@ -36,7 +36,7 @@ function Shop({ searchQuery = '' }) {
 
   const fetchShopItems = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/shop/items');
+      const response = await fetch('http://localhost:5000/api/shop/items');
       const data = await response.json();
       if (data.success || data.items) setItems(data.items || data.data || []);
     } catch (error) { console.error("[SHOP] Lỗi lấy danh sách cửa hàng:", error); } 
@@ -50,7 +50,7 @@ function Shop({ searchQuery = '' }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/shop/buy', {
+      const response = await fetch('http://localhost:5000/api/shop/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ itemId })
@@ -80,7 +80,7 @@ function Shop({ searchQuery = '' }) {
     if (!user) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/shop/equip', {
+      const response = await fetch('http://localhost:5000/api/shop/equip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ itemId })

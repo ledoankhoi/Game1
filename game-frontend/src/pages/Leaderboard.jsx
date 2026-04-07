@@ -16,7 +16,7 @@ function Leaderboard() {
 
   // 1. KHI VỪA VÀO TRANG: Tự động tải danh sách Game từ Database (Có thuật toán quét dọn)
   useEffect(() => {
-    fetch('http://localhost:3000/api/game/list')
+    fetch('http://localhost:5000/api/game/list')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.games && Array.isArray(data.games) && data.games.length > 0) {
@@ -68,20 +68,20 @@ function Leaderboard() {
     let url = '';
 
     if (mainTab === 'exp') {
-        url = 'http://localhost:3000/api/game/leaderboard/exp';
+        url = 'http://localhost:5000/api/game/leaderboard/exp';
     } 
     else if (mainTab === 'score') {
-        url = 'http://localhost:3000/api/game/leaderboard/score';
+        url = 'http://localhost:5000/api/game/leaderboard/score';
     } 
     else if (mainTab === 'game') {
         // A. NẾU ĐÃ CHỌN GAME CỤ THỂ -> Xem BXH của duy nhất Game đó
         if (activeGameId) {
-            url = `http://localhost:3000/api/game/leaderboard/game/${activeGameId}`;
+            url = `http://localhost:5000/api/game/leaderboard/game/${activeGameId}`;
         } 
         // B. NẾU CHƯA CHỌN GAME (Tức là đang ở trạng thái chọn Thể loại, bao gồm cả 'All') 
         // -> Sẽ gọi API Category và gởi chữ 'All' (hoặc tên thể loại) xuống Backend
         else if (activeCategory) {
-            url = `http://localhost:3000/api/game/leaderboard/category/${activeCategory}`;
+            url = `http://localhost:5000/api/game/leaderboard/category/${activeCategory}`;
         }
     }
 

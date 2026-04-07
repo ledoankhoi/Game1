@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // CHỈNH SỬA: Đảm bảo khớp với route `/api/game/...` thường dùng ở Backend
-            const response = await fetch(`http://localhost:3000/api/game/instructions/${slug}`);
+            const response = await fetch(`http://localhost:5000/api/game/instructions/${slug}`);
             const data = await response.json();
 
             if (data.success && data.howToPlay && data.howToPlay.length > 0) {
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">${data.message || 'Chưa có dữ liệu hướng dẫn cho trò chơi này.'}</div>`;
             }
         } catch (error) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: #ff4d4d;">Lỗi kết nối Backend (Port 3000)!</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: #ff4d4d;">Lỗi kết nối Backend (Port 5000)!</div>`;
         }
     });
 

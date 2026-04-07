@@ -26,7 +26,7 @@ function UserProfile() {
 
   const fetchShopItems = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/shop/items');
+      const response = await fetch('http://localhost:5000/api/shop/items');
       const data = await response.json();
       if (data.success) {
         setShopItems(data.items || []);
@@ -57,7 +57,7 @@ function UserProfile() {
 
       // TRƯỜNG HỢP 1: Chọn ảnh từ danh sách Shop -> Gọi API Mặc Đồ để đồng bộ 100%
       if (selectedItemId) {
-        const response = await fetch('http://localhost:3000/api/shop/equip', {
+        const response = await fetch('http://localhost:5000/api/shop/equip', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

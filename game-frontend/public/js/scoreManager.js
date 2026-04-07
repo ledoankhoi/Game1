@@ -11,8 +11,8 @@ async function saveScoreToDatabase(gameId, score) {
     try {
         console.log(`Đang gửi ${score} điểm của game ${gameId} lên máy chủ...`);
         
-        // 2. Gửi điểm lên đúng cổng 3000 kèm theo Token
-        const response = await fetch('http://localhost:3000/api/auth/update-score', {
+        // 2. Gửi điểm lên đúng cổng 5000 kèm theo Token
+        const response = await fetch('http://localhost:5000/api/auth/update-score', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

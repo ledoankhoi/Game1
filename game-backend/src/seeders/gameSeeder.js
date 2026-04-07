@@ -78,7 +78,7 @@ const sampleGames = [
     thumbnailUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600", // Tạm dùng ảnh thay thế
     gameUrl: "/pixel.html",
     category: "Elite",
-    views: 33000
+    views: 35000
   }
 ];
 

@@ -30,8 +30,8 @@ const RewardManager = {
         const expEarned = Math.floor(finalScore * this.config.scoreToExpRatio);
 
         try {
-            // SỬA LẠI PORT 3000 CHO KHỚP VỚI BACKEND CỦA BẠN
-            const response = await fetch('http://localhost:3000/api/games/save-result', {
+            // SỬA LẠI PORT 5000 CHO KHỚP VỚI BACKEND CỦA BẠN
+            const response = await fetch('http://localhost:5000/api/games/save-result', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const RewardManager = {
         const expEarned = Math.floor(finalScore * this.config.scoreToExpRatio);
 
         try {
-            const response = await fetch('http://localhost:3000/api/games/save-result', {
+            const response = await fetch('http://localhost:5000/api/games/save-result', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ gameId, score: finalScore, coinsEarned, expEarned })

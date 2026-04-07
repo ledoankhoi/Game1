@@ -33,9 +33,9 @@ function AdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       let url = '';
-      if (activeTab === 'users') url = 'http://localhost:3000/api/admin/users';
-      else if (activeTab === 'games') url = 'http://localhost:3000/api/admin/games';
-      else if (activeTab === 'items') url = 'http://localhost:3000/api/shop/items'; 
+      if (activeTab === 'users') url = 'http://localhost:5000/api/admin/users';
+      else if (activeTab === 'games') url = 'http://localhost:5000/api/admin/games';
+      else if (activeTab === 'items') url = 'http://localhost:5000/api/shop/items'; 
       
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       const result = await response.json();
@@ -52,7 +52,7 @@ function AdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       const endpoint = activeTab === 'items' ? 'items' : (activeTab === 'users' ? 'users' : 'games');
-      const response = await fetch(`http://localhost:3000/api/admin/${endpoint}/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/admin/${endpoint}/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -109,8 +109,8 @@ function AdminDashboard() {
       
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId 
-        ? `http://localhost:3000/api/admin/${endpoint}/${editingId}` 
-        : `http://localhost:3000/api/admin/${endpoint}`;
+        ? `http://localhost:5000/api/admin/${endpoint}/${editingId}` 
+        : `http://localhost:5000/api/admin/${endpoint}`;
       
       // Tạo bản sao dữ liệu để gửi đi
       const submitData = { ...formData };

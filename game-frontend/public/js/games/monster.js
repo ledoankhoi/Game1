@@ -477,7 +477,7 @@ const MonsterGame = {
 
         try {
             // 1. Lưu điểm cao (High Score)
-            await fetch('http://localhost:3000/api/user/highscore', {
+            await fetch('http://localhost:5000/api/user/highscore', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -488,7 +488,7 @@ const MonsterGame = {
             });
 
             // 2. Nhận thưởng và Tăng Play Count (Quan trọng: game: 'monster')
-            await fetch('http://localhost:3000/api/user/reward', {
+            await fetch('http://localhost:5000/api/user/reward', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

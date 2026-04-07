@@ -17,7 +17,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
       if (setShowAuth) setShowAuth(true);
     } else {
       try {
-        await fetch(`http://localhost:3000/api/game/${gameSlug}/play`, {
+        await fetch(`http://localhost:5000/api/game/${gameSlug}/play`, {
           method: 'POST'
         });
       } catch (err) {
@@ -30,7 +30,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/game/list');
+        const response = await fetch('http://localhost:5000/api/game/list');
         const result = await response.json();
         if (result.success && Array.isArray(result.games)) {
           setGames(result.games);
@@ -50,7 +50,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const res = await fetch('http://localhost:3000/api/auth/profile', {
+          const res = await fetch('http://localhost:5000/api/auth/profile', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
@@ -70,7 +70,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
     const fetchRecommendations = async () => {
       const token = localStorage.getItem('token');
       if (token) {
-        const res = await fetch('http://localhost:3000/api/game/recommendations', {
+        const res = await fetch('http://localhost:5000/api/game/recommendations', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -88,7 +88,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
       return;
     }
     try {
-      const res = await fetch('http://localhost:3000/api/auth/toggle-favorite', {
+      const res = await fetch('http://localhost:5000/api/auth/toggle-favorite', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

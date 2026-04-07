@@ -80,8 +80,8 @@ function App() {
       />
 
       {/* KHU VỰC THAY ĐỔI TRANG (MAIN CONTENT) */}
-<main className="flex flex-1 flex-col w-full p-4 sm:p-6 lg:p-8">
-          <Routes>
+      <main className="flex flex-1 flex-col w-full p-4 sm:p-6 lg:p-8">
+        <Routes>
           <Route path="/" element={<Home searchQuery={searchQuery} user={user} setShowAuth={setShowAuth} />} />          
           <Route path="/shop" element={<Shop searchQuery={searchQuery} />} /> 
           <Route path="/profile" element={<Profile />} />
@@ -92,7 +92,8 @@ function App() {
       </main>
 
       {/* CÁC THÀNH PHẦN NỔI */}
-      <Chatbot />
+      {/* Sửa đổi: Chỉ hiển thị Chatbot nếu user tồn tại (đã đăng nhập) */}
+      {user && <Chatbot />}
 
       {/* FOOTER */}
       <Footer />

@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const token = localStorage.getItem('token');
             if(token) {
-                const response = await fetch('http://localhost:3000/api/games/save-result', {
+                const response = await fetch('http://localhost:5000/api/games/save-result', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ 

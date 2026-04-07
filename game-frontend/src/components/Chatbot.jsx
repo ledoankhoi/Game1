@@ -45,7 +45,7 @@ function Chatbot() {
       const token = localStorage.getItem('token'); 
 
       // Gọi API sang Backend
-      const res = await fetch('http://localhost:3000/api/ai/chat', {
+      const res = await fetch('http://localhost:5000/api/ai/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

@@ -62,8 +62,8 @@ const MathQuestBridge = {
         console.log(`Đang gửi điểm của ${user.username} lên Máy chủ...`);
 
         try {
-            // 2. Gửi xe chở Điểm số chạy sang Backend cổng 3000
-            const response = await fetch('http://localhost:3000/api/auth/update-score', {
+            // 2. Gửi xe chở Điểm số chạy sang Backend cổng 5000
+            const response = await fetch('http://localhost:5000/api/auth/update-score', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
