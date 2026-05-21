@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
 function UserProfile() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [shopItems, setShopItems] = useState([]); 
-  const [previewImage, setPreviewImage] = useState(''); 
+  const [previewImage, setPreviewImage] = useState(user
+    ? (user.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username}`)
+    : ''
+  ); 
   
   // CHIÊU THỨC MỚI: Nhớ ID của vật phẩm được chọn để đồng bộ với Shop
-  const [selectedItemId, setSelectedItemId] = useState(null);
-
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem('user'));
-    if (savedUser) {
-      setUser(savedUser);
-      setPreviewImage(savedUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${savedUser.username}`);
-      
-      // Khôi phục ID đang mặc nếu có
-      if (savedUser.equipped && Object.values(savedUser.equipped).length > 0) {
-        setSelectedItemId(Object.values(savedUser.equipped)[0]);
-      }
-    }
-    fetchShopItems();
-  }, []);
+  const [selectedItemId, setSelectedItemId] = useState(
+    (user && user.equipped && Object.values(user.equipped).length > 0)
+      ? Object.values(user.equipped)[0]
+      : null
+  );
 
   const fetchShopItems = async () => {
     try {
@@ -31,10 +27,15 @@ function UserProfile() {
       if (data.success) {
         setShopItems(data.items || []);
       }
-    } catch (error) {
-      console.error("Lỗi lấy danh sách shop:", error);
+    } catch (_error) {
+      console.error("Lỗi lấy danh sách shop:", _error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchShopItems();
+  }, []);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -88,7 +89,7 @@ function UserProfile() {
         setIsModalOpen(false);
         window.location.reload();
       }
-    } catch (error) {
+    } catch (_error) {
       alert("Có lỗi kết nối máy chủ!");
     }
   };

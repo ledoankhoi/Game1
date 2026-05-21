@@ -52,6 +52,41 @@ const GlowCard = ({ children, className, style }) => {
     );
 };
 
+class Particle {
+    constructor(x, y) {
+        this.x = x; this.y = y;
+        this.size = Math.random() * 2 + 1;
+        this.baseX = this.x; this.baseY = this.y;
+        this.density = (Math.random() * 30) + 1;
+    }
+    draw(ctx) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+    }
+    update(mouse) {
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        let forceDirectionX = dx / distance;
+        let forceDirectionY = dy / distance;
+        let maxDistance = mouse.radius;
+        let force = (maxDistance - distance) / maxDistance;
+        let directionX = forceDirectionX * force * this.density;
+        let directionY = forceDirectionY * force * this.density;
+
+        if (distance < mouse.radius) {
+            this.x -= directionX;
+            this.y -= directionY;
+        } else {
+            if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 10;
+            if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 10;
+        }
+    }
+}
+
 // --- 3. Interactive Particle Canvas ---
 const InteractiveCanvas = () => {
     const canvasRef = useRef(null);
@@ -77,41 +112,6 @@ const InteractiveCanvas = () => {
         };
         window.addEventListener('mousemove', handleMouseMove);
 
-        class Particle {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.size = Math.random() * 2 + 1;
-                this.baseX = this.x; this.baseY = this.y;
-                this.density = (Math.random() * 30) + 1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.6)'; // Hạt màu đen xám
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-            }
-            update() {
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                let forceDirectionX = dx / distance;
-                let forceDirectionY = dy / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
-
-                if (distance < mouse.radius) {
-                    this.x -= directionX;
-                    this.y -= directionY;
-                } else {
-                    if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 10;
-                    if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 10;
-                }
-            }
-        }
-
         const init = () => {
             particles = [];
             const numberOfParticles = (canvas.width * canvas.height) / 6000;
@@ -123,15 +123,15 @@ const InteractiveCanvas = () => {
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < particles.length; i++) {
-                particles[i].draw();
-                particles[i].update();
+                particles[i].draw(ctx);
+                particles[i].update(mouse);
                 for (let j = i; j < particles.length; j++) {
                     let dx = particles[i].x - particles[j].x;
                     let dy = particles[i].y - particles[j].y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < 60) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(15, 23, 42, ${0.15 - distance/80})`; // Dây nối
+                        ctx.strokeStyle = `rgba(15, 23, 42, ${0.15 - distance/80})`;
                         ctx.lineWidth = 1;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);

@@ -1,3 +1,4 @@
+/* global SoundManager, ScoreManager, updateHeaderUI, updateUserProfile */
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof SoundManager !== 'undefined' && typeof SoundManager.init === 'function') {
         SoundManager.init();

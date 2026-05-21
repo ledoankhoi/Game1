@@ -39,7 +39,7 @@ function Shop({ searchQuery = '' }) {
       const response = await fetch('http://localhost:5000/api/shop/items');
       const data = await response.json();
       if (data.success || data.items) setItems(data.items || data.data || []);
-    } catch (error) { console.error("[SHOP] Lỗi lấy danh sách cửa hàng:", error); } 
+    } catch (_error) { console.error("[SHOP] Lỗi lấy danh sách cửa hàng:", _error); } 
     finally { setLoading(false); }
   };
 
@@ -73,7 +73,7 @@ function Shop({ searchQuery = '' }) {
            }
         }
       }
-    } catch (error) { alert("Lỗi kết nối máy chủ!"); }
+    } catch (_error) { alert("Lỗi kết nối máy chủ!"); }
   };
 
   const handleEquip = async (itemId) => {
@@ -95,7 +95,7 @@ function Shop({ searchQuery = '' }) {
         alert(data.message || "Đã mặc vật phẩm!");
         window.dispatchEvent(new Event('storage'));
       } else { alert("Lỗi: " + data.message); }
-    } catch (error) { alert("Lỗi kết nối máy chủ!"); }
+    } catch (_error) { alert("Lỗi kết nối máy chủ!"); }
   };
 
   const getActualRarity = (item) => {

@@ -1,3 +1,4 @@
+/* global SoundManager, MonsterExtension, saveScoreToDatabase */
 /* file: public/js/games/monster.js - Phiên bản tích hợp Server Reward & PlayCount */
 
 const MonsterGame = {

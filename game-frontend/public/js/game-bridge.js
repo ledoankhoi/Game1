@@ -156,8 +156,8 @@ const MathQuestBridge = {
         try {
             const audio = new Audio('/sounds/correct.mp3'); 
             audio.volume = 0.6;
-            audio.play().catch(e => console.log('Trình duyệt chặn autoplay âm thanh'));
-        } catch(e) {}
+            audio.play().catch(_e => console.log('Trình duyệt chặn autoplay âm thanh'));
+        } catch(_e) { /* ignore */ }
 
         // Kích hoạt hoạt ảnh mượt mà
         setTimeout(() => {

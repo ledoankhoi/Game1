@@ -1,3 +1,4 @@
+/* global RewardManager */
 /* file: public/js/games/puzzle.js */
 
 const SIZE = 4;

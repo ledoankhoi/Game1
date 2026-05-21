@@ -1,3 +1,4 @@
+/* global RewardManager */
 /* file: public/js/games/decryption.js */
 
 const DecryptionGame = {
@@ -112,7 +113,7 @@ const DecryptionGame = {
             osc.start();
             gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
             osc.stop(ctx.currentTime + 0.3);
-        } catch(e) { /* Trình duyệt chặn audio nếu chưa click */ }
+        } catch(_e) { /* Trình duyệt chặn audio nếu chưa click */ }
     },
 
     gameOver: async function() {

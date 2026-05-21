@@ -28,7 +28,7 @@ function TabFeedback() {
       } else {
         setFeedbackStatus({ type: 'error', message: data.message });
       }
-    } catch (err) {
+    } catch (_err) {
       setFeedbackStatus({ type: 'error', message: 'Lỗi kết nối. Vui lòng thử lại sau.' });
     } finally {
       setIsSubmitting(false);

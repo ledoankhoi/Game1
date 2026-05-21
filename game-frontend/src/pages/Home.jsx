@@ -8,7 +8,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   const [categories, setCategories] = useState(['All']);
   const [activeCategory, setActiveCategory] = useState('All');
   const [favoriteGames, setFavoriteGames] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
+  const [_recommendations, setRecommendations] = useState([]);
   const [pageBgImage, setPageBgImage] = useState('none');
 
   const handlePlayGame = async (gameSlug, url, e) => {

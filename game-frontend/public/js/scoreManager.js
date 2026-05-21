@@ -1,4 +1,5 @@
 // Hàm này sẽ được gọi khi Game Over
+// eslint-disable-next-line no-unused-vars
 async function saveScoreToDatabase(gameId, score) {
     // 1. Lấy thẻ căn cước (Token) để chứng minh mình đã đăng nhập
     const token = localStorage.getItem('token');

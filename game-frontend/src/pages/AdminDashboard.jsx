@@ -25,6 +25,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const fetchData = async () => {
@@ -40,8 +41,8 @@ function AdminDashboard() {
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       const result = await response.json();
       if (result.success) setData(result[activeTab] || result.items || result.games || result.users || []);
-    } catch (error) {
-      console.error("Lỗi lấy dữ liệu:", error);
+    } catch (_error) {
+      console.error("Lỗi lấy dữ liệu:", _error);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ function AdminDashboard() {
       } else {
         alert('Lỗi: ' + result.message);
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Lỗi kết nối server!');
     }
   };
@@ -143,7 +144,7 @@ function AdminDashboard() {
       } else {
         alert('Lỗi: ' + result.message);
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Lỗi kết nối Server!');
     } finally {
       setIsSubmitting(false);

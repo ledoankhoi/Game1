@@ -55,8 +55,8 @@ function Leaderboard() {
           setCategories(['All']);
         }
       })
-      .catch(err => {
-        console.error("Lỗi tải danh sách game:", err);
+        .catch(_err => {
+          console.error("Lỗi tải danh sách game:", _err);
         setGames([]);
         setCategories(['All']);
       });
@@ -64,6 +64,7 @@ function Leaderboard() {
 
   // --- 2. KHI CHUYỂN TAB HOẶC CHỌN THỂ LOẠI: Tự động gọi đúng API ---
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     let url = '';
 
@@ -92,7 +93,7 @@ function Leaderboard() {
           setLeaderboardData(data.success ? data.leaderboard : []);
           setIsLoading(false);
         })
-        .catch(err => {
+        .catch(_err => {
           setLeaderboardData([]);
           setIsLoading(false);
         });

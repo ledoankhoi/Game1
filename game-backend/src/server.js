@@ -2,12 +2,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // 1. Nạp cấu hình từ file .env
 dotenv.config();
 
-// 2. Khởi tạo ứng dụng Express
+// 2. Khởi tạo ứng dụng Express + HTTP server cho Socket.IO
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: '*', methods: ['GET', 'POST'] }
+});
 
 // 3. Cấu hình Middleware (Bảo vệ và xử lý dữ liệu)
 app.use(cors()); // Cho phép Frontend (cổng 5173) gọi dữ liệu từ Backend (cổng 5000)
@@ -49,12 +55,16 @@ const DB_URI = process.env.MONGO_URI || process.env.DB_URI || 'mongodb://127.0.0
 const { chatWithAssistant } = require('./controllers/aiController');
 app.post('/api/ai/chat', chatWithAssistant);
 
+// Socket.IO — Chess Multiplayer
+const chessHandler = require('./socket/chessHandler');
+chessHandler(io);
+
 mongoose.connect(DB_URI)
     .then(() => {
         console.log('✅ Đã kết nối cơ sở dữ liệu MongoDB thành công!');
         
         // Chỉ bật server lên khi đã kết nối Database thành công
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`🚀 Server Backend đang chạy tại: http://localhost:${PORT}`);
         });
     })

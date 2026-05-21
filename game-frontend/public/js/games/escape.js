@@ -296,4 +296,4 @@ function endGame() {
     }
 }
 
-function playSound(t) {}
+function playSound(_t) {}

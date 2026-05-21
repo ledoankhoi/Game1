@@ -1,3 +1,4 @@
+/* global RewardManager, submitMove */
 /* file: public/js/games/chess.js */
 
 let TARGET_SUM = 200; 
@@ -182,7 +183,7 @@ function updateUI() {
 
     // Cập nhật điểm lên Header hệ thống
     const headerScore = document.getElementById('current-score');
-    if(headerScore) headerScore.innerText = currentScore.toLocaleString();
+    if(headerScore) headerScore.innerText = path.length.toLocaleString();
     
     const progressText = document.getElementById('progress-text');
     if (progressText) progressText.innerText = `${path.length}/64`;
@@ -198,7 +199,6 @@ function handleCellClick(r, c) {
 }
 
 function bindInputEvents() {
-    const input = document.getElementById('cell-input');
     const btn = document.getElementById('btn-submit-val');
     
     if (btn) btn.onclick = (e) => { e.preventDefault(); submitMove(); };

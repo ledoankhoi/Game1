@@ -1,3 +1,4 @@
+/* global RewardManager */
 /**
  * SPEED.JS - Core Logic (Integrated with RewardManager)
  */

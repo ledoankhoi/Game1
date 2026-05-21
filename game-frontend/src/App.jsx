@@ -20,7 +20,10 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuth, setShowAuth] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,23 +31,18 @@ function App() {
   const isAboutPage = location.pathname === '/about';
 
   // --- QUẢN LÝ USER ---
-  const loadUser = () => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    } else {
-      setUser(null);
-    }
-  };
-
   useEffect(() => {
-    loadUser(); 
-    window.addEventListener('storage', loadUser);
-    return () => window.removeEventListener('storage', loadUser);
+    const handleStorage = () => {
+      const savedUser = localStorage.getItem('user');
+      setUser(savedUser ? JSON.parse(savedUser) : null);
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   useEffect(() => {
-    setSearchQuery(''); // Xóa thanh tìm kiếm khi chuyển trang
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSearchQuery('');
   }, [location.pathname]);
 
   const handleLogout = () => {

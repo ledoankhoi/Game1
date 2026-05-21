@@ -1,3 +1,4 @@
+/* global RewardManager */
 /* file: public/js/games/maze.js */
 
 const MazeGame = {

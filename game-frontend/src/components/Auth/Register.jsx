@@ -24,7 +24,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
       } else {
         setError(data.message || "Đăng ký thất bại!");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Lỗi kết nối tới máy chủ!");
     } finally {
       setLoading(false);

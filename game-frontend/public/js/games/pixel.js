@@ -1,3 +1,4 @@
+/* global RewardManager */
 /**
  * PIXEL.JS - Elite League Logic (Integrated with RewardManager)
  */
@@ -145,7 +146,7 @@ const PixelGame = {
         }
     },
 
-    gameOver: async function(reason) {
+    gameOver: async function(_reason) {
         // 1. GỬI ĐIỂM LÊN SERVER
         if (typeof RewardManager !== 'undefined' && typeof RewardManager.submitScore === 'function') {
             const reward = await RewardManager.submitScore('pixel', this.score);

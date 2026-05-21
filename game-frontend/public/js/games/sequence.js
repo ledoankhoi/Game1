@@ -1,3 +1,4 @@
+/* global RewardManager */
 /**
  * SEQUENCE.JS - GENIUS EDITION (Integrated with RewardManager)
  */
@@ -57,19 +58,19 @@ function initGame() {
 
 // BỘ TẠO THUẬT TOÁN (Giữ nguyên siêu cấp trí tuệ của bạn)
 const LevelGenerator = {
-    generateArithmetic: (level) => {
+    generateArithmetic: (_level) => {
         const start = Math.floor(Math.random() * 50);
         const diff = Math.floor(Math.random() * 10) + 2; 
         const seq = [start, start + diff, start + diff*2, start + diff*3];
         return { sequence: seq, next: start + diff*4, hint: `Cấp số cộng: Tăng đều ${diff} đơn vị.`, points: 100 };
     },
-    generateGeometric: (level) => {
+    generateGeometric: (_level) => {
         const start = Math.floor(Math.random() * 5) + 2;
         const ratio = Math.floor(Math.random() * 2) + 2; 
         const seq = [start, start * ratio, start * ratio*ratio, start * ratio*ratio*ratio];
         return { sequence: seq, next: start * Math.pow(ratio, 4), hint: `Cấp số nhân: Gấp ${ratio} lần số trước.`, points: 200 };
     },
-    generateFibonacci: (level) => {
+    generateFibonacci: (_level) => {
         const type = Math.random() > 0.5 ? 'fib' : 'tri';
         if (type === 'fib') {
             let a = Math.floor(Math.random() * 5) + 1, b = Math.floor(Math.random() * 5) + 1;
@@ -79,12 +80,12 @@ const LevelGenerator = {
             return { sequence: [a, b, c, a+b+c], next: b + c + (a+b+c), hint: "Tổng ba số liền trước (Tribonacci).", points: 400 };
         }
     },
-    generateInterleaved: (level) => {
+    generateInterleaved: (_level) => {
         const startA = Math.floor(Math.random() * 10), diffA = 2; 
         const startB = Math.floor(Math.random() * 50) + 50, diffB = 5; 
         return { sequence: [startA, startB, startA + diffA, startB - diffB, startA + diffA*2], next: startB - diffB*2, hint: "Hai quy luật đan xen nhau.", points: 600 };
     },
-    generateDigitalSum: (level) => {
+    generateDigitalSum: (_level) => {
         const start = Math.floor(Math.random() * 3) + 1;
         const logic = (n) => (n*n) + n; 
         return { sequence: [logic(start), logic(start+1), logic(start+2), logic(start+3)], next: logic(start+4), hint: "Quy luật: n² + n.", points: 800 };

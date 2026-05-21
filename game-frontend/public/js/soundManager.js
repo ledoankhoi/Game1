@@ -23,7 +23,7 @@ const SoundManager = {
                     this.sounds.bgm.pause();
                 } else {
                     // Nếu bật âm thanh thì cố gắng phát nhạc nền
-                    this.sounds.bgm.play().catch(err => console.log("Trình duyệt yêu cầu tương tác trước khi phát nhạc."));
+                    this.sounds.bgm.play().catch(_err => console.log("Trình duyệt yêu cầu tương tác trước khi phát nhạc."));
                 }
             }
         });
@@ -34,7 +34,7 @@ const SoundManager = {
 
         if (this.sounds[name]) {
             this.sounds[name].currentTime = 0; 
-            this.sounds[name].play().catch(e => console.log("Chưa tải được file: " + name));
+            this.sounds[name].play().catch(_e => console.log("Chưa tải được file: " + name));
         }
     },
 
@@ -42,7 +42,7 @@ const SoundManager = {
         if (this.isMuted) return; // Không cho bật/tắt tay nếu đang Mute ở Settings tổng
         
         if (this.sounds.bgm.paused) {
-            this.sounds.bgm.play().catch(e => {});
+            this.sounds.bgm.play().catch(_e => { /* ignore */ });
         } else {
             this.sounds.bgm.pause();
         }
@@ -56,7 +56,7 @@ const SoundManager = {
             this.sounds.bgm.pause();
             return "🔇"; 
         } else {
-            this.sounds.bgm.play().catch(e => {});
+            this.sounds.bgm.play().catch(_e => { /* ignore */ });
             return "🔊"; 
         }
     }

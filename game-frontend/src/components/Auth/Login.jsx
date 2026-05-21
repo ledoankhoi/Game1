@@ -35,7 +35,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
       } else {
         setError(data.message || "Sai email hoặc mật khẩu!");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Lỗi kết nối tới máy chủ!");
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
       } else {
         setError("Xác thực Google thất bại!");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Lỗi kết nối tới máy chủ!");
     }
   };
@@ -81,7 +81,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
         onClose();
         window.location.reload(); 
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Đăng nhập Facebook thất bại!");
     }
   };

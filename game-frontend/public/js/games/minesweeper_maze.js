@@ -1,3 +1,4 @@
+/* global RewardManager */
 /* file: public/js/games/minesweeper_maze.js */
 
 const MinesweeperMaze = {

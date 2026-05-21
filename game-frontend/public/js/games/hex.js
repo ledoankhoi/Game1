@@ -1,3 +1,4 @@
+/* global SoundManager, ScoreManager */
 const BOARD_SIZE = 7;
 const PLAYER_RED = 1; // Left to Right
 const PLAYER_BLUE = 2; // Top to Bottom

@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 contentDiv.innerHTML = `<div style="text-align: center; color: #aaa;">${data.message || 'Chưa có dữ liệu hướng dẫn cho trò chơi này.'}</div>`;
             }
-        } catch (error) {
+        } catch (_error) {
             contentDiv.innerHTML = `<div style="text-align: center; color: #ff4d4d;">Lỗi kết nối Backend (Port 5000)!</div>`;
         }
     });
@@ -167,6 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 6. HÀM ĐĂNG XUẤT TOÀN CỤC
 // ==========================================
+// eslint-disable-next-line no-unused-vars
 function handleGlobalLogout() {
     if(confirm("Bạn có chắc muốn thoát?")) {
         localStorage.clear();

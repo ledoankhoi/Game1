@@ -79,6 +79,22 @@ const sampleGames = [
     gameUrl: "/pixel.html",
     category: "Elite",
     views: 35000
+  },
+  {
+    title: "Memory Card",
+    slug: "memory",
+    thumbnailUrl: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=600",
+    gameUrl: "/memory.html",
+    category: "Memory",
+    views: 42000
+  },
+  {
+    title: "Chess Multiplayer",
+    slug: "chess-multi",
+    thumbnailUrl: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?q=80&w=600",
+    gameUrl: "/chess-multi.html",
+    category: "Multiplayer",
+    views: 0
   }
 ];
 
