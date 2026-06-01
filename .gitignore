@@ -41,12 +41,27 @@ yarn-debug.log*
 yarn-error.log*
 
 # CodeGraph (local index, do not commit)
-.codegraph/*.db
-.codegraph/*.db-wal
-.codegraph/*.db-shm
-.codegraph/cache/
-.codegraph/*.log
-.codegraph/.dirty
+tools/codegraph/
+
+# Uploads
+game-backend/uploads/
+
+# Cloned skill repos (only commit .opencode/skills/ wrappers)
+skills/
+mcp/
+
+# Cloned tools (full clones)
+tools/openspec/
+tools/compound-engineering/
+
+# Local Node.js runtime
+tools/nodejs/
+
+# OpenCode internal (auto-generated agents, commands, skills, plugins)
+.opencode/agents/
+.opencode/commands/
+.opencode/compound-engineering/
+.opencode/skills/
 
 # Misc
 *.class

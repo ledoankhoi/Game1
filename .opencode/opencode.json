@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "*": "allow",
+    "external_directory": "deny"
+  },
+  "command": {
+    "analyze": {
+      "template": "Chạy eslint ở frontend và kiểm tra lỗi. Fix từng lỗi nếu có.",
+      "description": "Kiểm tra lỗi ESLint (frontend)"
+    },
+    "dev": {
+      "template": "Chạy cả backend và frontend: cd game-backend && npm run dev (port 5000) và cd game-frontend && npm run dev (port 5173)",
+      "description": "Chạy dev server cả backend và frontend"
+    },
+    "dev-backend": {
+      "template": "cd game-backend && npm run dev",
+      "description": "Chạy backend dev server (port 5000)"
+    },
+    "dev-frontend": {
+      "template": "cd game-frontend && npm run dev",
+      "description": "Chạy frontend dev server (port 5173)"
+    },
+    "build": {
+      "template": "Build frontend: cd game-frontend && npm run build",
+      "description": "Build frontend production"
+    },
+    "install": {
+      "template": "Cài đặt dependencies cho cả backend và frontend: cd game-backend && npm install && cd ../game-frontend && npm install",
+      "description": "Cài đặt tất cả dependencies"
+    },
+    "cycle": {
+      "template": "Thực hiện AI Workflow Loop từ AGENTS.md. Bắt đầu Phase 1 (Init): đọc AGENTS.md, kiểm tra lint, git status. Sau đó Phase 2 (Research): xác định issue P0/P1 cần fix. Phase 3 (Plan): tạo todowrite. Phase 4 (Develop): fix từng issue. Phase 5 (Verify): chạy lint/test. Phase 6 (Loop): tự động commit nếu git dirty, báo cáo kết quả, tự động bắt đầu cycle mới. Lặp đến khi không còn issue.",
+      "description": "Chạy AI Workflow Loop tự động (Init → Research → Plan → Develop → Verify → Loop)",
+      "agent": "build"
+    }
+  },
+  "instructions": [
+    ".opencode/rules.md",
+    ".opencode/AGENTS.md"
+  ],
+  "mcp": {
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "codegraph",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
