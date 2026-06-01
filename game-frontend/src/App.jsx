@@ -4,6 +4,7 @@ import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import { animatePageIn } from './utils/animations';
 import useAuthStore from './store/useAuthStore';
+import useNotificationStore from './store/useNotificationStore';
 
 // Import Các Trang
 import Home from './pages/Home';
@@ -17,6 +18,7 @@ import PrivacyCenter from './pages/PrivacyCenter';
 import Social from './pages/Social';
 import Guild from './pages/Guild';
 import PublicProfile from './pages/PublicProfile';
+import Discover from './pages/Discover';
 
 // Import Components
 import Header from './components/Header';
@@ -49,12 +51,17 @@ function App() {
   }, [showAuth]);
 
   const isAboutPage = location.pathname === '/about';
+  const isDiscoverPage = location.pathname === '/discover';
 
   useEffect(() => {
     const handleStorage = () => syncUser();
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, [syncUser]);
+
+  useEffect(() => {
+    if (user) useNotificationStore.getState().init();
+  }, [user]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -65,6 +72,14 @@ function App() {
     return (
       <Routes>
         <Route path="/about" element={<About />} />
+      </Routes>
+    );
+  }
+
+  if (isDiscoverPage) {
+    return (
+      <Routes>
+        <Route path="/discover" element={<Discover />} />
       </Routes>
     );
   }

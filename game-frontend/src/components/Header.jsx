@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import AvatarDisplay from './AvatarDisplay';
 import { createFloatingCoin } from '../utils/animations';
 import useAuthStore from '../store/useAuthStore';
+import useNotificationStore from '../store/useNotificationStore';
 
 const Header = ({ searchQuery, setSearchQuery }) => {
   const navigate = useNavigate();
@@ -18,6 +19,13 @@ const Header = ({ searchQuery, setSearchQuery }) => {
   const navRef = useRef(null);
   const coinValueRef = useRef(null);
   const prevCoinsRef = useRef(user?.coins ?? user?.coin ?? 0);
+  const unreadCounts = useNotificationStore((s) => s.unreadCounts);
+  const chatUnread = Object.entries(unreadCounts)
+    .filter(([k]) => !k.startsWith('guild:'))
+    .reduce((sum, [, n]) => sum + n, 0);
+  const guildUnread = Object.entries(unreadCounts)
+    .filter(([k]) => k.startsWith('guild:'))
+    .reduce((sum, [, n]) => sum + n, 0);
 
   const handleLogout = () => {
     logout();
@@ -100,14 +108,29 @@ const Header = ({ searchQuery, setSearchQuery }) => {
             <span className="hidden lg:block">Shop</span>
           </Link>
 
-          <Link to="/social" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
-            <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">forum</span>
-            <span className="hidden lg:block">Social</span>
+          <Link to="/discover" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
+            <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">explore</span>
+            <span className="hidden lg:block">Khám Phá</span>
           </Link>
 
-          <Link to="/guild" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
+          <Link to="/social" className="relative flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
+            <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">forum</span>
+            <span className="hidden lg:block">Social</span>
+            {chatUnread > 0 && (
+              <span className="absolute -top-1 -right-1 md:static md:flex md:items-center md:justify-center md:min-w-[20px] md:h-5 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full leading-none shadow-md">
+                {chatUnread > 99 ? '99+' : chatUnread}
+              </span>
+            )}
+          </Link>
+
+          <Link to="/guild" className="relative flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
             <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">military_tech</span>
             <span className="hidden lg:block">Guild</span>
+            {guildUnread > 0 && (
+              <span className="absolute -top-1 -right-1 md:static md:flex md:items-center md:justify-center md:min-w-[20px] md:h-5 bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full leading-none shadow-md">
+                {guildUnread > 99 ? '99+' : guildUnread}
+              </span>
+            )}
           </Link>
         </div>
 
