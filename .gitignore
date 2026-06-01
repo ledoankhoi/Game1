@@ -57,9 +57,8 @@ tools/compound-engineering/
 # Local Node.js runtime
 tools/nodejs/
 
-# OpenCode internal (auto-generated agents, commands, skills, plugins)
+# OpenCode internal (auto-generated agents, skills, plugins)
 .opencode/agents/
-.opencode/commands/
 .opencode/compound-engineering/
 .opencode/skills/
 
