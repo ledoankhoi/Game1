@@ -70,6 +70,31 @@ export const endpoints = {
     // Achievement
     achievementList: '/achievement/list',
 
+    // Social - Friends
+    friendList: '/friends/list',
+    friendRequests: '/friends/requests',
+    friendRequest: '/friends/request',
+    friendAccept: '/friends/accept',
+    friendReject: '/friends/reject',
+    friendRemove: '/friends/remove',
+
+    // Social - Guilds
+    guildCreate: '/guilds/create',
+    guildMy: '/guilds/my',
+    guildInfo: (id) => `/guilds/${id}`,
+    guildJoin: (id) => `/guilds/${id}/join`,
+    guildLeave: (id) => `/guilds/${id}/leave`,
+    guildKick: (id) => `/guilds/${id}/kick`,
+    guildPromote: (id) => `/guilds/${id}/promote`,
+    guildLeaderboard: '/guilds/leaderboard',
+
+    // Social - Messages
+    messagesConversation: (userId) => `/messages/${userId}`,
+    messagesGuild: (guildId) => `/messages/guild/${guildId}`,
+
+    // Social - Profile
+    publicProfile: (username) => `/profile/${username}`,
+
     // Admin
     adminUsers: '/admin/users',
     adminGames: '/admin/games',

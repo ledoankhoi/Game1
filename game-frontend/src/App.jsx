@@ -14,6 +14,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
 import FAQ from './pages/FAQ';
 import PrivacyCenter from './pages/PrivacyCenter';
+import Social from './pages/Social';
+import Guild from './pages/Guild';
+import PublicProfile from './pages/PublicProfile';
 
 // Import Components
 import Header from './components/Header';
@@ -79,6 +82,9 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy" element={<PrivacyCenter />} />
+          <Route path="/social" element={<Social />} />
+          <Route path="/guild" element={<Guild />} />
+          <Route path="/profile/:username" element={<PublicProfile />} />
           <Route path="/admin" element={<AdminDashboard />} /> 
           <Route path="*" element={<h1 className="text-center text-2xl mt-10">404 - Không tìm thấy trang</h1>} />
         </Routes>

@@ -45,6 +45,15 @@ app.use('/api/achievement', achievementRoutes);
 const documentRoutes = require('./routes/documentRoutes');
 app.use('/api/document', documentRoutes);
 
+const friendRoutes = require('./routes/friendRoutes');
+const guildRoutes = require('./routes/guildRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+app.use('/api/friends', friendRoutes);
+app.use('/api/guilds', guildRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/profile', profileRoutes);
+
 app.get('/', (req, res) => {
     res.send('Máy chủ Backend MathQuest đang hoạt động bình thường!');
 });
@@ -52,11 +61,17 @@ app.get('/', (req, res) => {
 const { chatWithAssistant } = require('./controllers/aiController');
 app.post('/api/ai/chat', chatWithAssistant);
 
+const socketAuth = require('./middlewares/socketAuth');
+io.use(socketAuth);
+
 const chessHandler = require('./socket/chessHandler');
 chessHandler(io);
 
 const othelloHandler = require('./socket/othelloHandler');
 othelloHandler(io);
+
+const chatHandler = require('./socket/chatHandler');
+chatHandler(io);
 
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
