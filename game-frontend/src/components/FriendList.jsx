@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useFriendStore from '../store/useFriendStore';
+import useNotificationStore from '../store/useNotificationStore';
 
 function FriendList({ onSelectChat }) {
   const friends = useFriendStore((s) => s.friends);
@@ -12,6 +13,7 @@ function FriendList({ onSelectChat }) {
   const acceptRequest = useFriendStore((s) => s.acceptRequest);
   const rejectRequest = useFriendStore((s) => s.rejectRequest);
   const removeFriend = useFriendStore((s) => s.removeFriend);
+  const unreadCounts = useNotificationStore((s) => s.unreadCounts);
 
   const [showAdd, setShowAdd] = useState(false);
   const [username, setUsername] = useState('');
@@ -126,13 +128,20 @@ function FriendList({ onSelectChat }) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <Link
-                  to={`/profile/${friend.username}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-medium text-sm text-gray-800 dark:text-white hover:text-primary truncate block"
-                >
-                  {friend.username}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/profile/${friend.username}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-medium text-sm text-gray-800 dark:text-white hover:text-primary truncate block"
+                  >
+                    {friend.username}
+                  </Link>
+                  {unreadCounts[friend._id] > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full leading-none shrink-0">
+                      {unreadCounts[friend._id] > 99 ? '99+' : unreadCounts[friend._id]}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Level {friend.level} {isOnline(friend._id) ? '• Online' : ''}
                 </p>

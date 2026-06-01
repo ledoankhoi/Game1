@@ -58,6 +58,11 @@ const userSchema = new mongoose.Schema({
         of: Date,
         default: {} // Ví dụ: { "play3Games": "2023-10-25T12:00:00Z" }
     },
+
+    settings: {
+        theme: { type: String, enum: ['light', 'dark'], default: 'light' },
+        soundEnabled: { type: Boolean, default: true }
+    },
 }, { timestamps: true });
 
 // Mã hóa password

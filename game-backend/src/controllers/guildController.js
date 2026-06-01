@@ -186,6 +186,29 @@ const promote = async (req, res) => {
   }
 };
 
+const getAll = async (req, res) => {
+  try {
+    const guilds = await Guild.find()
+      .select('name tag icon description exp level members')
+      .lean();
+
+    const result = guilds.map(g => ({
+      _id: g._id,
+      name: g.name,
+      tag: g.tag,
+      icon: g.icon,
+      description: g.description,
+      exp: g.exp,
+      level: g.level,
+      memberCount: g.members.length
+    }));
+
+    res.json({ success: true, guilds: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi Server' });
+  }
+};
+
 const leaderboard = async (req, res) => {
   try {
     const guilds = await Guild.find()
@@ -200,4 +223,4 @@ const leaderboard = async (req, res) => {
   }
 };
 
-module.exports = { create, getMyGuild, getGuild, join, leave, kick, promote, leaderboard };
+module.exports = { create, getMyGuild, getGuild, getAll, join, leave, kick, promote, leaderboard };

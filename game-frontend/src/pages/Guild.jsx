@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import useGuildStore from '../store/useGuildStore';
@@ -7,14 +7,18 @@ import GuildMemberList from '../components/GuildMemberList';
 import ChatWindow from '../components/ChatWindow';
 
 function Guild() {
+  const pageRef = useRef(null);
   const myGuild = useGuildStore((s) => s.myGuild);
   const loading = useGuildStore((s) => s.loading);
+  const guilds = useGuildStore((s) => s.guilds);
   const leaderboard = useGuildStore((s) => s.leaderboard);
   const fetchMyGuild = useGuildStore((s) => s.fetchMyGuild);
+  const fetchGuilds = useGuildStore((s) => s.fetchGuilds);
   const fetchLeaderboard = useGuildStore((s) => s.fetchLeaderboard);
   const joinGuild = useGuildStore((s) => s.joinGuild);
   const leaveGuild = useGuildStore((s) => s.leaveGuild);
   const initGuildSocket = useGuildStore((s) => s.initSocket);
+  const joinGuildRoom = useGuildStore((s) => s.joinGuildRoom);
 
   const [showCreate, setShowCreate] = useState(false);
   const [activeTab, setActiveTab] = useState('my');
@@ -22,12 +26,20 @@ function Guild() {
 
   useEffect(() => {
     fetchMyGuild();
+    fetchGuilds();
     fetchLeaderboard();
     initGuildSocket();
-  }, [fetchMyGuild, fetchLeaderboard, initGuildSocket]);
+  }, [fetchMyGuild, fetchGuilds, fetchLeaderboard, initGuildSocket]);
+
+  useEffect(() => {
+    if (myGuild?._id) {
+      joinGuildRoom(myGuild._id);
+    }
+  }, [myGuild, joinGuildRoom]);
 
   useGSAP(() => {
-    gsap.fromTo('.guild-page', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+    if (!pageRef.current) return;
+    gsap.fromTo(pageRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
   }, []);
 
   const handleLeave = async () => {
@@ -46,13 +58,13 @@ function Guild() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto guild-page">
+    <div ref={pageRef} className="w-full max-w-6xl mx-auto guild-page">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">military_tech</span>
         Guild
       </h1>
 
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-2 md:gap-4 mb-4 flex-wrap">
         <button
           onClick={() => setActiveTab('my')}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
@@ -62,6 +74,16 @@ function Guild() {
           }`}
         >
           Guild của tôi
+        </button>
+        <button
+          onClick={() => setActiveTab('list')}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+            activeTab === 'list'
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+          }`}
+        >
+          Danh sách Guild
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
@@ -150,6 +172,48 @@ function Guild() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {activeTab === 'list' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {guilds.length === 0 ? (
+            <div className="col-span-full p-8 text-center text-gray-400 dark:text-gray-500">
+              <span className="material-symbols-outlined text-4xl mb-2">groups</span>
+              <p className="text-sm">Chưa có guild nào</p>
+            </div>
+          ) : guilds.map((g) => {
+            const alreadyMember = myGuild?._id === g._id;
+            return (
+              <div key={g._id} className="bg-white dark:bg-[#1a2e20] rounded-2xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-green-400 flex items-center justify-center text-lg font-bold text-white shadow">
+                    {g.tag}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-800 dark:text-white truncate">{g.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Level {g.level} • {g.memberCount} thành viên
+                    </p>
+                  </div>
+                </div>
+                {g.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{g.description}</p>
+                )}
+                <button
+                  onClick={() => alreadyMember ? null : joinGuild(g._id)}
+                  disabled={alreadyMember}
+                  className={`w-full py-2 rounded-xl text-sm font-medium transition-colors ${
+                    alreadyMember
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-default'
+                      : 'bg-primary text-white hover:bg-green-500'
+                  }`}
+                >
+                  {alreadyMember ? 'Đã tham gia' : 'Tham gia'}
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 

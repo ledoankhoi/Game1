@@ -33,6 +33,11 @@
       "template": "Thực hiện AI Workflow Loop từ AGENTS.md. Bắt đầu Phase 1 (Init): đọc AGENTS.md, kiểm tra lint, git status. Sau đó Phase 2 (Research): xác định issue P0/P1 cần fix. Phase 3 (Plan): tạo todowrite. Phase 4 (Develop): fix từng issue. Phase 5 (Verify): chạy lint/test. Phase 6 (Loop): tự động commit nếu git dirty, báo cáo kết quả, tự động bắt đầu cycle mới. Lặp đến khi không còn issue.",
       "description": "Chạy AI Workflow Loop tự động (Init → Research → Plan → Develop → Verify → Loop)",
       "agent": "build"
+    },
+    "auto": {
+      "template": "Chạy full Compound Engineering pipeline tự động. Đầu tiên đọc TODO.md, AGENTS.md, kiểm tra lint và git status. Sau đó load skill `lfg` và thực thi toàn bộ pipeline: plan → work → code-review (mode:autofix) → compound → lưu knowledge → commit. Kiểm tra lint sau mỗi bước. Output `<promise>DONE</promise>` khi hoàn thành.",
+      "description": "Chạy toàn bộ CE pipeline tự động (plan → work → code-review → compound → commit)",
+      "agent": "build"
     }
   },
   "instructions": [
@@ -49,13 +54,9 @@
       "enabled": true
     },
     "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "enabled": true,
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+      "type": "local",
+      "command": ["npx", "-y", "@github/github-mcp-server"],
+      "enabled": true
     }
   }
 }

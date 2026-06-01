@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import useAuthStore from '../store/useAuthStore';
 
@@ -168,6 +169,7 @@ function Discover() {
   const subtitleRef = useRef(null);
   const ctaBtnRef = useRef(null);
   const setShowAuth = useAuthStore((s) => s.setShowAuth);
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
   useGSAP(() => {
@@ -219,6 +221,10 @@ function Discover() {
     setShowAuth(true);
   };
 
+  const scrollToFeatures = () => {
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="relative w-full min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
       {/* Hero Section */}
@@ -258,7 +264,7 @@ function Discover() {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-emerald-500/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </button>
-            <button className="px-8 py-4 border border-white/20 text-white font-bold text-lg rounded-2xl hover:bg-white/5 transition-all active:scale-95">
+            <button onClick={scrollToFeatures} className="px-8 py-4 border border-white/20 text-white font-bold text-lg rounded-2xl hover:bg-white/5 transition-all active:scale-95">
               Tìm Hiểu Thêm
             </button>
           </div>
@@ -326,7 +332,7 @@ function Discover() {
             </p>
 
             <button
-              onClick={handleCTA}
+              onClick={() => navigate('/')}
               className="relative z-10 px-12 py-5 bg-gradient-to-r from-primary to-emerald-500 text-white font-bold text-xl rounded-2xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Khám Phá Ngay

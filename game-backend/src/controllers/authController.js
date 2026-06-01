@@ -479,6 +479,33 @@ const facebookLogin = async (req, res) => {
 };
 
 
+// --- 14. CẬP NHẬT CÀI ĐẶT (Theme, Âm thanh) ---
+const updateSettings = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { theme, soundEnabled } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: "Không tìm thấy User" });
+
+        if (!user.settings) user.settings = {};
+
+        if (theme && ['light', 'dark'].includes(theme)) {
+            user.settings.theme = theme;
+        }
+        if (typeof soundEnabled === 'boolean') {
+            user.settings.soundEnabled = soundEnabled;
+        }
+
+        await user.save();
+
+        res.json({ success: true, message: "Đã cập nhật cài đặt!", settings: user.settings });
+    } catch (error) {
+        console.error("Lỗi cập nhật settings:", error);
+        res.status(500).json({ success: false, message: "Lỗi Server" });
+    }
+};
+
 // --- XUẤT TẤT CẢ CÁC HÀM (ĐÃ BAO GỒM ĐẦY ĐỦ LOGIn/REGISTER) ---
 module.exports = { 
     register, 
@@ -494,5 +521,6 @@ module.exports = {
     claimQuest,
     equipBadge,
     updateUsername,
-    facebookLogin
+    facebookLogin,
+    updateSettings
 };

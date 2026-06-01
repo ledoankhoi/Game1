@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import useChatStore from '../store/useChatStore';
 import useAuthStore from '../store/useAuthStore';
 import useGuildStore from '../store/useGuildStore';
+import useNotificationStore from '../store/useNotificationStore';
 
 function ChatWindow({ activeChat, mode = 'friend', guildId }) {
   const user = useAuthStore((s) => s.user);
@@ -11,6 +12,7 @@ function ChatWindow({ activeChat, mode = 'friend', guildId }) {
   const sendMessage = useChatStore((s) => s.sendMessage);
   const sendTyping = useChatStore((s) => s.sendTyping);
   const sendLobbyMessage = useChatStore((s) => s.sendLobbyMessage);
+  const setRead = useNotificationStore((s) => s.setRead);
   const guildMessages = useGuildStore((s) => s.guildMessages);
   const sendGuildMessage = useGuildStore((s) => s.sendGuildMessage);
   const fetchGuildMessages = useGuildStore((s) => s.fetchGuildMessages);
@@ -28,11 +30,13 @@ function ChatWindow({ activeChat, mode = 'friend', guildId }) {
   useEffect(() => {
     if (mode === 'friend' && activeChat) {
       fetchMessages(activeChat._id);
+      setRead(activeChat._id);
     }
     if (mode === 'guild' && guildId) {
       fetchGuildMessages(guildId);
+      setRead(`guild:${guildId}`);
     }
-  }, [activeChat, guildId, mode, fetchMessages, fetchGuildMessages]);
+  }, [activeChat, guildId, mode, fetchMessages, fetchGuildMessages, setRead]);
 
   const currentMessages = getMessages();
 
@@ -93,7 +97,8 @@ function ChatWindow({ activeChat, mode = 'friend', guildId }) {
           </div>
         )}
         {currentMessages.map((msg, i) => {
-          const isMine = msg.sender?._id === user?._id || msg.sender === user?._id;
+          const myId = user?.id || user?._id;
+          const isMine = msg.sender?._id === myId || msg.sender === myId;
           return (
             <div key={msg._id || i} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[75%] p-3 rounded-2xl text-sm leading-relaxed ${
@@ -101,7 +106,7 @@ function ChatWindow({ activeChat, mode = 'friend', guildId }) {
                   ? 'bg-primary text-white rounded-tr-none'
                   : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-gray-700'
               }`}>
-                {!isMine && mode !== 'guild' && (
+                {!isMine && (
                   <p className="text-xs font-semibold text-primary mb-1">
                     {msg.sender?.username || 'Unknown'}
                   </p>

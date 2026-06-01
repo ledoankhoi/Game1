@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -16,6 +16,13 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <script>
+        (function() {
+            var theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+            var sound = localStorage.getItem('global_sound');
+            if (sound === 'false') localStorage.setItem('global_sound', 'false');
+        })();
+
         window.toggleSound = function(btn) {
             if (typeof SoundManager !== 'undefined') {
                 const icon = SoundManager.toggleMute();

@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { api, endpoints } from '../services/api';
 import { connectSocket } from '../services/socket';
 
+let chatInitDone = false;
+
+function addMessage(messages, key, message) {
+  const existing = messages[key] || [];
+  const dupe = existing.some(m => m._id === message._id);
+  if (dupe) return messages;
+  return { ...messages, [key]: [...existing, message] };
+}
+
 const useChatStore = create((set) => ({
   messages: {},
   activeChat: null,
@@ -9,18 +18,10 @@ const useChatStore = create((set) => ({
   loading: false,
 
   initSocket: () => {
+    if (chatInitDone) return;
+    chatInitDone = true;
     const socket = connectSocket();
     if (!socket) return;
-
-    socket.on('chat:new-message', (message) => {
-      set((s) => {
-        const key = message.sender._id;
-        const existing = s.messages[key] || [];
-        return {
-          messages: { ...s.messages, [key]: [...existing, message] }
-        };
-      });
-    });
 
     socket.on('chat:typing-indicator', ({ fromUserId, fromUsername }) => {
       set((s) => ({
@@ -36,12 +37,9 @@ const useChatStore = create((set) => ({
     });
 
     socket.on('chat:lobby-new-message', (message) => {
-      set((s) => {
-        const existing = s.messages['lobby'] || [];
-        return {
-          messages: { ...s.messages, lobby: [...existing, message] }
-        };
-      });
+      set((s) => ({
+        messages: addMessage(s.messages, 'lobby', message)
+      }));
     });
   },
 
@@ -51,10 +49,16 @@ const useChatStore = create((set) => ({
     set({ loading: true });
     try {
       const data = await api.get(endpoints.messagesConversation(userId));
-      set((s) => ({
-        messages: { ...s.messages, [userId]: data.messages || [] },
-        loading: false
-      }));
+      const fetched = data.messages || [];
+      set((s) => {
+        const existing = s.messages[userId] || [];
+        const fetchedIds = new Set(fetched.map(m => m._id));
+        const extra = existing.filter(m => !fetchedIds.has(m._id));
+        return {
+          messages: { ...s.messages, [userId]: [...fetched, ...extra] },
+          loading: false
+        };
+      });
     } catch (_e) {
       set({ loading: false });
     }

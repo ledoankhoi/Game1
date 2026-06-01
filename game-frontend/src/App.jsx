@@ -12,7 +12,6 @@ import Shop from './pages/Shop';
 import Leaderboard from './pages/Leaderboard'; 
 import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import About from './pages/About';
 import FAQ from './pages/FAQ';
 import PrivacyCenter from './pages/PrivacyCenter';
 import Social from './pages/Social';
@@ -51,7 +50,6 @@ function App() {
   }, [showAuth]);
 
   const isAboutPage = location.pathname === '/about';
-  const isDiscoverPage = location.pathname === '/discover';
 
   useEffect(() => {
     const handleStorage = () => syncUser();
@@ -71,15 +69,7 @@ function App() {
   if (isAboutPage) {
     return (
       <Routes>
-        <Route path="/about" element={<About />} />
-      </Routes>
-    );
-  }
-
-  if (isDiscoverPage) {
-    return (
-      <Routes>
-        <Route path="/discover" element={<Discover />} />
+        <Route path="/about" element={<Discover />} />
       </Routes>
     );
   }

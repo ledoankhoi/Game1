@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { api, endpoints } from '../services/api';
 import { connectSocket } from '../services/socket';
+import useAuthStore from './useAuthStore';
+
+let guildInitDone = false;
+
+function addGuildMessage(messages, message) {
+  const exists = messages.some(m => m._id === message._id);
+  if (exists) return messages;
+  return [...messages, message];
+}
 
 const useGuildStore = create((set, get) => ({
   myGuild: null,
@@ -11,12 +20,14 @@ const useGuildStore = create((set, get) => ({
   error: null,
 
   initSocket: () => {
+    if (guildInitDone) return;
+    guildInitDone = true;
     const socket = connectSocket();
     if (!socket) return;
 
     socket.on('guild:chat-message', (message) => {
       set((s) => ({
-        guildMessages: [...s.guildMessages, message]
+        guildMessages: addGuildMessage(s.guildMessages, message)
       }));
     });
   },
@@ -52,6 +63,13 @@ const useGuildStore = create((set, get) => ({
     } catch (_e) {
       set({ loading: false });
     }
+  },
+
+  fetchGuilds: async () => {
+    try {
+      const data = await api.get(endpoints.guildList);
+      set({ guilds: data.guilds || [] });
+    } catch (_e) { /* silent */ }
   },
 
   fetchLeaderboard: async () => {
@@ -101,9 +119,28 @@ const useGuildStore = create((set, get) => ({
     }
   },
 
+  joinGuildRoom: (guildId) => {
+    const socket = connectSocket();
+    if (!socket) return;
+    socket.emit('guild:join-room', guildId);
+  },
+
   sendGuildMessage: (guildId, content) => {
     const socket = connectSocket();
     if (!socket) return;
+    const user = useAuthStore.getState().user;
+    if (user) {
+      const optimistic = {
+        _id: `opt_${Date.now()}`,
+        sender: { _id: user.id || user._id, username: user.username },
+        content,
+        createdAt: new Date().toISOString(),
+        type: 'text'
+      };
+      set((s) => ({
+        guildMessages: [...s.guildMessages, optimistic]
+      }));
+    }
     socket.emit('guild:chat-send', { guildId, content });
   },
 

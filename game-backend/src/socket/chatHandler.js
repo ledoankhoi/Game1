@@ -108,6 +108,15 @@ function chatHandler(io) {
       }
     });
 
+    socket.on('guild:join-room', async (guildId) => {
+      if (!guildId) return;
+      const guild = await Guild.findById(guildId);
+      if (!guild) return;
+      const isMember = guild.members.some(m => m.user.toString() === userId);
+      if (!isMember) return;
+      socket.join(`guild:${guildId}`);
+    });
+
     socket.on('guild:chat-send', async (data) => {
       try {
         const { guildId, content } = data;

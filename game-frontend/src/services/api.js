@@ -41,6 +41,7 @@ export const endpoints = {
     submitFeedback: '/auth/feedback',
     claimQuest: '/auth/claim-quest',
     equipBadge: '/auth/equip-badge',
+    updateSettings: '/auth/update-settings',
     getUserInfo: '/auth/info',
 
     // Game
@@ -81,6 +82,7 @@ export const endpoints = {
     // Social - Guilds
     guildCreate: '/guilds/create',
     guildMy: '/guilds/my',
+    guildList: '/guilds/list',
     guildInfo: (id) => `/guilds/${id}`,
     guildJoin: (id) => `/guilds/${id}/join`,
     guildLeave: (id) => `/guilds/${id}/leave`,

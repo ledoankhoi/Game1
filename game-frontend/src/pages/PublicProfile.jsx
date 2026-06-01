@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -12,6 +12,7 @@ function PublicProfile() {
   const user = useAuthStore((s) => s.user);
   const sendRequest = useFriendStore((s) => s.sendRequest);
 
+  const pageRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,7 +38,8 @@ function PublicProfile() {
   }, [username]);
 
   useGSAP(() => {
-    gsap.fromTo('.profile-page', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+    if (!profile || !pageRef.current) return;
+    gsap.fromTo(pageRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
   }, [profile]);
 
   const handleAddFriend = async () => {
@@ -63,7 +65,7 @@ function PublicProfile() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto profile-page">
+    <div ref={pageRef} className="w-full max-w-4xl mx-auto profile-page">
       <div className="bg-white dark:bg-[#1a2e20] rounded-2xl p-8 border border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <AvatarDisplay user={profile} size="xl" />

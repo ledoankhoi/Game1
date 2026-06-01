@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 router.post('/create', authMiddleware, guildController.create);
 router.get('/my', authMiddleware, guildController.getMyGuild);
+router.get('/list', authMiddleware, guildController.getAll);
 router.get('/leaderboard', authMiddleware, guildController.leaderboard);
 router.get('/:id', authMiddleware, guildController.getGuild);
 router.post('/:id/join', authMiddleware, guildController.join);

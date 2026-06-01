@@ -108,7 +108,7 @@ const Header = ({ searchQuery, setSearchQuery }) => {
             <span className="hidden lg:block">Shop</span>
           </Link>
 
-          <Link to="/discover" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
+          <Link to="/about" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#233829] text-gray-600 dark:text-gray-300 hover:text-primary transition-colors font-bold group">
             <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">explore</span>
             <span className="hidden lg:block">Khám Phá</span>
           </Link>

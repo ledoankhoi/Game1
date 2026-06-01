@@ -10,6 +10,7 @@ import TabAchievements from './TabAchievements';
 import TabHistory from './TabHistory';
 import TabFavorites from './TabFavorites';
 import TabFeedback from './TabFeedback';
+import TabSettings from './TabSettings';
 import AvatarDisplay from '../../components/AvatarDisplay';
 
 function Profile() {
@@ -332,13 +333,14 @@ function Profile() {
       </div>
 
       {/* THANH ĐIỀU HƯỚNG TABS */}
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-px overflow-x-auto hide-scrollbar">
-        {['overview', 'quests', 'achievements', 'history', 'favorites', 'feedback'].map(tab => (
-           <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 lg:px-6 py-3 font-bold uppercase tracking-widest text-sm whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === tab ? 'text-primary border-b-4 border-primary' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
-             <span className="material-symbols-outlined">
-               {tab === 'overview' ? 'dashboard' : tab === 'quests' ? 'assignment' : tab === 'achievements' ? 'military_tech' : tab === 'history' ? 'history' : tab === 'favorites' ? 'favorite' : 'campaign'}
+      <div className="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 overflow-x-auto hide-scrollbar">
+        {['overview', 'quests', 'achievements', 'history', 'favorites', 'feedback', 'settings'].map(tab => (
+           <button key={tab} onClick={() => setActiveTab(tab)} className={`relative px-3 py-2.5 font-bold uppercase tracking-widest text-xs whitespace-nowrap transition-colors flex items-center gap-1.5 ${activeTab === tab ? 'text-primary' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+             <span className="material-symbols-outlined text-lg">
+                {tab === 'overview' ? 'dashboard' : tab === 'quests' ? 'assignment' : tab === 'achievements' ? 'military_tech' : tab === 'history' ? 'history' : tab === 'favorites' ? 'favorite' : tab === 'feedback' ? 'campaign' : 'settings'}
              </span>
-             {tab === 'overview' ? 'Tổng Quan' : tab === 'quests' ? 'Nhiệm Vụ' : tab === 'achievements' ? 'Thành Tựu' : tab === 'history' ? 'Lịch Sử Đấu' : tab === 'favorites' ? 'Yêu Thích' : 'Góp Ý'}
+             {tab === 'overview' ? 'Tổng Quan' : tab === 'quests' ? 'Nhiệm Vụ' : tab === 'achievements' ? 'Thành Tựu' : tab === 'history' ? 'Lịch Sử Đấu' : tab === 'favorites' ? 'Yêu Thích' : tab === 'feedback' ? 'Góp Ý' : 'Cài Đặt'}
+             {activeTab === tab && <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
            </button>
         ))}
       </div>
@@ -375,6 +377,10 @@ function Profile() {
         )}
         
         {activeTab === 'feedback' && <TabFeedback />}
+
+        {activeTab === 'settings' && (
+          <TabSettings profileData={profileData} setProfileData={setProfileData} />
+        )}
       </div>
 
       {/* MODAL TẢI ẢNH LÊN */}

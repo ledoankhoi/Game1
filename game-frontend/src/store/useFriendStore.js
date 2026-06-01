@@ -42,7 +42,14 @@ const useFriendStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const data = await api.get(endpoints.friendList);
-      set({ friends: data.friends || [], loading: false });
+      const friends = data.friends || [];
+      const seen = new Set();
+      const uniqueFriends = friends.filter(f => {
+        if (seen.has(f._id)) return false;
+        seen.add(f._id);
+        return true;
+      });
+      set({ friends: uniqueFriends, loading: false });
     } catch (e) {
       set({ error: e.message, loading: false });
     }
@@ -60,7 +67,7 @@ const useFriendStore = create((set, get) => ({
       const data = await api.post(endpoints.friendRequest, { username });
       return { success: true, data };
     } catch (e) {
-      return { success: false, error: e.message };
+      return { success: false, error: e.response?.data?.message || e.message || 'Lỗi kết nối' };
     }
   },
 
@@ -71,7 +78,7 @@ const useFriendStore = create((set, get) => ({
       await get().fetchRequests();
       return { success: true, data };
     } catch (e) {
-      return { success: false, error: e.message };
+      return { success: false, error: e.response?.data?.message || e.message || 'Lỗi kết nối' };
     }
   },
 
@@ -81,7 +88,7 @@ const useFriendStore = create((set, get) => ({
       await get().fetchRequests();
       return { success: true };
     } catch (e) {
-      return { success: false, error: e.message };
+      return { success: false, error: e.response?.data?.message || e.message || 'Lỗi kết nối' };
     }
   },
 
@@ -91,7 +98,7 @@ const useFriendStore = create((set, get) => ({
       await get().fetchFriends();
       return { success: true };
     } catch (e) {
-      return { success: false, error: e.message };
+      return { success: false, error: e.response?.data?.message || e.message || 'Lỗi kết nối' };
     }
   },
 
