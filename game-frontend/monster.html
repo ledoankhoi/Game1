@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Galaxy Logic Striker</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/main.css">
+
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#25f46a", "background-dark": "#0a0f0b" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
+    </script>
+</head>
+<body class="bg-background-dark text-white overflow-hidden h-screen font-display select-none">
+
+    <div id="monster-game-screen" class="relative flex h-full w-full flex-col overflow-hidden">
+
+        <header class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-4 bg-gradient-to-b from-black/90 to-transparent">
+            <div class="flex items-center gap-4">
+                <a href="/" class="flex items-center gap-2 text-primary hover:opacity-80 transition">
+                    <span class="material-symbols-outlined text-3xl">arrow_back</span>
+                    <h1 class="text-xl font-bold tracking-tight uppercase">Galaxy Striker</h1>
+                </a>
+                <div class="ml-8 flex flex-col">
+                    <span class="text-[10px] uppercase text-gray-400 tracking-widest">Level</span>
+                    <span class="text-lg font-bold leading-none">Sector <span id="wave-count">01</span></span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <button onclick="MonsterGame.togglePause()" class="flex items-center justify-center rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 hover:bg-primary hover:text-black transition-colors">
+                    <span class="material-symbols-outlined mr-2">pause</span> PAUSE
+                </button>
+            </div>
+        </header>
+
+        <main id="battlefield" class="relative flex-1 star-field nebula-glow overflow-hidden">
+            <div class="absolute inset-0 scanline pointer-events-none opacity-20 z-0"></div>
+
+            <div id="player-ship" class="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+                <div class="relative">
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-16 bg-primary/40 blur-xl rounded-full"></div>
+                    <div id="ship-visual" class="w-16 h-20 bg-gradient-to-t from-gray-700 to-gray-400 relative z-10" style="clip-path: polygon(50% 0%, 0% 100%, 50% 80%, 100% 100%);">
+                        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-1 h-6 bg-primary/50 rounded-full"></div>
+                    </div>
+                </div>
+                <div class="absolute -top-[300px] w-48 h-48 border border-primary/20 border-dashed rounded-full flex items-center justify-center opacity-40">
+                    <div class="w-1 h-8 bg-primary/40 absolute -top-4"></div>
+                </div>
+            </div>
+
+            <div id="game-over-overlay" class="hidden absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center text-center">
+                <h2 class="text-5xl font-black text-red-500 mb-4 tracking-tighter">MISSION FAILED</h2>
+                <button onclick="MonsterGame.start()" class="px-8 py-3 bg-primary text-black font-bold rounded-lg hover:scale-105 transition">RETRY</button>
+            </div>
+            <div id="pause-overlay" class="hidden absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center text-white">
+                <h2 class="text-4xl font-bold mb-4 tracking-widest">PAUSED</h2>
+                <button onclick="MonsterGame.togglePause()" class="px-6 py-2 bg-primary text-black font-bold rounded hover:scale-105 transition">RESUME</button>
+            </div>
+
+            <input type="text" id="monster-input" class="opacity-0 absolute top-0 left-0 h-0 w-0" autocomplete="off">
+        </main>
+
+        <footer class="relative z-30 bg-background-dark border-t-2 border-primary/20 p-6 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+            <div class="max-w-7xl mx-auto grid grid-cols-12 gap-8 items-center">
+                <div class="col-span-3 flex flex-col gap-2">
+                    <div class="flex justify-between text-xs font-bold uppercase">
+                        <span class="text-gray-400">Shield</span>
+                        <span class="text-primary" id="player-hp-text">100%</span>
+                    </div>
+                    <div class="h-2 w-full bg-gray-900 rounded-full overflow-hidden">
+                        <div id="player-hp-bar" class="h-full bg-primary shadow-[0_0_10px_rgba(37,244,106,0.6)] transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="col-span-6 flex flex-col items-center justify-center rounded-xl py-2 relative h-28 z-50">
+                    <span class="text-[10px] text-primary uppercase font-bold tracking-[0.3em] mb-1 opacity-50">Target Lock</span>
+                    <h2 class="text-2xl font-black text-white mb-0" id="math-equation-display">SCANNING...</h2>
+                    <div id="input-display" onclick="document.getElementById('monster-input').focus()"></div>
+                </div>
+
+                <div class="col-span-3 text-right">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Score</p>
+                    <p class="text-3xl font-bold leading-none tracking-tighter" id="monster-score">0</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MÀN HÌNH BÁO CÁO (REPORT SCREEN) -->
+    <div id="report-screen" class="hidden fixed inset-0 z-50 bg-[#0a0f0b] flex flex-col h-screen w-screen overflow-hidden">
+
+    <header class="shrink-0 relative z-20 flex items-center justify-between px-4 h-[60px] bg-black/80 border-b border-primary/20 backdrop-blur-md shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 text-primary">
+                <span class="material-symbols-outlined text-2xl">analytics</span>
+                <h1 class="text-lg font-black tracking-widest uppercase italic">Report</h1>
+            </div>
+            <div class="h-4 w-[1px] bg-white/20"></div>
+            <div class="flex flex-col">
+                <span class="text-[8px] uppercase text-gray-400 tracking-widest leading-none">Sector</span>
+                <span class="text-xs font-bold text-white">ORION-04</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 bg-primary/10 border border-primary/30 rounded flex items-center gap-2">
+                <span class="text-[10px] text-primary font-bold uppercase tracking-tighter">Score</span>
+                <span class="text-lg font-black text-white leading-none" id="report-final-score">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative custom-scrollbar flex flex-col items-center">
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1a2a1e_0%,#0a0f0b_100%)]"></div>
+            <div class="absolute inset-0 opacity-20 scanline"></div>
+        </div>
+
+        <div class="relative max-w-6xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 z-10">
+            <div class="md:col-span-5 flex flex-col gap-4">
+                <div class="bg-black/40 border border-white/10 rounded-2xl p-4 backdrop-blur-md relative overflow-hidden text-center flex flex-col items-center justify-center min-h-[200px]">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2">Performance Grade</h3>
+                    <div class="relative w-32 h-32 flex items-center justify-center border-4 border-primary/30 rounded-full">
+                         <span id="report-grade" class="text-6xl font-black text-white">C</span>
+                    </div>
+                </div>
+
+                <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-3xl text-primary">smart_toy</span>
+                    <div>
+                        <h4 class="text-primary text-xs font-black uppercase mb-1">AI Feedback</h4>
+                        <p id="report-feedback" class="text-xs text-gray-300 italic">"Processing battle data..."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-7 flex flex-col gap-2 h-full">
+                <h3 class="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Battle Log</h3>
+                <div id="report-list" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[200px] max-h-[400px]">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="shrink-0 relative z-30 bg-black/80 border-t border-primary/20 p-4 flex justify-between items-center backdrop-blur">
+        <button onclick="MonsterExtension.goHome()" class="px-6 py-2 border border-white/20 text-white text-sm font-bold rounded hover:bg-white hover:text-black transition">
+            BASE HUB
+        </button>
+        <button onclick="MonsterExtension.retryMission()" class="px-8 py-2 bg-primary text-black font-black text-sm uppercase tracking-widest rounded hover:scale-105 transition">
+            RETRY
+        </button>
+    </footer>
+</div>
+
+    <script type="module" src="/src/game-entries/monster.js"></script>
+</body>
+</html>

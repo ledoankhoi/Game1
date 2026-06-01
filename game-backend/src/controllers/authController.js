@@ -6,8 +6,7 @@ const Feedback = require('../models/Feedback');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 
-// Cấu hình Google Client
-const CLIENT_ID = "424857046874-ag5tmbrp5b7951u7185d7b78ttkflvhj.apps.googleusercontent.com";
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(CLIENT_ID);
 
 // --- 1. ĐĂNG KÝ ---
@@ -44,7 +43,7 @@ const login = async (req, res) => {
             return res.status(401).json({ success: false, message: "Sai email hoặc mật khẩu!" });
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.status(200).json({
             success: true,
@@ -88,8 +87,7 @@ const googleLogin = async (req, res) => {
                 avatarUrl: picture,
                 coins: 500,
                 level: 1,
-                inventory: ['skin_default', 'face_smile'],
-                equipped: { skin: 'skin_default', face: 'face_smile' }
+                inventory: ['skin_default', 'face_smile']
             });
         } else if (!user.googleId) {
             user.googleId = googleId;
@@ -97,7 +95,7 @@ const googleLogin = async (req, res) => {
             await user.save();
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.status(200).json({
             success: true,
@@ -197,35 +195,7 @@ const leaderboard = async (req, res) => {
     }
 };
 
-// --- 6. MUA ĐỒ ---
-const buyItem = async (req, res) => {
-    try {
-        const { userId, itemId } = req.body; 
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: "Lỗi User" });
-
-        let price = (itemId === 'forest') ? 500 : (itemId === 'ice' ? 1000 : 0);
-
-        if (user.inventory.includes(itemId)) {
-            user.equippedSkin = itemId;
-            await user.save();
-            return res.json({ success: true, message: "Đã đổi skin!", coins: user.coins, equipped: itemId });
-        }
-
-        if (user.coins < price) return res.json({ success: false, message: "Không đủ tiền!" });
-
-        user.coins -= price;
-        user.inventory.push(itemId);
-        user.equippedSkin = itemId;
-        await user.save();
-
-        return res.json({ success: true, message: "Mua thành công!", coins: user.coins, equipped: itemId });
-    } catch (error) {
-        res.status(500).json({ message: "Lỗi Server" });
-    }
-};
-
-// --- 7. LẤY THÔNG TIN PROFILE (ĐÃ THÊM AUTO RESET NHIỆM VỤ NGÀY) ---
+// --- 6. LẤY THÔNG TIN PROFILE ---
 const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -258,7 +228,7 @@ const getProfile = async (req, res) => {
     }
 };
 
-// --- 8. CẬP NHẬT AVATAR ---
+// --- 7. CẬP NHẬT AVATAR ---
 const updateAvatar = async (req, res) => {
     try {
         const { avatarUrl } = req.body;
@@ -277,7 +247,7 @@ const updateAvatar = async (req, res) => {
     }
 };
 
-// --- 9. LẤY THÔNG TIN USER (Dành cho đồng bộ Shop) ---
+// --- 8. LẤY THÔNG TIN USER (Dành cho đồng bộ Shop) ---
 const getUserInfo = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
@@ -292,7 +262,7 @@ const getUserInfo = async (req, res) => {
     }
 };
 
-// --- 10. BẬT/TẮT YÊU THÍCH GAME ---
+// --- 9. BẬT/TẮT YÊU THÍCH GAME ---
 const toggleFavorite = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -321,7 +291,7 @@ const toggleFavorite = async (req, res) => {
     }
 };
 
-// --- 11. GỬI GÓP Ý / BÁO LỖI ---
+// --- 10. GỬI GÓP Ý / BÁO LỖI ---
 const submitFeedback = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -350,7 +320,7 @@ const submitFeedback = async (req, res) => {
     }
 };
 
-// --- 12. NHẬN THƯỞNG NHIỆM VỤ ---
+// --- 11. NHẬN THƯỞNG NHIỆM VỤ ---
 const claimQuest = async (req, res) => {
     try {
         const { questId } = req.body;
@@ -393,7 +363,7 @@ const claimQuest = async (req, res) => {
     }
 };
 
-// --- 13. GẮN HUY HIỆU ---
+// --- 12. GẮN HUY HIỆU ---
 const equipBadge = async (req, res) => {
     try {
         const { badgeId } = req.body;
@@ -406,6 +376,7 @@ const equipBadge = async (req, res) => {
 
         res.json({ success: true, message: "Đã cập nhật phụ kiện!", user });
     } catch (error) {
+        console.error("Lỗi equipBadge:", error);
         res.status(500).json({ success: false, message: "Lỗi Server" });
     }
 };
@@ -475,8 +446,7 @@ const facebookLogin = async (req, res) => {
                 avatarUrl: picture,
                 coins: 500,
                 level: 1,
-                inventory: ['skin_default', 'face_smile'],
-                equipped: { skin: 'skin_default', face: 'face_smile' }
+                inventory: ['skin_default', 'face_smile']
             });
         } else if (!user.facebookId) {
             user.facebookId = facebookId;
@@ -484,7 +454,7 @@ const facebookLogin = async (req, res) => {
             await user.save();
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.status(200).json({
             success: true,
@@ -514,8 +484,7 @@ module.exports = {
     register, 
     login, 
     leaderboard, 
-    updateScore, 
-    buyItem,
+    updateScore,
     googleLogin,
     getProfile, 
     updateAvatar,

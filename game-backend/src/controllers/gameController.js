@@ -212,46 +212,6 @@ exports.getCategoryLeaderboard = async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
-
-
-exports.getAIRecommendations = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const user = await User.findById(userId);
-        
-        // 1. Lấy lịch sử chơi game của User này
-        const history = await GameHistory.find({ userId }).limit(20);
-        const playedGameSlugs = history.map(h => h.gameId);
-        const favoriteSlugs = user.favoriteGames || [];
-
-        // 2. Thống kê xem thể loại nào xuất hiện nhiều nhất (Sở thích)
-        const allInteractions = [...playedGameSlugs, ...favoriteSlugs];
-        const interactiveGames = await Game.find({ slug: { $in: allInteractions } });
-        
-        const categoryCount = {};
-        interactiveGames.forEach(game => {
-            const cats = Array.isArray(game.category) ? game.category : [game.category];
-            cats.forEach(cat => {
-                categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-            });
-        });
-
-        // Tìm thể loại "ruột" (ví dụ: 'Math', 'Logic')
-        const topCategories = Object.keys(categoryCount).sort((a, b) => categoryCount[b] - categoryCount[a]).slice(0, 2);
-
-        // 3. Gợi ý những game thuộc thể loại đó mà User CHƯA chơi/thích
-        const recommendedGames = await Game.find({
-            category: { $in: topCategories },
-            slug: { $nin: allInteractions }, // Tránh gợi ý lại game cũ
-            isActive: true
-        }).limit(6);
-
-        res.json({ success: true, games: recommendedGames });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi hệ thống gợi ý" });
-    }
-};
-
 exports.getAIRecommendations = async (req, res) => {
     try {
         const currentUserId = req.user.id;

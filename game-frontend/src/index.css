@@ -4,23 +4,102 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-/* 2. CẤU HÌNH BODY */
-/* Lưu ý: Không đặt background-image ở đây để tránh đè lên giao diện Lobby mới */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. DESIGN TOKENS — MathQuest Design System */
+:root {
+    /* Brand Colors */
+    --primary: #25f46a;
+    --primary-hover: #1fcf5a;
+    --primary-dim: rgba(37, 244, 106, 0.1);
+    --secondary: #00ffff;
+    --accent-yellow: #facc15;
+    --accent-orange: #f97316;
+    --accent-red: #ef4444;
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+
+    /* Semantic Colors */
+    --success: #25f46a;
+    --warning: #facc15;
+    --error: #ef4444;
+    --info: #3b82f6;
+
+    /* Neutral / Surface */
+    --surface-light: #ffffff;
+    --surface-dark: #1a2e20;
+    --bg-light: #f9f9f9;
+    --bg-dark: #141516;
+    --border-light: #e0e8e2;
+    --border-dark: #2a3f31;
+    --text-primary: #111827;
+    --text-secondary: #608a6e;
+    --text-inverse: #ffffff;
+
+    /* Legacy (giữ tương thích ngược) */
+    --primary-color: var(--primary);
+    --secondary-color: var(--secondary);
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --blur-amount: 12px;
+
+    /* Typography */
+    --font-game: 'Orbitron', sans-serif;
+    --font-body: 'Space Grotesk', 'Roboto', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Spacing Scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-2xl: 32px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(37, 244, 106, 0.3);
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 400ms ease;
+}
+
 body {
     margin: 0;
     padding: 0;
-    /* Font mặc định cho các phần chưa có Tailwind */
-    font-family: 'Roboto', sans-serif; 
-    
-    /* --- CSS VARIABLES (THEME SYSTEM) --- */
-    :root {
-        --primary-color: #25f46a;       /* Xanh lá Neon */
-        --secondary-color: #00ffff;     /* Xanh dương Neon */
-        --glass-bg: rgba(15, 23, 42, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.1);
-        --blur-amount: 12px;
-        --font-game: 'Orbitron', sans-serif;
-    }
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: var(--font-body);
+}
+
+::selection {
+    background: var(--primary);
+    color: var(--text-inverse);
+}
+
+#root {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
 }
 
 /* 3. LỚP TIỆN ÍCH QUAN TRỌNG */
@@ -146,12 +225,91 @@ body.theme-ice .game-area {
 }
 /* --- NHÂN VẬT GUNDAM --- */
 .shin-character {
-    width: 100px;  /* Tăng lên 100px để Gundam nhìn cho ngầu */
+    width: 100px;
     height: 100px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
     image-rendering: auto;
     transition: all 0.3s ease;
-    display: block !important; /* Ép buộc hiển thị */
+    display: block !important;
+}
+
+/* 9. DESIGN SYSTEM UTILITY CLASSES */
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--text-inverse);
+    font-weight: 700;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    border: none;
+    cursor: pointer;
+}
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glow);
+}
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.card-hover {
+    transition: all var(--transition-base);
+}
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+}
+
+.glow-border {
+    box-shadow: var(--shadow-glow);
+    border-color: var(--primary);
+}
+
+.fade-in {
+    animation: fadeIn var(--transition-slow) ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.4s ease forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease forwards;
 }

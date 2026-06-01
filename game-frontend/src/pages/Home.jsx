@@ -1,23 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import SettingsMenu from '../components/SettingsMenu';
+import React, { useEffect, useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import useAuthStore from '../store/useAuthStore';
+import useGameStore from '../store/useGameStore';
 
-function Home({ searchQuery = '', user, setShowAuth }) {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState(['All']);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [favoriteGames, setFavoriteGames] = useState([]);
-  const [_recommendations, setRecommendations] = useState([]);
-  const [pageBgImage, setPageBgImage] = useState('none');
+function Home({ searchQuery = '' }) {
+  const user = useAuthStore((s) => s.user);
+  const setShowAuth = useAuthStore((s) => s.setShowAuth);
+  const games = useGameStore((s) => s.games);
+  const categories = useGameStore((s) => s.categories);
+  const activeCategory = useGameStore((s) => s.activeCategory);
+  const favoriteGames = useGameStore((s) => s.favoriteGames);
+  const loading = useGameStore((s) => s.loading);
+  const setActiveCategory = useGameStore((s) => s.setActiveCategory);
+  const fetchGames = useGameStore((s) => s.fetchGames);
+  const fetchFavorites = useGameStore((s) => s.fetchFavorites);
+  const fetchRecommendations = useGameStore((s) => s.fetchRecommendations);
+  const toggleFavorite = useGameStore((s) => s.toggleFavorite);
+
+  const gridRef = useRef(null);
+  const bannerRef = useRef(null);
+  const categoryRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.fromTo(bannerRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' });
+    if (categoryRef.current?.children?.length) gsap.fromTo(categoryRef.current.children, { opacity: 0, x: -15 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out', delay: 0.2 });
+    if (gridRef.current?.children?.length) gsap.fromTo(gridRef.current.children, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: 'power2.out', delay: 0.3 });
+  }, [activeCategory, searchQuery]);
 
   const handlePlayGame = async (gameSlug, url, e) => {
     if (e) e.stopPropagation();
     if (!user) {
-      if (setShowAuth) setShowAuth(true);
+      setShowAuth(true);
     } else {
       try {
-        await fetch(`http://localhost:5000/api/game/${gameSlug}/play`, {
+        await fetch(`/api/game/${gameSlug}/play`, {
           method: 'POST'
         });
       } catch (err) {
@@ -28,81 +45,18 @@ function Home({ searchQuery = '', user, setShowAuth }) {
   };
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/game/list');
-        const result = await response.json();
-        if (result.success && Array.isArray(result.games)) {
-          setGames(result.games);
-          const uniqueCategories = ['All', ...new Set(result.games.flatMap(g => {
-              return Array.isArray(g?.category) ? g.category : [g?.category];
-          }).filter(Boolean))];
-          setCategories(uniqueCategories);
-        }
-      } catch (error) {
-        console.error("Lỗi khi kết nối với Backend:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const res = await fetch('http://localhost:5000/api/auth/profile', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const data = await res.json();
-          if (data.success && data.user) {
-            setFavoriteGames(Array.isArray(data.user.favoriteGames) ? data.user.favoriteGames : []);
-          }
-        } catch (error) {
-          console.error("Lỗi khi tải profile:", error);
-        }
-      }
-    };
     fetchGames();
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const res = await fetch('http://localhost:5000/api/game/recommendations', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) setRecommendations(data.games);
-      }
-    };
+    fetchFavorites();
     fetchRecommendations();
-  }, []);
+  }, [fetchGames, fetchFavorites, fetchRecommendations]);
 
   const handleToggleFavorite = async (gameSlug, e) => {
-    e.stopPropagation(); 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      if (setShowAuth) setShowAuth(true); // Hiển thị form đăng nhập nếu chưa đăng nhập
+    e.stopPropagation();
+    if (!localStorage.getItem('token')) {
+      setShowAuth(true);
       return;
     }
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/toggle-favorite', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ gameSlug })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFavoriteGames(Array.isArray(data.favoriteGames) ? data.favoriteGames : []); 
-      }
-    } catch (err) {
-      console.error("Lỗi khi thêm/xóa yêu thích:", err);
-    }
+    await toggleFavorite(gameSlug);
   };
 
   const filteredGames = games.filter(game => {
@@ -122,17 +76,6 @@ function Home({ searchQuery = '', user, setShowAuth }) {
 
   return (
     <div className="relative w-full min-h-screen">
-      
-      <div 
-        className="fixed inset-0 z-[-1] transition-all duration-1000 ease-in-out bg-cover bg-center bg-no-repeat" 
-        style={{ 
-          backgroundColor: pageBgImage === 'none' ? '#ffffff' : '#141516',
-          backgroundImage: pageBgImage !== 'none' ? `url(${pageBgImage})` : 'none' 
-        }}
-      ></div>
-
-      <SettingsMenu pageBgImage={pageBgImage} setPageBgImage={setPageBgImage} />
-
       <div className="flex flex-col lg:flex-row w-full gap-8 relative z-10 p-4 lg:p-8">
         
         <aside className="w-full lg:w-64 flex flex-col gap-8 shrink-0">
@@ -142,7 +85,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
 
             <section>
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#608a6e] mb-4">Danh mục</h3>
-              <div className="flex flex-col gap-2">
+              <div ref={categoryRef} className="flex flex-col gap-2">
                 {categories.map(cat => (
                   <button 
                     key={cat}
@@ -155,7 +98,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
                   >
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-lg">
-                        {cat === 'All' ? 'grid_view' : 'stadia_controller'}
+                        {cat === 'All' ? 'grid_view' : cat === 'Multiplayer' ? 'groups' : 'stadia_controller'}
                       </span>
                       <span>{cat === 'All' ? 'Tất cả game' : cat}</span>
                     </div>
@@ -171,7 +114,7 @@ function Home({ searchQuery = '', user, setShowAuth }) {
 
         <div className="flex-1 flex flex-col gap-10">
           
-          <section className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl group">
+          <section ref={bannerRef} className="relative h-[400px] w-full rounded-3xl overflow-hidden shadow-xl group">
             <img alt="Game of the Day" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000"/>
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-12">
               <div className="flex items-center gap-2 mb-4">
@@ -199,9 +142,15 @@ function Home({ searchQuery = '', user, setShowAuth }) {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="game-grid">
+            <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="game-grid">
               {loading ? (
                 <p className="text-gray-500 dark:text-gray-300">Đang tải...</p>
+              ) : filteredGames.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
+                  <span className="material-symbols-outlined text-6xl mb-4" style={{fontVariationSettings: "'FILL' 1"}}>search_off</span>
+                  <p className="text-lg font-bold">Không tìm thấy game nào</p>
+                  <p className="text-sm">Thử thay đổi từ khóa hoặc thể loại</p>
+                </div>
               ) : filteredGames.map((game) => {
                 const isFav = safeFavoriteGames.includes(game.slug);
                 return (
@@ -210,6 +159,12 @@ function Home({ searchQuery = '', user, setShowAuth }) {
                     onClick={(e) => handlePlayGame(game.slug, game.gameUrl || `/${game.slug}.html`, e)}>
                     <div className="h-44 relative bg-gray-800 overflow-hidden">
                       <img alt={game.title} className="size-full object-cover opacity-90 group-hover:scale-110 transition duration-500" src={game.thumbnailUrl || "https://via.placeholder.com/300"}/>
+                      {(Array.isArray(game.category) ? game.category : []).includes('Multiplayer') && (
+                        <div className="absolute top-3 left-3 z-10 bg-purple-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1 shadow-lg">
+                          <span className="material-symbols-outlined text-xs">groups</span>
+                          <span>Multiplayer</span>
+                        </div>
+                      )}
                       <button 
                         onClick={(e) => handleToggleFavorite(game.slug, e)}
                         className="absolute top-3 right-3 z-10 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-all active:scale-90"

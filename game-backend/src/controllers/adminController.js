@@ -104,6 +104,28 @@ const createGame = async (req, res) => {
     } catch (error) { res.status(500).json({ success: false, message: "Lỗi tạo Game" }); }
 };
 
+const addGameCategory = async (req, res) => {
+    try {
+        const { slug, category } = req.body;
+        if (!slug || !category) {
+            return res.status(400).json({ success: false, message: 'Thiếu slug hoặc category' });
+        }
+        const game = await Game.findOne({ slug });
+        if (!game) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy game' });
+        }
+        const cats = Array.isArray(game.category) ? game.category : [];
+        if (!cats.includes(category)) {
+            cats.push(category);
+            game.category = cats;
+            await game.save();
+        }
+        res.json({ success: true, message: `Đã thêm category "${category}" vào game "${slug}"`, game });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi Server' });
+    }
+};
+
 const deleteGame = async (req, res) => {
     try {
         await Game.findByIdAndDelete(req.params.id);
@@ -126,5 +148,5 @@ const updateGame = async (req, res) => {
 module.exports = {
     getAllUsers, deleteUser, createUser, updateUser,
     createItem, deleteItem, updateItem,
-    getAllGames, createGame, deleteGame, updateGame, // <--- Bổ sung getAllGames
+    getAllGames, createGame, deleteGame, updateGame, addGameCategory, // <--- Bổ sung getAllGames
 };

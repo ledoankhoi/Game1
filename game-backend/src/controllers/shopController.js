@@ -57,23 +57,9 @@ const equipItem = async (req, res) => {
         // Đảm bảo object equipped tồn tại
         if (!user.equipped) user.equipped = {};
 
-        // --- CHIÊU THỨC MỚI ---
-        if (item.category === 'frame') {
-            // Nếu đồ mặc là KHUNG: Chỉ thay đổi khung, không chạm vào Avatar
-            user.equipped.frame = itemId;
-        } else {
-            // Nếu đồ mặc là AVATAR: Xóa sạch đồ cũ, NHƯNG LƯU LẠI Khung và Huy Hiệu
-            const currentFrame = user.equipped.frame;
-            const currentBadge = user.equipped.badge;
-            
-            user.equipped = {}; 
-            if (currentFrame) user.equipped.frame = currentFrame;
-            if (currentBadge) user.equipped.badge = currentBadge;
-            
-            // Mặc Avatar mới vào
-            user.equipped[item.category] = itemId;
-            user.avatarUrl = item.imageUrl || item.assetUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.itemId}`;
-        }
+        // CHỈ cập nhật đúng category, không reset các slot khác
+        user.equipped[item.category] = itemId;
+        // Không thay đổi avatarUrl gốc — frontend sẽ overlay assetUrl
 
         user.markModified('equipped');
         await user.save();

@@ -8,7 +8,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#8beaff",
+        "primary": "#25f46a",
+        "background-light": "#f5f8f6",
+        "background-dark": "#102216",
         "primary-fixed": "#a5eeff",
         "on-background": "#dfe2eb",
         "surface-container-low": "#181c22",
@@ -21,10 +23,17 @@ export default {
         "background": "#10141a",
       },
       fontFamily: {
+        "display": ["Lexend", "sans-serif"],
         "headline": ["Space Grotesk", "sans-serif"],
         "body": ["Inter", "sans-serif"],
         "label": ["Space Grotesk", "sans-serif"]
-      }
+      },
+      borderRadius: {
+        "DEFAULT": "0.5rem",
+        "lg": "1rem",
+        "xl": "1.5rem",
+        "full": "9999px"
+      },
     },
   },
   plugins: [],

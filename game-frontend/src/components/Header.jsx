@@ -1,40 +1,53 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import AvatarDisplay from './AvatarDisplay';
+import { createFloatingCoin } from '../utils/animations';
+import useAuthStore from '../store/useAuthStore';
 
-const Header = ({ 
-  searchQuery, 
-  setSearchQuery, 
-  user, 
-  handleLogout, 
-  setShowAuth, 
-  setIsLoginMode 
-}) => {
+const Header = ({ searchQuery, setSearchQuery }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const setShowAuth = useAuthStore((s) => s.setShowAuth);
+  const setIsLoginMode = useAuthStore((s) => s.setIsLoginMode);
+  const logoRef = useRef(null);
+  const coinRef = useRef(null);
+  const navRef = useRef(null);
+  const coinValueRef = useRef(null);
+  const prevCoinsRef = useRef(user?.coins ?? user?.coin ?? 0);
 
-  // --- HELPER CSS CHO HEADER AVATAR (Lấy từ code gốc của bạn) ---
-  const getFrameStyleApp = (frameId) => {
-    if (frameId === 'frame_gold') return "border-2 border-yellow-400 shadow-[0_0_10px_#facc15]";
-    if (frameId === 'frame_neon') return "border-2 border-cyan-400 shadow-[0_0_10px_#22d3ee]";
-    if (frameId === 'frame_fire') return "border-2 border-red-500 shadow-[0_0_10px_#ef4444]";
-    return "border-2 border-primary shadow-sm"; // Mặc định
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    window.location.reload();
   };
 
-  const getBadgeIconApp = (badgeId) => {
-    switch(badgeId) {
-      case 'rookie': return { icon: 'verified', color: 'text-orange-500' };
-      case 'firstBlood': return { icon: 'sports_esports', color: 'text-blue-500' };
-      case 'richMan': return { icon: 'monetization_on', color: 'text-yellow-500' };
-      case 'streak7': return { icon: 'local_fire_department', color: 'text-red-500' };
-      default: return { icon: 'stars', color: 'text-yellow-500' }; // Đề phòng lỗi
+  useGSAP(() => {
+    gsap.fromTo(logoRef.current, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out' });
+    if (navRef.current?.children?.length) gsap.fromTo(navRef.current.children, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.05, ease: 'power2.out', delay: 0.1 });
+  }, []);
+
+  useEffect(() => {
+    const currentCoins = user?.coins ?? user?.coin ?? 0;
+    const prevCoins = prevCoinsRef.current;
+    if (coinValueRef.current && user) {
+      gsap.fromTo(coinValueRef.current, { scale: 1.3, color: '#facc15' }, { scale: 1, color: '#fff', duration: 0.4, ease: 'power2.out', onComplete: () => { coinValueRef.current.style.color = ''; } });
     }
-  };
+    if (currentCoins > prevCoins && coinRef.current) {
+      createFloatingCoin(coinRef.current, currentCoins - prevCoins);
+    }
+    prevCoinsRef.current = currentCoins;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.coins, user?.coin]);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#1a2e20]/95 backdrop-blur-md border-b border-[#e0e8e2] dark:border-[#2a3f31] px-4 md:px-6 py-3 flex items-center justify-between gap-4 shadow-sm h-auto md:h-20 flex-wrap md:flex-nowrap">
       
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-3 cursor-pointer group shrink-0">
+      <Link ref={logoRef} to="/" className="flex items-center gap-3 cursor-pointer group shrink-0">
         <div className="bg-primary p-2.5 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-105 transition-transform">
           <span className="material-symbols-outlined text-white text-3xl">calculate</span>
         </div>
@@ -69,7 +82,7 @@ const Header = ({
       {/* Nút bấm bên phải */}
       <div className="flex items-center gap-2 md:gap-4 shrink-0 order-2 md:order-none">
         
-        <div className="flex items-center gap-1 md:mr-2">
+        <div ref={navRef} className="flex items-center gap-1 md:mr-2">
           {user && user.role === 'admin' && (
             <Link to="/admin" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors font-bold group">
               <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">admin_panel_settings</span>
@@ -97,11 +110,11 @@ const Header = ({
           </div>
         ) : (
           <div className="flex items-center gap-2 md:gap-6">
-            <div className="bg-white dark:bg-[#0f1a14] border border-gray-100 dark:border-gray-700 pl-2 pr-2 md:pr-4 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-2 shadow-sm cursor-pointer hover:border-yellow-400 transition-colors" onClick={() => navigate('/shop')}>
+            <div ref={coinRef} className="bg-white dark:bg-[#0f1a14] border border-gray-100 dark:border-gray-700 pl-2 pr-2 md:pr-4 py-1 md:py-1.5 rounded-full flex items-center gap-1 md:gap-2 shadow-sm cursor-pointer hover:border-yellow-400 transition-colors" onClick={() => navigate('/shop')}>
               <div className="bg-yellow-100 dark:bg-yellow-900/30 p-1 rounded-full">
                 <span className="material-symbols-outlined text-[#facc15] text-lg md:text-xl block">monetization_on</span>
               </div>
-              <span className="text-xs md:text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
+              <span ref={coinValueRef} className="text-xs md:text-sm font-black text-gray-800 dark:text-white tracking-wide">{user.coins || user.coin || 0}</span>
             </div>
 
             {/* NÚT AVATAR ĐẦY ĐỦ KHUNG & HUY HIỆU */}
@@ -109,19 +122,7 @@ const Header = ({
               <Link to="/profile" className="relative flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition-opacity" title="Vào trang Hồ Sơ">
                 <span className="font-bold text-gray-800 dark:text-white hidden lg:block text-sm">Chào, {user.username}</span>
                 
-                <img 
-                  src={user.avatarUrl || localStorage.getItem('user_avatar_custom') || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"}
-                  className={`w-8 h-8 md:w-10 md:h-10 rounded-full object-cover bg-white transition-all ${getFrameStyleApp(user.equipped?.frame)}`} 
-                  alt="Avatar" 
-                />
-
-                {user.equipped?.badge && user.equipped.badge !== 'none' && (
-                  <div className="absolute -top-1 -right-1 z-20 w-4 h-4 md:w-5 md:h-5 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-md transform rotate-12">
-                    <span className={`material-symbols-outlined text-[10px] md:text-[12px] ${getBadgeIconApp(user.equipped.badge).color}`}>
-                      {getBadgeIconApp(user.equipped.badge).icon}
-                    </span>
-                  </div>
-                )}
+                <AvatarDisplay user={user} size="md" />
               </Link>
               <button onClick={handleLogout} className="text-[10px] md:text-xs text-red-500 font-bold hover:underline px-1 md:px-2">Đăng xuất</button>
             </div>

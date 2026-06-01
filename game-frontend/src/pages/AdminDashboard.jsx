@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('users'); 
+  const [activeTab, setActiveTab] = useState('users');
+  const pageRef = useRef(null);
+  const tabRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.fromTo(pageRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+    if (tabRef.current?.children?.length) gsap.fromTo(tabRef.current.children, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.08, ease: 'power2.out', delay: 0.15 });
+  }, [activeTab]);
   
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -14,6 +23,11 @@ function AdminDashboard() {
   const [imagePreview, setImagePreview] = useState(null); 
   
   const [editingId, setEditingId] = useState(null);
+
+  const [knowledgeFile, setKnowledgeFile] = useState(null);
+  const [knowledgeCategory, setKnowledgeCategory] = useState('Document');
+  const [knowledgeTitle, setKnowledgeTitle] = useState('');
+  const [importStatus, setImportStatus] = useState('');
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -34,9 +48,9 @@ function AdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       let url = '';
-      if (activeTab === 'users') url = 'http://localhost:5000/api/admin/users';
-      else if (activeTab === 'games') url = 'http://localhost:5000/api/admin/games';
-      else if (activeTab === 'items') url = 'http://localhost:5000/api/shop/items'; 
+      if (activeTab === 'users') url = '/api/admin/users';
+      else if (activeTab === 'games') url = '/api/admin/games';
+      else if (activeTab === 'items') url = '/api/shop/items'; 
       
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       const result = await response.json();
@@ -53,7 +67,7 @@ function AdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       const endpoint = activeTab === 'items' ? 'items' : (activeTab === 'users' ? 'users' : 'games');
-      const response = await fetch(`http://localhost:5000/api/admin/${endpoint}/${id}`, {
+      const response = await fetch(`/api/admin/${endpoint}/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -110,8 +124,8 @@ function AdminDashboard() {
       
       const method = editingId ? 'PUT' : 'POST';
       const url = editingId 
-        ? `http://localhost:5000/api/admin/${endpoint}/${editingId}` 
-        : `http://localhost:5000/api/admin/${endpoint}`;
+        ? `/api/admin/${endpoint}/${editingId}` 
+        : `/api/admin/${endpoint}`;
       
       // Tạo bản sao dữ liệu để gửi đi
       const submitData = { ...formData };
@@ -177,7 +191,7 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="w-full bg-white dark:bg-[#1a2e20] rounded-3xl shadow-xl border border-[#e0e8e2] dark:border-[#2a3f31] overflow-hidden min-h-[600px] flex flex-col relative">
+    <div ref={pageRef} className="w-full bg-white dark:bg-[#1a2e20] rounded-3xl shadow-xl border border-[#e0e8e2] dark:border-[#2a3f31] overflow-hidden min-h-[600px] flex flex-col relative">
       
       <div className="bg-gray-900 text-white p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -187,7 +201,7 @@ function AdminDashboard() {
         <button onClick={() => navigate('/')} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-bold transition">Thoát</button>
       </div>
 
-      <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#102216]">
+      <div ref={tabRef} className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#102216]">
         <button onClick={() => setActiveTab('users')} className={`flex-1 py-4 font-bold text-center flex items-center justify-center gap-2 transition-colors ${activeTab === 'users' ? 'text-primary border-b-4 border-primary bg-white dark:bg-[#1a2e20]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
           <span className="material-symbols-outlined">group</span> Người Chơi
         </button>
@@ -197,95 +211,182 @@ function AdminDashboard() {
         <button onClick={() => setActiveTab('games')} className={`flex-1 py-4 font-bold text-center flex items-center justify-center gap-2 transition-colors ${activeTab === 'games' ? 'text-primary border-b-4 border-primary bg-white dark:bg-[#1a2e20]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
           <span className="material-symbols-outlined">stadia_controller</span> Kho Game
         </button>
+        <button onClick={() => setActiveTab('knowledge')} className={`flex-1 py-4 font-bold text-center flex items-center justify-center gap-2 transition-colors ${activeTab === 'knowledge' ? 'text-primary border-b-4 border-primary bg-white dark:bg-[#1a2e20]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+          <span className="material-symbols-outlined">book</span> Knowledge
+        </button>
       </div>
 
       <div className="p-6 flex-1 bg-gray-50/50 dark:bg-[#0f1a14] overflow-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white capitalize">Danh sách {activeTab}</h2>
-          <button onClick={openModal} className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition active:scale-95">
-            <span className="material-symbols-outlined">add</span> Thêm Mới
-          </button>
-        </div>
 
-        {loading ? (
-          <div className="text-center py-10 font-bold text-gray-500">Đang tải dữ liệu...</div>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2e20]">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                  <th className="p-4 font-bold"># ID / Tên</th>
-                  <th className="p-4 font-bold">Thông tin phụ</th>
-                  <th className="p-4 font-bold text-right">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.length > 0 ? data.map((item) => (
-                  <tr key={item._id} className={`border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}>
-                    <td className="p-4 flex items-center gap-3">
-                      {activeTab === 'users' && <img src={item.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.username}`} className="w-10 h-10 rounded-full border border-gray-300 object-cover" alt="avatar" />}
-                      {activeTab === 'games' && <img src={item.thumbnailUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Thumb'} className="w-16 h-10 rounded-md object-cover border border-gray-300" alt="thumb" />}
-                      {activeTab === 'items' && <img src={item.imageUrl || item.assetUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Image'} className="w-10 h-10 rounded-md object-cover bg-gray-100" alt="item" />}
-                      <div>
-                        <p className="font-bold text-gray-800 dark:text-white">
-                            {activeTab === 'users' ? item.username : (activeTab === 'items' ? item.name : item.title)}
-                        </p>
-                        <p className="text-xs text-gray-500 font-mono">
-                          {activeTab === 'items' ? `ID: ${item.itemId}` : (activeTab === 'games' ? `Slug: ${item.slug}` : item._id)}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="p-4 text-gray-600 dark:text-gray-300">
-                      {activeTab === 'users' && (
-                        <div className="flex flex-col gap-1">
-                           <span className="text-sm">{item.email}</span>
-                           <div className="flex gap-2 items-center">
-                             <span className={`px-2 py-0.5 inline-block w-fit rounded-md text-[10px] font-bold ${item.role === 'admin' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>{item.role === 'admin' ? 'ADMIN' : 'USER'}</span>
-                             <span className="text-xs font-bold text-yellow-500">{item.coins} Xu</span>
-                           </div>
-                        </div>
-                      )}
-                      
-                      {activeTab === 'games' && (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex flex-wrap items-center gap-1">
-                              {(Array.isArray(item.category) ? item.category : [item.category]).map((c, i) => (
-                                  c && <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold w-fit uppercase">{c}</span>
-                              ))}
+        {activeTab === 'knowledge' ? (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">📚 Import tài liệu vào Knowledge Base</h2>
 
-                              {item.isActive === false && (
-                                  <span className="px-2 py-0.5 bg-red-500 text-white rounded-md text-[10px] font-black uppercase shadow-sm">Đã Ẩn</span>
-                              )}
-                          </div>
-                          <span className="text-xs text-blue-500 truncate max-w-[200px]">{item.gameUrl}</span>
-                        </div>
-                      )}
-                      
-                      {activeTab === 'items' && (
-                          <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
-                                  <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">{item.category}</span>
-                                  {renderRarityBadge(item.rarity)}
-                              </div>
-                              <div className="flex items-center gap-1 font-bold text-yellow-500">
-                                  <span className="material-symbols-outlined text-sm">monetization_on</span> {item.price}
-                              </div>
-                          </div>
-                      )}
-                    </td>
-                    <td className="p-4 text-right whitespace-nowrap">
-                      <button onClick={() => handleEdit(item)} className="text-blue-500 hover:text-blue-700 p-2 transition" title="Sửa">
-                        <span className="material-symbols-outlined">edit</span>
-                      </button>
-                      <button onClick={() => handleDelete(item._id)} className="text-red-500 hover:text-red-700 p-2 transition" title="Xóa">
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </td>
-                  </tr>
-                )) : <tr><td colSpan="3" className="p-8 text-center text-gray-500">Chưa có dữ liệu.</td></tr>}
-              </tbody>
-            </table>
+            <div className="bg-white dark:bg-[#1a2e20] rounded-xl border border-gray-200 dark:border-gray-700 p-6 max-w-2xl">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Chọn file (PDF, Word, Excel, PPT, HTML, TXT, ...)</label>
+                  <label className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#102216] border border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <span className="material-symbols-outlined text-primary">cloud_upload</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 flex-1 truncate">
+                      {knowledgeFile ? knowledgeFile.name : 'Click để chọn file...'}
+                    </span>
+                    <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.html,.htm,.csv,.json,.xml,.txt,.md,.epub" onChange={(e) => setKnowledgeFile(e.target.files[0])} className="hidden" />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Danh mục (Category)</label>
+                    <select value={knowledgeCategory} onChange={(e) => setKnowledgeCategory(e.target.value)} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white">
+                      <option value="Document">Document</option>
+                      <option value="Game">Game</option>
+                      <option value="Economy">Economy</option>
+                      <option value="Feature">Feature</option>
+                      <option value="Story">Story</option>
+                      <option value="System">System</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Tiêu đề (Title)</label>
+                    <input value={knowledgeTitle} onChange={(e) => setKnowledgeTitle(e.target.value)} placeholder="Để trống = tên file" className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 outline-none focus:border-primary dark:bg-gray-800 dark:text-white" />
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (!knowledgeFile) { alert('Vui lòng chọn file!'); return; }
+                    setImportStatus('Đang xử lý...');
+                    try {
+                      const token = localStorage.getItem('token');
+                      const form = new FormData();
+                      form.append('file', knowledgeFile);
+                      form.append('category', knowledgeCategory);
+                      if (knowledgeTitle) form.append('title', knowledgeTitle);
+
+                      const res = await fetch('/api/document/import-knowledge', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: form
+                      });
+                      const result = await res.json();
+                      if (result.success) {
+                        setImportStatus(`✅ Đã import "${result.knowledge.title}" vào Knowledge base!`);
+                        setKnowledgeFile(null);
+                        setKnowledgeTitle('');
+                        if (document.querySelector('input[type="file"]')) document.querySelector('input[type="file"]').value = '';
+                      } else {
+                        setImportStatus('❌ Lỗi: ' + result.message);
+                      }
+                    } catch (_err) {
+                      setImportStatus('❌ Lỗi kết nối server!');
+                    }
+                  }}
+                  disabled={!knowledgeFile}
+                  className="self-start flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined">import_contacts</span>
+                  Import vào Knowledge Base
+                </button>
+
+                {importStatus && (
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">
+                    {importStatus}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white capitalize">Danh sách {activeTab}</h2>
+              <button onClick={openModal} className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition active:scale-95">
+                <span className="material-symbols-outlined">add</span> Thêm Mới
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-10 font-bold text-gray-500">Đang tải dữ liệu...</div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2e20]">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                      <th className="p-4 font-bold"># ID / Tên</th>
+                      <th className="p-4 font-bold">Thông tin phụ</th>
+                      <th className="p-4 font-bold text-right">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.length > 0 ? data.map((item) => (
+                      <tr key={item._id} className={`border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}>
+                        <td className="p-4 flex items-center gap-3">
+                          {activeTab === 'users' && <img src={item.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.username}`} className="w-10 h-10 rounded-full border border-gray-300 object-cover" alt="avatar" />}
+                          {activeTab === 'games' && <img src={item.thumbnailUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Thumb'} className="w-16 h-10 rounded-md object-cover border border-gray-300" alt="thumb" />}
+                          {activeTab === 'items' && <img src={item.imageUrl || item.assetUrl || 'https://placehold.co/150x150/1a2e20/8ff5ff?text=No+Image'} className="w-10 h-10 rounded-md object-cover bg-gray-100" alt="item" />}
+                          <div>
+                            <p className="font-bold text-gray-800 dark:text-white">
+                                {activeTab === 'users' ? item.username : (activeTab === 'items' ? item.name : item.title)}
+                            </p>
+                            <p className="text-xs text-gray-500 font-mono">
+                              {activeTab === 'items' ? `ID: ${item.itemId}` : (activeTab === 'games' ? `Slug: ${item.slug}` : item._id)}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="p-4 text-gray-600 dark:text-gray-300">
+                          {activeTab === 'users' && (
+                            <div className="flex flex-col gap-1">
+                               <span className="text-sm">{item.email}</span>
+                               <div className="flex gap-2 items-center">
+                                 <span className={`px-2 py-0.5 inline-block w-fit rounded-md text-[10px] font-bold ${item.role === 'admin' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>{item.role === 'admin' ? 'ADMIN' : 'USER'}</span>
+                                 <span className="text-xs font-bold text-yellow-500">{item.coins} Xu</span>
+                               </div>
+                            </div>
+                          )}
+                          
+                          {activeTab === 'games' && (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex flex-wrap items-center gap-1">
+                                  {(Array.isArray(item.category) ? item.category : [item.category]).map((c, i) => (
+                                      c && <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[10px] font-bold w-fit uppercase">{c}</span>
+                                  ))}
+
+                                  {item.isActive === false && (
+                                      <span className="px-2 py-0.5 bg-red-500 text-white rounded-md text-[10px] font-black uppercase shadow-sm">Đã Ẩn</span>
+                                  )}
+                              </div>
+                              <span className="text-xs text-blue-500 truncate max-w-[200px]">{item.gameUrl}</span>
+                            </div>
+                          )}
+                          
+                          {activeTab === 'items' && (
+                              <div className="flex flex-col gap-1">
+                                  <div className="flex items-center gap-2">
+                                      <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[10px] font-bold uppercase">{item.category}</span>
+                                      {renderRarityBadge(item.rarity)}
+                                  </div>
+                                  <div className="flex items-center gap-1 font-bold text-yellow-500">
+                                      <span className="material-symbols-outlined text-sm">monetization_on</span> {item.price}
+                                  </div>
+                              </div>
+                          )}
+                        </td>
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <button onClick={() => handleEdit(item)} className="text-blue-500 hover:text-blue-700 p-2 transition" title="Sửa">
+                            <span className="material-symbols-outlined">edit</span>
+                          </button>
+                          <button onClick={() => handleDelete(item._id)} className="text-red-500 hover:text-red-700 p-2 transition" title="Xóa">
+                            <span className="material-symbols-outlined">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    )) : <tr><td colSpan="3" className="p-8 text-center text-gray-500">Chưa có dữ liệu.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -416,7 +517,7 @@ function AdminDashboard() {
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Thể loại (Chọn nhiều)</label>
                       <div className="flex flex-wrap gap-2 p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800">
-                        {['Math', 'Logic', 'Speed', 'Memory', 'Elite', 'Action', 'Puzzle'].map(cat => {
+                        {['Math', 'Logic', 'Speed', 'Memory', 'Elite', 'Action', 'Puzzle', 'Multiplayer'].map(cat => {
                           const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
                           const isSelected = currentCats.includes(cat);
                           

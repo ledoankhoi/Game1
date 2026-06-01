@@ -4,7 +4,7 @@ const knowledgeSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ['Game', 'Economy', 'Feature', 'Story', 'System'] // Phân loại kiến thức
+        enum: ['Game', 'Economy', 'Feature', 'Story', 'System', 'Document'] // Phân loại kiến thức
     },
     title: {
         type: String,

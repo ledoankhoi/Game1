@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { saveResultRules } = require('../middlewares/validate');
 
 // 1. Các API chung
 router.get('/list', gameController.getAllGames); 
 router.get('/history', authMiddleware, gameController.getUserHistory); 
 
 // API Lưu kết quả
-router.post('/save-result', authMiddleware, gameController.saveGameResult);
+router.post('/save-result', authMiddleware, saveResultRules, gameController.saveGameResult);
 
 // 2. Các API Xếp hạng
 router.get('/leaderboard/exp', gameController.getTopExp);

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 
 // Import các Tabs con
 import TabOverview from './TabOverview';
@@ -8,25 +10,24 @@ import TabAchievements from './TabAchievements';
 import TabHistory from './TabHistory';
 import TabFavorites from './TabFavorites';
 import TabFeedback from './TabFeedback';
-
-const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
-
-const getFrameStyle = (frameId) => {
-  if (frameId === 'frame_gold') return "border-4 border-yellow-400 shadow-[0_0_15px_#facc15]";
-  if (frameId === 'frame_neon') return "border-4 border-cyan-400 shadow-[0_0_15px_#22d3ee]";
-  if (frameId === 'frame_fire') return "border-4 border-red-500 shadow-[0_0_20px_#ef4444]";
-  return "border-4 border-white dark:border-[#1a2e20]";
-};
+import AvatarDisplay from '../../components/AvatarDisplay';
 
 function Profile() {
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
+  const profileRef = useRef(null);
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [gamesList, setGamesList] = useState([]);
   
   const [history, setHistory] = useState([]);
   const [favoriteGames, setFavoriteGames] = useState([]);
-  const [activeTab, setActiveTab] = useState('overview'); 
+  const [activeTab, setActiveTab] = useState('overview');
+
+  useGSAP(() => {
+    if (profileRef.current?.children?.length) {
+      gsap.fromTo(profileRef.current.children, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' });
+    }
+  }, [activeTab, profileData]); 
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState("");
@@ -45,7 +46,7 @@ function Profile() {
       return;
     }
 
-    fetch('http://localhost:5000/api/auth/profile', { headers: { 'Authorization': `Bearer ${token}` } })
+    fetch('/api/auth/profile', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.user) {
@@ -60,10 +61,10 @@ function Profile() {
       })
       .catch(err => console.error("Lỗi tải profile:", err));
 
-    fetch('http://localhost:5000/api/game/list').then(res => res.json()).then(data => { if (data.success) setGamesList(data.games || []); });
-    fetch('http://localhost:5000/api/game/history', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setHistory(data.history || []); });
-    fetch('http://localhost:5000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setQuestsList(data.quests || []); });
-    fetch('http://localhost:5000/api/achievement/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setAchievementsList(data.achievements || []); });
+    fetch('/api/game/list').then(res => res.json()).then(data => { if (data.success) setGamesList(data.games || []); });
+    fetch('/api/game/history', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setHistory(data.history || []); });
+    fetch('/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setQuestsList(data.quests || []); });
+    fetch('/api/achievement/list', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.success) setAchievementsList(data.achievements || []); });
 
   }, [navigate]);
 
@@ -76,7 +77,7 @@ function Profile() {
   const handleSaveAvatar = async () => {
     if (!selectedAvatar) return setIsModalOpen(false);
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:5000/api/auth/update-avatar', {
+    const res = await fetch('/api/auth/update-avatar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ avatarUrl: selectedAvatar })
@@ -100,7 +101,7 @@ function Profile() {
     
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/update-username', {
+      const res = await fetch('/api/auth/update-username', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ newUsername: newName })
@@ -142,7 +143,7 @@ function Profile() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:5000/api/auth/toggle-favorite', {
+      const res = await fetch('/api/auth/toggle-favorite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ gameSlug })
@@ -155,7 +156,7 @@ function Profile() {
   const handleClaimQuest = async (questId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:5000/api/quest/claim', {
+      const res = await fetch('/api/quest/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ questId })
@@ -182,7 +183,7 @@ function Profile() {
           return updatedUser;
         });
         
-        fetch('http://localhost:5000/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch('/api/quest/list', { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.json())
           .then(d => { if (d.success) setQuestsList(d.quests || []); });
       } else {
@@ -201,7 +202,7 @@ function Profile() {
   const handleEquipBadge = async (badgeId) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/equip-badge', {
+      const res = await fetch('/api/auth/equip-badge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ badgeId })
@@ -248,15 +249,8 @@ function Profile() {
     return { current, isUnlocked, progressPercent };
   };
 
-  const renderBadgeIcon = (badgeId) => {
-    if (!badgeId || badgeId === 'none') return null;
-    const ach = achievementsList.find(a => a.id === badgeId);
-    if (!ach) return null;
-    return <span className={`material-symbols-outlined text-[20px] text-${ach.color}-500`}>{ach.icon}</span>;
-  };
-
   return (
-    <div className="flex-1 w-full max-w-6xl mx-auto p-4 lg:p-8 flex flex-col gap-6 animate-fade-in">
+    <div ref={profileRef} className="flex-1 w-full max-w-6xl mx-auto p-4 lg:p-8 flex flex-col gap-6">
       
       {/* THẺ ĐỊNH DANH CÓ KHUNG & HUY HIỆU */}
       <div className="bg-white dark:bg-[#1a2e20] rounded-[2rem] p-8 shadow-xl border border-[#e0e8e2] dark:border-[#2a3f31] relative overflow-hidden flex flex-col md:flex-row items-center gap-8">
@@ -271,16 +265,11 @@ function Profile() {
             <circle cx="50" cy="50" r="46" stroke="#25f46a" strokeWidth="6" fill="transparent" className="transition-all duration-1000 ease-out" strokeDasharray="289" style={{ strokeDashoffset: strokeDashoffset }} strokeLinecap="round" />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <img src={profileData.avatarUrl || DEFAULT_AVATAR} className={`w-[120px] h-[120px] rounded-full object-cover bg-white z-10 transition-all ${getFrameStyle(profileData.equipped?.frame)}`} alt="avatar" />
+            <AvatarDisplay user={profileData} size="lg" showBadge={false} showFrame={false} />
           </div>
           <div className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full z-20 hover:bg-green-600 transition shadow-md">
             <span className="material-symbols-outlined text-lg">edit</span>
           </div>
-          {profileData.equipped?.badge && profileData.equipped.badge !== 'none' && (
-             <div className="absolute top-1 right-1 z-30 w-10 h-10 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-lg transform rotate-12 hover:scale-110 transition duration-300">
-                {renderBadgeIcon(profileData.equipped.badge)}
-             </div>
-          )}
         </div>
 
         <div className="flex-1 text-center md:text-left z-10 w-full">

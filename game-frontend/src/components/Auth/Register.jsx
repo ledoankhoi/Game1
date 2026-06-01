@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import useAuthStore from '../../store/useAuthStore';
 
-const Register = ({ onClose, onSwitchToLogin }) => {
+const Register = () => {
+  const setIsLoginMode = useAuthStore((s) => s.setIsLoginMode);
+  const setShowAuth = useAuthStore((s) => s.setShowAuth);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +15,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
     setError("");
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password })
@@ -20,7 +23,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
       const data = await response.json();
       if (data.success) {
         alert("Đăng ký thành công! Hãy đăng nhập để bắt đầu.");
-        onSwitchToLogin(); // Chuyển sang màn hình đăng nhập
+        setIsLoginMode(true);
       } else {
         setError(data.message || "Đăng ký thất bại!");
       }
@@ -34,8 +37,8 @@ const Register = ({ onClose, onSwitchToLogin }) => {
   const handleBoxClick = (e) => e.stopPropagation();
 
   return (
-    <div className="bg-white dark:bg-[#1a2e20] p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-300" onClick={handleBoxClick}>
-      <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors">
+    <div className="auth-modal bg-white dark:bg-[#1a2e20] p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-300" onClick={handleBoxClick}>
+      <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors">
         <span className="material-symbols-outlined">close</span>
       </button>
       
@@ -74,7 +77,7 @@ const Register = ({ onClose, onSwitchToLogin }) => {
       </form>
 
       <p className="text-center text-gray-600 dark:text-gray-300 mt-6 text-sm">
-        Đã có tài khoản? <button onClick={onSwitchToLogin} className="text-primary font-bold hover:underline">Đăng nhập</button>
+        Đã có tài khoản? <button onClick={() => setIsLoginMode(true)} className="text-primary font-bold hover:underline">Đăng nhập</button>
       </p>
     </div>
   );

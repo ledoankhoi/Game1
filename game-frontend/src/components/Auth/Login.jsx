@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-// Nhập thư viện Facebook và Google
 import FacebookLoginRaw from 'react-facebook-login/dist/facebook-login-render-props';
 import { GoogleLogin } from '@react-oauth/google';
+import useAuthStore from '../../store/useAuthStore';
 
 const FacebookLogin = FacebookLoginRaw.default || FacebookLoginRaw;
 
-const Login = ({ onClose, onSwitchToRegister }) => {
+const Login = () => {
+  const login = useAuthStore((s) => s.login);
+  const setShowAuth = useAuthStore((s) => s.setShowAuth);
+  const setIsLoginMode = useAuthStore((s) => s.setIsLoginMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,20 +21,15 @@ const Login = ({ onClose, onSwitchToRegister }) => {
     setError("");
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
       const data = await response.json();
       if (data.success) {
-        // Lưu thông tin và token vào localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        // Thông báo cho App.jsx biết để cập nhật giao diện
-        window.dispatchEvent(new Event('storage'));
-        onClose();
-        window.location.reload(); 
+        login(data.user, data.token);
+        window.location.reload();
       } else {
         setError(data.message || "Sai email hoặc mật khẩu!");
       }
@@ -46,17 +44,14 @@ const Login = ({ onClose, onSwitchToRegister }) => {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError("");
     try {
-      const response = await fetch('http://localhost:5000/api/auth/google-login', {
+      const response = await fetch('/api/auth/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential })
       });
       const data = await response.json();
       if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        window.dispatchEvent(new Event('storage'));
-        onClose();
+        login(data.user, data.token);
         window.location.reload();
       } else {
         setError("Xác thực Google thất bại!");
@@ -71,15 +66,12 @@ const Login = ({ onClose, onSwitchToRegister }) => {
     if (!response.accessToken) return;
     setError("");
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/facebook-login', {
+      const res = await axios.post('/api/auth/facebook-login', {
         accessToken: response.accessToken
       });
       if (res.data.success) {
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        localStorage.setItem('token', res.data.token);
-        window.dispatchEvent(new Event('storage'));
-        onClose();
-        window.location.reload(); 
+        login(res.data.user, res.data.token);
+        window.location.reload();
       }
     } catch (_err) {
       setError("Đăng nhập Facebook thất bại!");
@@ -89,8 +81,8 @@ const Login = ({ onClose, onSwitchToRegister }) => {
   const handleBoxClick = (e) => e.stopPropagation();
 
   return (
-    <div className="bg-white dark:bg-[#1a2e20] p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-300" onClick={handleBoxClick}>
-      <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors">
+    <div className="auth-modal bg-white dark:bg-[#1a2e20] p-8 rounded-2xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-300" onClick={handleBoxClick}>
+      <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors">
         <span className="material-symbols-outlined">close</span>
       </button>
       
@@ -156,7 +148,7 @@ const Login = ({ onClose, onSwitchToRegister }) => {
       </div>
 
       <p className="text-center text-gray-600 dark:text-gray-300 mt-6 text-sm">
-        Chưa có tài khoản? <button onClick={onSwitchToRegister} className="text-primary font-bold hover:underline">Đăng ký ngay</button>
+        Chưa có tài khoản? <button onClick={() => setIsLoginMode(false)} className="text-primary font-bold hover:underline">Đăng ký ngay</button>
       </p>
     </div>
   );

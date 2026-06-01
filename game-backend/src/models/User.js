@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema({
     equipped: {
         skin: { type: String, default: 'skin_default' },
         face: { type: String, default: 'face_smile' },
+        hair: { type: String, default: 'none' },
+        shirt: { type: String, default: 'none' },
+        pants: { type: String, default: 'none' },
+        shoes: { type: String, default: 'none' },
+        accessory: { type: String, default: 'none' },
+        wings: { type: String, default: 'none' },
         frame: { type: String, default: 'none' }, 
         badge: { type: String, default: 'none' }
     },

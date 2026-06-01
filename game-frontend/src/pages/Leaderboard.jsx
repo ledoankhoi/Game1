@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 
 // Ảnh mặc định nội bộ (Giống bên Profile)
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -13,10 +15,17 @@ function Leaderboard() {
   
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const listRef = useRef(null);
+
+  useGSAP(() => {
+    if (listRef.current?.children?.length) {
+      gsap.fromTo(listRef.current.children, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' });
+    }
+  }, [leaderboardData]);
 
   // 1. KHI VỪA VÀO TRANG: Tự động tải danh sách Game từ Database (Có thuật toán quét dọn)
   useEffect(() => {
-    fetch('http://localhost:5000/api/game/list')
+    fetch('/api/game/list')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.games && Array.isArray(data.games) && data.games.length > 0) {
@@ -69,20 +78,20 @@ function Leaderboard() {
     let url = '';
 
     if (mainTab === 'exp') {
-        url = 'http://localhost:5000/api/game/leaderboard/exp';
+        url = '/api/game/leaderboard/exp';
     } 
     else if (mainTab === 'score') {
-        url = 'http://localhost:5000/api/game/leaderboard/score';
+        url = '/api/game/leaderboard/score';
     } 
     else if (mainTab === 'game') {
         // A. NẾU ĐÃ CHỌN GAME CỤ THỂ -> Xem BXH của duy nhất Game đó
         if (activeGameId) {
-            url = `http://localhost:5000/api/game/leaderboard/game/${activeGameId}`;
+            url = `/api/game/leaderboard/game/${activeGameId}`;
         } 
         // B. NẾU CHƯA CHỌN GAME (Tức là đang ở trạng thái chọn Thể loại, bao gồm cả 'All') 
         // -> Sẽ gọi API Category và gởi chữ 'All' (hoặc tên thể loại) xuống Backend
         else if (activeCategory) {
-            url = `http://localhost:5000/api/game/leaderboard/category/${activeCategory}`;
+            url = `/api/game/leaderboard/category/${activeCategory}`;
         }
     }
 
@@ -205,6 +214,7 @@ function Leaderboard() {
               </div>
             </div>
 
+            <div ref={listRef}>
             {leaderboardData.map((player, index) => (
               <div key={player.id || index} className="grid grid-cols-12 gap-4 p-5 items-center border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-[#233829] transition-colors group">
                 
@@ -241,6 +251,7 @@ function Leaderboard() {
 
               </div>
             ))}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-center">

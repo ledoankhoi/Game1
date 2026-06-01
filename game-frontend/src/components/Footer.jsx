@@ -1,11 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; 
-import '../assets/css/footer.css'; 
+import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import '../assets/css/footer.css';
 
 const Footer = () => {
+  const footerRef = useRef(null);
+  const sectionRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.fromTo(footerRef.current, { opacity: 0 }, { opacity: 1, duration: 0.5, delay: 0.3, ease: 'power2.out' });
+    if (sectionRef.current?.children?.length) gsap.fromTo(sectionRef.current.children, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.1, ease: 'power2.out', delay: 0.4 });
+  }, []);
+
   return (
-    <footer className="footer-container">
-      <div className="footer-content">
+    <footer ref={footerRef} className="footer-container">
+      <div ref={sectionRef} className="footer-content">
         
         {/* Cột 1: Thông tin liên hệ */}
         <div className="footer-section">
@@ -38,8 +48,7 @@ const Footer = () => {
           <h4>Giúp đỡ & Hỗ trợ</h4>
           <ul>
             <li><Link to="/faq">Câu hỏi thường gặp</Link></li>
-            <li><Link to="/contact">Liên hệ trực tiếp</Link></li>
-            <li><Link to="/security">Trung tâm bảo mật</Link></li>
+            <li><Link to="/privacy">Trung tâm bảo mật</Link></li>
           </ul>
         </div>
 
@@ -47,7 +56,7 @@ const Footer = () => {
 
       {/* Phần bản quyền */}
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} Game1 Project. Đã đăng ký bản quyền.</p>
+        <p>&copy; {new Date().getFullYear()} mathquest.com. Đã đăng ký bản quyền.</p>
       </div>
     </footer>
   );

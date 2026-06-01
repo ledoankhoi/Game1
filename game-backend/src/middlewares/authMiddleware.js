@@ -14,7 +14,7 @@ const authMiddleware = (req, res, next) => {
         const tokenString = token.startsWith('Bearer ') ? token.slice(7, token.length) : token;
         
         // 3. Giải mã vé
-        const verified = jwt.verify(tokenString, process.env.JWT_SECRET || 'secret');
+        const verified = jwt.verify(tokenString, process.env.JWT_SECRET);
         
         // 4. Mở cửa cho vào, dán thẻ tên người dùng vào req.user để Shop biết ai đang mua đồ
         req.user = verified; 

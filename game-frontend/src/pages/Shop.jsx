@@ -1,102 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import useAuthStore from '../store/useAuthStore';
+import useShopStore from '../store/useShopStore';
 
 function Shop({ searchQuery = '' }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  
+  const user = useAuthStore((s) => s.user);
+  const updateUser = useAuthStore((s) => s.updateUser);
+  const items = useShopStore((s) => s.items);
+  const loading = useShopStore((s) => s.loading);
+  const fetchItems = useShopStore((s) => s.fetchItems);
+  const buyItemAction = useShopStore((s) => s.buyItem);
+  const equipItemAction = useShopStore((s) => s.equipItem);
+
   const [selectedRarity, setSelectedRarity] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
-
-  useEffect(() => {
-    fetchShopItems();
-    syncUserData();
-  }, []);
-
-  const syncUserData = async () => {
-    const savedUser = JSON.parse(localStorage.getItem('user'));
-    const token = localStorage.getItem('token');
-    if (!savedUser || !token) { setUser(null); return; }
-    setUser(savedUser);
-
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', { 
-        method: 'GET', 
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data && data.success && data.user) {
-        const realUser = { ...savedUser, ...data.user };
-        setUser(realUser);
-        localStorage.setItem('user', JSON.stringify(realUser));
-      }
-    } catch (e) { console.warn("[SHOP] Lỗi kết nối server.", e); }
-  };
-
-  const fetchShopItems = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/shop/items');
-      const data = await response.json();
-      if (data.success || data.items) setItems(data.items || data.data || []);
-    } catch (_error) { console.error("[SHOP] Lỗi lấy danh sách cửa hàng:", _error); } 
-    finally { setLoading(false); }
-  };
-
-  const handleBuy = async (itemId, price) => {
-    if (!user) return alert("Vui lòng đăng nhập để mua đồ!");
-    if (user.coins < price) return alert("Bạn không đủ xu để mua vật phẩm này!");
-    if (!window.confirm("Xác nhận mua vật phẩm này?")) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/shop/buy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ itemId })
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        const updatedUser = { ...user, coins: data.coins, inventory: data.inventory };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        alert(data.message || "Mua thành công!");
-      } else {
-        alert("Lỗi: " + data.message);
-        if (data.message.toLowerCase().includes("sở hữu") || response.status === 400) {
-           const currentInv = user.inventory || [];
-           if (!currentInv.includes(itemId)) {
-               const updatedUser = { ...user, inventory: [...currentInv, itemId] };
-               setUser(updatedUser);
-               localStorage.setItem('user', JSON.stringify(updatedUser));
-           }
-        }
-      }
-    } catch (_error) { alert("Lỗi kết nối máy chủ!"); }
-  };
-
-  const handleEquip = async (itemId) => {
-    if (!user) return;
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/shop/equip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ itemId })
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        localStorage.removeItem('user_avatar_custom'); 
-        const updatedUser = { ...user, equipped: data.equipped, avatarUrl: data.avatarUrl };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        alert(data.message || "Đã mặc vật phẩm!");
-        window.dispatchEvent(new Event('storage'));
-      } else { alert("Lỗi: " + data.message); }
-    } catch (_error) { alert("Lỗi kết nối máy chủ!"); }
-  };
+  const shopGridRef = useRef(null);
 
   const getActualRarity = (item) => {
     let r = item.rarity;
@@ -109,6 +28,71 @@ function Shop({ searchQuery = '' }) {
       else r = 'silver';
     }
     return r;
+  };
+
+  const removeAccents = (str) => {
+    if (!str) return '';
+    return str.normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "") 
+              .replace(/đ/g, "d").replace(/Đ/g, "D") 
+              .toLowerCase()
+              .trim();
+  };
+
+  const filteredItems = useMemo(() => items.filter(item => {
+     const matchRarity = selectedRarity === 'all' || getActualRarity(item) === selectedRarity;
+     const matchCategory = selectedCategory === 'all' || (item.category || 'other').toLowerCase() === selectedCategory;
+     
+     if (!searchQuery) return matchRarity && matchCategory; 
+
+     const keyword = removeAccents(searchQuery);
+     const safeName = removeAccents(item.name); 
+     const matchSearch = safeName.includes(keyword);
+
+     return matchRarity && matchCategory && matchSearch;
+  }), [items, selectedRarity, selectedCategory, searchQuery]);
+
+  useGSAP(() => {
+    if (shopGridRef.current?.children?.length) {
+      gsap.fromTo(shopGridRef.current.children, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.04, ease: 'power2.out' });
+    }
+  }, [filteredItems]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  const handleBuy = async (itemId, price) => {
+    if (!user) return alert("Vui lòng đăng nhập để mua đồ!");
+    if (user.coins < price) return alert("Bạn không đủ xu để mua vật phẩm này!");
+    if (!window.confirm("Xác nhận mua vật phẩm này?")) return;
+
+    const { success, data } = await buyItemAction(itemId);
+    if (success) {
+      updateUser({ coins: data.coins, inventory: data.inventory });
+      alert(data.message || "Mua thành công!");
+    } else {
+      alert("Lỗi: " + data?.message);
+      if (data?.message?.toLowerCase().includes("sở hữu")) {
+        const currentInv = user.inventory || [];
+        if (!currentInv.includes(itemId)) {
+          updateUser({ inventory: [...currentInv, itemId] });
+        }
+      }
+    }
+  };
+
+  const handleEquip = async (itemId) => {
+    if (!user) return;
+    const { success, data } = await equipItemAction(itemId);
+    if (success) {
+      localStorage.removeItem('user_avatar_custom');
+      updateUser({ equipped: data.equipped, avatarUrl: data.avatarUrl });
+      alert(data.message || "Đã mặc vật phẩm!");
+      window.dispatchEvent(new Event('storage'));
+    } else {
+      alert("Lỗi: " + data?.message);
+    }
   };
 
   const getRarityStyle = (item) => {
@@ -146,28 +130,6 @@ function Shop({ searchQuery = '' }) {
     { id: 'accessory', label: 'Phụ kiện', icon: 'diamond' },
     { id: 'wings', label: 'Cánh', icon: 'flight' },
   ];
-
-  const removeAccents = (str) => {
-    if (!str) return '';
-    return str.normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "") 
-              .replace(/đ/g, "d").replace(/Đ/g, "D") 
-              .toLowerCase()
-              .trim();
-  };
-
-  const filteredItems = items.filter(item => {
-     const matchRarity = selectedRarity === 'all' || getActualRarity(item) === selectedRarity;
-     const matchCategory = selectedCategory === 'all' || (item.category || 'other').toLowerCase() === selectedCategory;
-     
-     if (!searchQuery) return matchRarity && matchCategory; 
-
-     const keyword = removeAccents(searchQuery);
-     const safeName = removeAccents(item.name); 
-     const matchSearch = safeName.includes(keyword);
-
-     return matchRarity && matchCategory && matchSearch;
-  });
 
   if (loading) return <div className="text-center py-20 text-xl font-bold">Đang tải cửa hàng...</div>;
 
@@ -246,7 +208,7 @@ function Shop({ searchQuery = '' }) {
                           <p className="font-bold text-lg">Không tìm thấy vật phẩm phù hợp.</p>
                       </div>
                   ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-fade-in">
+                        <div ref={shopGridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                           {filteredItems.map((item) => {
                               const userInv = Array.isArray(user?.inventory) ? user.inventory : [];
                               const userEqp = user?.equipped ? Object.values(user.equipped) : [];
